@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FF7A1A"/>
+      <stop offset="55%" stop-color="#FF6A00"/>
+      <stop offset="100%" stop-color="#E65E00"/>
+    </linearGradient>
+    <radialGradient id="vignette" cx="0.5" cy="0.4" r="0.75">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.10)"/>
+      <stop offset="65%" stop-color="rgba(0,0,0,0)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0.22)"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Fondo full bleed -->
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <rect width="512" height="512" fill="url(#vignette)"/>
+
+  <!-- Eyebrow PRODE -->
+  <text x="256" y="158"
+        text-anchor="middle"
+        font-family="Inter 18pt, Inter, system-ui, sans-serif"
+        font-weight="700"
+        font-size="24"
+        letter-spacing="8"
+        fill="#FFFFFF"
+        opacity="0.92">PRODE</text>
+
+  <!-- Wordmark O2 -->
+  <text x="256" y="372"
+        text-anchor="middle"
+        font-family="Anton, Impact, sans-serif"
+        font-size="220"
+        letter-spacing="-2"
+        fill="#F5F7FA">O2</text>
+
+  <!-- Micro divider lime -->
+  <rect x="240" y="402" width="32" height="6" rx="3" fill="#D9FF3F"/>
+</svg>

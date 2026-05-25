@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Simplified para legibilidad a 16/32: solo O2 en bloque naranja, sin eyebrow ni divider -->
+  <rect width="64" height="64" rx="10" fill="#FF6A00"/>
+  <text x="32" y="50"
+        text-anchor="middle"
+        font-family="Anton, Impact, sans-serif"
+        font-size="46"
+        letter-spacing="-1"
+        fill="#F5F7FA">O2</text>
+</svg>

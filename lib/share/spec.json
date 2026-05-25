@@ -1,0 +1,421 @@
+{
+  "$schema": "https://o2-prode.local/schema/share-spec.json",
+  "_meta": {
+    "name": "O2 PRODE Share Templates · Declarative Spec",
+    "version": "1.0.0",
+    "agent": "Agent 5 · Viral Share Designer",
+    "date": "2026-05-18"
+  },
+  "templates": {
+    "summary": {
+      "canvas": { "story": [1080, 1920], "square": [1080, 1080] },
+      "padding": { "story": 96, "square": 64 },
+      "layers": [
+        {
+          "id": "bg-base",
+          "type": "gradient",
+          "value": "linear-gradient(160deg, #0a0608 0%, #1a1410 60%, #050307 100%)"
+        },
+        {
+          "id": "bg-atm-bottom",
+          "type": "radial",
+          "value": "radial-gradient(ellipse at 78% 85%, rgba(255,106,0,0.20) 0%, transparent 55%)"
+        },
+        {
+          "id": "bg-atm-top",
+          "type": "radial",
+          "value": "radial-gradient(ellipse at 20% 15%, rgba(116,172,223,0.10) 0%, transparent 50%)",
+          "conditionalArgentina": { "alpha": 0.18 }
+        },
+        { "id": "stadium-lights", "type": "decorative" },
+        {
+          "id": "sol-de-mayo",
+          "type": "svg-asset",
+          "ref": "sol-mayo",
+          "conditional": "isArgentinaChampion",
+          "transform": "rotate(-12deg)",
+          "position": { "top": -120, "right": -160 },
+          "size": 800,
+          "opacity": 0.05
+        },
+        { "id": "grain", "type": "overlay", "blend": "overlay", "opacity": 0.5 },
+        { "id": "vignette", "type": "radial-vignette" }
+      ],
+      "zones": [
+        {
+          "id": "top",
+          "yBand": [0, 540],
+          "elements": [
+            {
+              "id": "label-mi-prode",
+              "type": "text",
+              "value": "— MI PRODE",
+              "font": "Inter",
+              "weight": 700,
+              "size": 28,
+              "tracking": 0.2,
+              "color": "text.muted",
+              "transform": "uppercase"
+            },
+            {
+              "id": "brand-o2",
+              "type": "text",
+              "value": "O2",
+              "font": "Anton",
+              "size": 64,
+              "color": "brand.primary",
+              "glow": "0 0 32px rgba(255,106,0,0.5)"
+            },
+            {
+              "id": "title-mundial",
+              "type": "text",
+              "value": "MUNDIAL",
+              "font": "Anton",
+              "size": 160,
+              "lineHeight": 144,
+              "tracking": -0.01,
+              "fill": "gradient:title"
+            },
+            {
+              "id": "title-year",
+              "type": "text",
+              "value": "2 0 2 6",
+              "font": "Anton",
+              "size": 96,
+              "tracking": 0.16,
+              "color": "brand.primary",
+              "glow": "0 0 24px rgba(255,106,0,0.4)"
+            }
+          ]
+        },
+        {
+          "id": "hero",
+          "yBand": [540, 1080],
+          "elements": [
+            {
+              "id": "world-trophy",
+              "type": "svg-asset",
+              "ref": "world-trophy",
+              "size": 480,
+              "drop-shadow": "0 0 64px rgba(255,179,0,0.4)"
+            },
+            {
+              "id": "stars-row",
+              "type": "svg-row",
+              "ref": "star",
+              "count": 3,
+              "size": 32,
+              "gap": 32,
+              "color": "gold",
+              "drop-shadow": "0 0 8px rgba(255,179,0,0.6)"
+            },
+            { "id": "gold-divider", "type": "line", "height": 1, "fill": "gradient:gold-fade" }
+          ]
+        },
+        {
+          "id": "data",
+          "yBand": [1080, 1520],
+          "elements": [
+            {
+              "id": "row-campeon",
+              "type": "data-row",
+              "label": "— CAMPEÓN",
+              "valueRef": "champion.country",
+              "trailing": { "type": "flag", "ref": "champion.flagCode" },
+              "colorRule": "isArgentinaChampion ? celeste : text"
+            },
+            {
+              "id": "row-goleador",
+              "type": "data-row",
+              "label": "— GOLEADOR",
+              "valueRef": "topScorer.name",
+              "trailing": { "type": "flag", "ref": "topScorer.flagCode" }
+            },
+            {
+              "id": "row-final",
+              "type": "data-row-composite",
+              "label": "— RESULTADO FINAL",
+              "value": "{home.country} {score[0]} — {score[1]} {away.country}",
+              "fontSize": 48
+            }
+          ]
+        },
+        {
+          "id": "stats",
+          "yBand": [1520, 1720],
+          "borderTop": { "color": "gold", "alpha": 0.15 },
+          "elements": [
+            {
+              "id": "stat-points",
+              "type": "stat",
+              "label": "PUNTOS",
+              "valueRef": "points",
+              "color": "accent.lime",
+              "glow": "0 0 32px rgba(217,255,63,0.3)"
+            },
+            {
+              "id": "stat-position",
+              "type": "stat",
+              "label": "POSICIÓN",
+              "valueRef": "position",
+              "prefix": "#",
+              "color": "text.primary"
+            }
+          ]
+        },
+        {
+          "id": "footer",
+          "yBand": [1720, 1920],
+          "elements": [
+            {
+              "id": "hashtag",
+              "type": "text",
+              "value": "#PRODEMUNDIALO2",
+              "font": "Inter",
+              "weight": 700,
+              "size": 32,
+              "tracking": 0.16,
+              "color": "gold",
+              "anchor": "bottom-left"
+            },
+            {
+              "id": "brand-foot-o2",
+              "type": "text",
+              "value": "O2",
+              "font": "Anton",
+              "size": 36,
+              "color": "brand.primary",
+              "anchor": "bottom-right"
+            },
+            {
+              "id": "brand-foot-club",
+              "type": "text",
+              "value": "Wellness Club",
+              "font": "Inter",
+              "size": 18,
+              "color": "text.muted",
+              "anchor": "bottom-right-2"
+            }
+          ]
+        }
+      ]
+    },
+    "position": {
+      "canvas": { "story": [1080, 1920], "square": [1080, 1080] },
+      "padding": { "story": 96, "square": 64 },
+      "layers": [
+        {
+          "id": "bg-base",
+          "type": "gradient",
+          "value": "linear-gradient(180deg, #0a0a0c 0%, #1b1410 100%)"
+        },
+        {
+          "id": "bg-glow",
+          "type": "radial",
+          "value": "radial-gradient(ellipse at 50% 100%, rgba(255,106,0,0.25) 0%, transparent 60%)"
+        },
+        { "id": "grain", "type": "overlay", "blend": "overlay", "opacity": 0.4 },
+        { "id": "vignette", "type": "radial-vignette" }
+      ],
+      "hero": {
+        "frame": {
+          "size": 800,
+          "borderRadius": 80,
+          "border": "1px primary",
+          "fill": "linear-gradient(180deg, rgba(255,106,0,0.18), rgba(255,106,0,0.04))"
+        },
+        "content": [
+          {
+            "id": "label",
+            "type": "text",
+            "value": "MI PUESTO",
+            "font": "Inter",
+            "size": 28,
+            "tracking": 0.2,
+            "color": "text.muted",
+            "transform": "uppercase"
+          },
+          {
+            "id": "pos-num",
+            "type": "stat",
+            "prefix": "#",
+            "valueRef": "position",
+            "font": "Anton",
+            "size": 360,
+            "lineHeight": 320,
+            "tracking": -0.04,
+            "color": "brand.primary",
+            "glow": "0 0 80px rgba(255,106,0,0.4)"
+          },
+          {
+            "id": "name",
+            "type": "text",
+            "valueRef": "userName",
+            "font": "Anton",
+            "size": 96,
+            "tracking": 0.02
+          },
+          {
+            "id": "pts-level",
+            "type": "composite",
+            "template": "{points} PTS · NIVEL {userLevelName}",
+            "size": 32,
+            "color": "accent.lime"
+          }
+        ]
+      },
+      "below": [
+        {
+          "id": "delta",
+          "type": "stat-pair",
+          "label": "SUBÍ",
+          "valueRef": "deltaPosition",
+          "withArrow": true
+        },
+        {
+          "id": "week",
+          "type": "stat-pair",
+          "label": "SEMANA",
+          "valueRef": "weekPoints",
+          "prefix": "+",
+          "suffix": " PTS"
+        }
+      ],
+      "footer": [
+        { "id": "hashtag", "value": "#PRODEMUNDIALO2", "anchor": "bottom-left", "color": "gold" },
+        {
+          "id": "context",
+          "valueRef": "weekNumber",
+          "template": "Semana {weekNumber}",
+          "anchor": "bottom-right"
+        }
+      ]
+    },
+    "match": {
+      "canvas": { "story": [1080, 1920], "square": [1080, 1080] },
+      "padding": { "story": 96, "square": 64 },
+      "layers": [
+        {
+          "id": "bg-base",
+          "type": "gradient",
+          "value": "linear-gradient(135deg, #0a0a0c 0%, #1a1410 50%, #0a0a0c 100%)"
+        },
+        { "id": "grain", "type": "overlay", "blend": "overlay", "opacity": 0.4 },
+        { "id": "vignette", "type": "radial-vignette" }
+      ],
+      "top": [
+        { "id": "label", "value": "— MI PREDICCIÓN", "color": "text.muted" },
+        { "id": "brand", "value": "O2", "color": "brand.primary" },
+        { "id": "title", "value": "PRÓXIMO PARTIDO", "font": "Anton", "size": 96 },
+        { "id": "subtitle", "template": "{phase} · {kickoffShort}", "color": "gold" }
+      ],
+      "matchup": {
+        "homeTeam": { "flag": { "w": 144, "h": 96 }, "name": { "font": "Anton", "size": 56 } },
+        "awayTeam": { "flag": { "w": 144, "h": 96 }, "name": { "font": "Anton", "size": 56 } },
+        "score": {
+          "font": "Anton",
+          "size": 320,
+          "lineHeight": 280,
+          "tracking": -0.02,
+          "separator": "—",
+          "separatorColor": "brand.primary"
+        },
+        "predLabel": {
+          "value": "MI PREDICCIÓN",
+          "color": "text.muted",
+          "transform": "uppercase",
+          "tracking": 0.16
+        }
+      },
+      "footer": [
+        { "id": "hashtag", "value": "#PRODEMUNDIALO2", "anchor": "bottom-left" },
+        { "id": "user-pos", "template": "{userName} · #{userPosition}", "anchor": "bottom-right" }
+      ]
+    },
+    "achievement": {
+      "canvas": { "story": [1080, 1920], "square": [1080, 1080] },
+      "padding": { "story": 96, "square": 64 },
+      "layers": [
+        {
+          "id": "bg-base",
+          "type": "gradient",
+          "value": "linear-gradient(180deg, #0a0a0c 0%, #0e1206 60%, #0a0a0c 100%)"
+        },
+        {
+          "id": "hero-spot",
+          "type": "radial",
+          "value": "radial-gradient(circle at 50% 30%, rgba(217,255,63,0.20) 0%, transparent 55%)"
+        },
+        { "id": "grain", "type": "overlay", "blend": "overlay", "opacity": 0.4 },
+        { "id": "vignette", "type": "radial-vignette" }
+      ],
+      "top": [
+        { "id": "label", "value": "LOGRO DESBLOQUEADO", "color": "text.muted", "tracking": 0.2 },
+        { "id": "brand", "value": "O2", "color": "brand.primary" }
+      ],
+      "hero": {
+        "frame": {
+          "size": 560,
+          "shape": "circle",
+          "fill": "radial-gradient(circle, rgba(217,255,63,0.25), transparent 70%)"
+        },
+        "icon": {
+          "ref": "iconRef",
+          "size": 320,
+          "color": "accent.lime",
+          "drop-shadow": "0 0 80px rgba(217,255,63,0.6)"
+        }
+      },
+      "titles": [
+        {
+          "id": "category",
+          "valueRef": "achievementCategory",
+          "font": "Anton",
+          "size": 160,
+          "transform": "uppercase"
+        },
+        {
+          "id": "name",
+          "valueRef": "achievementName",
+          "font": "Anton",
+          "size": 128,
+          "color": "accent.lime"
+        },
+        {
+          "id": "description",
+          "valueRef": "achievementDescription",
+          "font": "Inter",
+          "size": 32,
+          "color": "text.muted",
+          "maxWidth": 720
+        }
+      ],
+      "footer": [
+        { "id": "hashtag", "value": "#PRODEMUNDIALO2", "anchor": "bottom-left" },
+        { "id": "user", "valueRef": "userName", "anchor": "bottom-right" }
+      ]
+    }
+  },
+  "tokens": {
+    "gradients": {
+      "title": "linear-gradient(180deg, #FFFFFF 0%, #FFE082 60%, #FFB300 100%)",
+      "gold-fade": "linear-gradient(90deg, transparent 0%, #FFB300 50%, transparent 100%)"
+    },
+    "colors": {
+      "celeste": "#74ACDF",
+      "gold": "#FFB300"
+    }
+  },
+  "performance": {
+    "targetCold": "600ms",
+    "targetWarm": "50ms",
+    "pngSize": "<200KB",
+    "compressionLevel": 8
+  },
+  "caching": {
+    "edge": "5min",
+    "cdn": "1h",
+    "swr": "24h",
+    "etagSource": "hash(data + templateVersion)"
+  }
+}

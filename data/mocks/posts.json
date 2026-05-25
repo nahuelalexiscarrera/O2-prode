@@ -1,0 +1,85 @@
+{
+  "$comment": "Mock de posts del muro para development. Mix de predicciones, reacciones, logros.",
+  "posts": [
+    {
+      "id": "p-001",
+      "userId": "u-010",
+      "body": "Yo tengo a Argentina campeón otra vez. Tres seguidos.",
+      "embedType": "prediction",
+      "embedRefId": "u-010-champion-ar",
+      "reactionCount": 24,
+      "commentCount": 8,
+      "createdAt": "2026-05-18T09:20:00-03:00"
+    },
+    {
+      "id": "p-002",
+      "userId": "u-002",
+      "body": "Brasil llega a la final. No tengo dudas.",
+      "embedType": "prediction",
+      "embedRefId": "u-002-finalist-br",
+      "reactionCount": 18,
+      "commentCount": 5,
+      "createdAt": "2026-05-18T08:30:00-03:00"
+    },
+    {
+      "id": "p-003",
+      "userId": "u-004",
+      "body": "Acabo de cargar todo el Grupo C. Tengo a Marruecos pasando 👀",
+      "embedType": null,
+      "embedRefId": null,
+      "reactionCount": 12,
+      "commentCount": 3,
+      "createdAt": "2026-05-18T07:00:00-03:00"
+    },
+    {
+      "id": "p-004",
+      "userId": "u-003",
+      "body": "Vamos a ver quién banca cuando Inglaterra pierda en octavos.",
+      "embedType": null,
+      "embedRefId": null,
+      "reactionCount": 9,
+      "commentCount": 11,
+      "createdAt": "2026-05-17T22:15:00-03:00"
+    },
+    {
+      "id": "p-005",
+      "userId": "u-001",
+      "body": "Probando el muro nuevo. Está pegado.",
+      "embedType": null,
+      "embedRefId": null,
+      "reactionCount": 6,
+      "commentCount": 2,
+      "createdAt": "2026-05-17T20:00:00-03:00"
+    },
+    {
+      "id": "p-006",
+      "userId": "u-006",
+      "body": "Goleador del torneo: Mbappé. Que después no me lloren.",
+      "embedType": null,
+      "embedRefId": null,
+      "reactionCount": 14,
+      "commentCount": 6,
+      "createdAt": "2026-05-17T18:00:00-03:00"
+    },
+    {
+      "id": "p-007",
+      "userId": "u-005",
+      "body": "Yo digo Croacia revelación de nuevo. Modric eterno.",
+      "embedType": null,
+      "embedRefId": null,
+      "reactionCount": 7,
+      "commentCount": 4,
+      "createdAt": "2026-05-17T15:30:00-03:00"
+    },
+    {
+      "id": "p-008",
+      "userId": "u-010",
+      "body": "Logro desbloqueado: Constancia (7 días seguidos prediciendo).",
+      "embedType": null,
+      "embedRefId": "C01",
+      "reactionCount": 15,
+      "commentCount": 1,
+      "createdAt": "2026-05-17T10:00:00-03:00"
+    }
+  ]
+}

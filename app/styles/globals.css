@@ -1,0 +1,322 @@
+/**
+ * O2 PRODE — Global Styles & Design Tokens
+ * Agente 3 · Design System
+ * Variables CSS derivadas de tokens.json
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ─── Surfaces ─────────────────────────────────────────── */
+    --color-bg: #0b0b0d;
+    --color-surface: #131417;
+    --color-card: #1b1d22;
+    --color-elevated: #23262c;
+    --color-border: #2a2e36;
+    --color-border-strong: #3a3f49;
+
+    /* ─── Text ─────────────────────────────────────────────── */
+    --text-primary: #f5f7fa;
+    --text-secondary: #c7ccd4;
+    --text-muted: #9ca3af;
+    --text-disabled: #5a5f69;
+    --text-inverse: #0b0b0d;
+
+    /* ─── Brand ────────────────────────────────────────────── */
+    --brand-primary: #ff6a00;
+    --brand-primary-hover: #ff7a1a;
+    --brand-primary-pressed: #e65e00;
+    --brand-primary-soft: #ff8a33;
+    --brand-primary-glow: rgba(255, 106, 0, 0.35);
+    --brand-primary-bg: rgba(255, 106, 0, 0.12);
+
+    /* ─── Accent ───────────────────────────────────────────── */
+    --accent-lime: #d9ff3f;
+    --accent-lime-soft: rgba(217, 255, 63, 0.18);
+
+    /* ─── Semantic states ──────────────────────────────────── */
+    --state-success: #22c55e;
+    --state-success-bg: rgba(34, 197, 94, 0.12);
+    --state-warning: #f59e0b;
+    --state-warning-bg: rgba(245, 158, 11, 0.12);
+    --state-error: #ef4444;
+    --state-error-bg: rgba(239, 68, 68, 0.12);
+    --state-info: #3b82f6;
+    --state-info-bg: rgba(59, 130, 246, 0.12);
+    --state-live: #ff2d55;
+
+    /* ─── Typography ───────────────────────────────────────── */
+    --font-display: "Anton", "Bebas Neue", "Oswald", Impact, sans-serif;
+    --font-body: "Inter", "Satoshi", system-ui, -apple-system, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+    /* ─── Spacing (base 4) ─────────────────────────────────── */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+    --space-16: 64px;
+    --space-20: 80px;
+
+    /* ─── Radius ───────────────────────────────────────────── */
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-2xl: 28px;
+    --radius-full: 9999px;
+
+    /* ─── Shadows ──────────────────────────────────────────── */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
+    --shadow-glow-primary: 0 0 24px rgba(255, 106, 0, 0.35);
+    --shadow-glow-accent: 0 0 24px rgba(217, 255, 63, 0.35);
+
+    /* ─── Motion ───────────────────────────────────────────── */
+    --duration-fast: 120ms;
+    --duration-base: 200ms;
+    --duration-medium: 320ms;
+    --duration-slow: 480ms;
+    --duration-epic: 800ms;
+
+    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    --ease-decelerate: cubic-bezier(0, 0, 0, 1);
+    --ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
+
+    /* ─── Z-index ──────────────────────────────────────────── */
+    --z-base: 0;
+    --z-raised: 10;
+    --z-sticky: 20;
+    --z-nav: 30;
+    --z-popover: 40;
+    --z-modal: 50;
+    --z-toast: 60;
+
+    /* ─── Safe areas (mobile) ──────────────────────────────── */
+    --safe-top: env(safe-area-inset-top, 0);
+    --safe-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  /* ─── Reset & base ───────────────────────────────────────── */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    background: var(--color-bg);
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--text-primary);
+    background: var(--color-bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior-y: none;
+  }
+
+  /* Tabular numerals para Anton en contextos de score/ranking */
+  .font-display,
+  .font-numeric {
+    font-family: var(--font-display);
+    font-feature-settings: "tnum" 1, "lnum" 1;
+  }
+
+  /* Inter alternates limpios */
+  body {
+    font-feature-settings: "cv11" 1, "ss01" 1;
+  }
+
+  /* Eliminamos italics globalmente */
+  i,
+  em {
+    font-style: normal;
+    font-weight: 700;
+  }
+
+  /* Selección de texto */
+  ::selection {
+    background: var(--brand-primary-bg);
+    color: var(--text-primary);
+  }
+
+  /* Prevents iOS auto-zoom on focus (requires ≥16px) */
+  input,
+  textarea,
+  select {
+    font-size: max(16px, 1em);
+  }
+
+  /* Scrollbar mínimo */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: var(--radius-full);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-border-strong);
+  }
+}
+
+@layer components {
+  /* ─── Glass surface ──────────────────────────────────────── */
+  .glass {
+    background: rgba(19, 20, 23, 0.72);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .glass-modal {
+    background: rgba(11, 11, 13, 0.85);
+    backdrop-filter: blur(28px) saturate(140%);
+    -webkit-backdrop-filter: blur(28px) saturate(140%);
+  }
+
+  /* ─── Label uppercase pattern ────────────────────────────── */
+  .label-uppercase {
+    font-size: 11px;
+    line-height: 14px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* ─── Skeleton shimmer ───────────────────────────────────── */
+  .skeleton {
+    position: relative;
+    background: var(--color-surface);
+    overflow: hidden;
+    border-radius: var(--radius-md);
+  }
+
+  .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.04) 50%,
+      transparent 100%
+    );
+    animation: shimmer 1.4s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  /* ─── Live pulse ─────────────────────────────────────────── */
+  .live-pulse {
+    position: relative;
+  }
+
+  .live-pulse::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--state-live);
+    opacity: 0.6;
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 0.6;
+    }
+    50% {
+      transform: scale(1.15);
+      opacity: 0.2;
+    }
+  }
+
+  /* ─── Focus visible (a11y) ───────────────────────────────── */
+  :focus-visible {
+    outline: 2px solid var(--brand-primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* ─── Layout helpers móvil ───────────────────────────────── */
+  .mobile-container {
+    max-width: 480px;
+    margin-inline: auto;
+    padding-inline: var(--space-6);
+    padding-top: calc(var(--space-12) + var(--safe-top));
+    padding-bottom: calc(96px + var(--safe-bottom));
+    min-height: 100dvh;
+  }
+
+  .screen-section + .screen-section {
+    margin-top: var(--space-8);
+  }
+}
+
+@layer utilities {
+  /* Espaciado del bottom nav (96px = nav 56 + aire 40) */
+  .pb-nav {
+    padding-bottom: calc(96px + var(--safe-bottom));
+  }
+
+  /* Numerales tabulares (forzar) */
+  .tabular {
+    font-variant-numeric: tabular-nums lining-nums;
+    font-feature-settings: "tnum" 1, "lnum" 1;
+  }
+
+  /* Texto sobre fondo primary */
+  .text-on-primary {
+    color: var(--text-inverse);
+  }
+}
+
+/* ─── Reduced motion ─────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─── PWA viewport fixes ────────────────────────────────── */
+@supports (height: 100dvh) {
+  .full-h {
+    height: 100dvh;
+  }
+}

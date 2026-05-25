@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>O2 PRODE — Presentación de producto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0b0b0d; --surface: #131417; --card: #1b1d22; --elevated: #23262c;
+    --border: #2a2e36; --border-strong: #3a3f49;
+    --text: #f5f7fa; --text-secondary: #c7ccd4; --text-muted: #9ca3af;
+    --primary: #ff6a00; --primary-soft: #ff8a33; --primary-glow: rgba(255,106,0,0.35);
+    --lime: #d9ff3f; --gold: #FFB300; --celeste: #74ACDF;
+    --font-display: "Anton", "Bebas Neue", Impact, sans-serif;
+    --font-body: "Inter", system-ui, sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{
+    margin:0;font-family:var(--font-body);color:var(--text);background:#050507;min-height:100vh;
+    -webkit-font-smoothing:antialiased;line-height:1.55;
+    background-image:radial-gradient(circle at 50% -10%,rgba(255,106,0,0.06) 0%,transparent 50%);
+  }
+  ::selection{background:var(--primary-glow);color:var(--text);}
+
+  /* ─────────────── HERO ─────────────── */
+  .hero{
+    padding:96px 48px 64px;border-bottom:1px solid var(--border);
+    background:radial-gradient(ellipse at 80% 30%,rgba(255,106,0,0.08),transparent 50%);
+  }
+  .hero .brand{
+    font-family:var(--font-display);font-size:14px;letter-spacing:0.32em;color:var(--text-muted);
+    text-transform:uppercase;margin-bottom:32px;
+  }
+  .hero .brand .o2{color:var(--primary);font-size:22px;letter-spacing:0;}
+  .hero h1{
+    font-family:var(--font-display);font-size:88px;line-height:84px;letter-spacing:-0.02em;
+    margin:0 0 24px;max-width:1000px;
+  }
+  .hero .tagline{
+    font-size:18px;line-height:28px;color:var(--text-secondary);max-width:680px;margin:0 0 32px;
+  }
+  .hero .meta{
+    font-size:11px;letter-spacing:0.2em;color:var(--text-muted);text-transform:uppercase;font-weight:700;
+  }
+  @media (max-width:768px){
+    .hero{padding:64px 24px 48px;}
+    .hero h1{font-size:48px;line-height:48px;}
+    .hero .tagline{font-size:16px;}
+  }
+
+  /* ─────────────── SECTIONS ─────────────── */
+  main{max-width:1100px;margin:0 auto;padding:64px 48px;}
+  @media (max-width:768px){main{padding:48px 24px;}}
+  section{margin-bottom:96px;}
+  section:last-of-type{margin-bottom:0;}
+  section h2{
+    font-family:var(--font-display);font-size:40px;line-height:40px;letter-spacing:-0.01em;
+    margin:0 0 8px;
+  }
+  section .section-eyebrow{
+    font-size:11px;letter-spacing:0.24em;color:var(--primary);text-transform:uppercase;font-weight:700;
+    margin-bottom:12px;
+  }
+  section p{font-size:16px;line-height:26px;color:var(--text-secondary);max-width:780px;}
+  section p strong{color:var(--text);font-weight:600;}
+
+  /* ─────────────── STEPS ─────────────── */
+  .steps{list-style:none;padding:0;margin:32px 0 0;display:grid;gap:24px;}
+  .steps li{
+    background:var(--card);border:1px solid var(--border);border-radius:18px;padding:28px;
+    display:grid;grid-template-columns:60px 1fr;gap:24px;align-items:start;
+  }
+  .steps .num{
+    font-family:var(--font-display);font-size:40px;line-height:36px;color:var(--primary);
+    letter-spacing:-0.02em;
+  }
+  .steps h3{
+    font-family:var(--font-body);font-size:18px;font-weight:700;color:var(--text);margin:0 0 6px;
+  }
+  .steps p{margin:0;font-size:15px;line-height:23px;}
+  @media (max-width:600px){
+    .steps li{grid-template-columns:1fr;gap:8px;}
+    .steps .num{font-size:32px;}
+  }
+
+  /* ─────────────── MOCKUPS GALLERY ─────────────── */
+  .gallery{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:32px;
+    margin-top:40px;justify-items:center;
+  }
+  .phone{
+    width:300px;background:#000;border-radius:32px;padding:7px;
+    box-shadow:0 24px 60px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.04);
+  }
+  .phone-screen{
+    background:var(--bg);border-radius:25px;height:560px;overflow:hidden;
+    display:flex;flex-direction:column;
+  }
+  .phone-label{
+    text-align:center;margin-top:14px;font-size:11px;color:var(--text-muted);
+    letter-spacing:0.08em;text-transform:uppercase;font-weight:700;
+  }
+  .status-bar{
+    display:flex;justify-content:space-between;align-items:center;padding:10px 16px 6px;
+    font-size:11px;font-weight:600;
+  }
+  .status-bar .right{font-size:10px;}
+  .screen-body{flex:1;overflow:hidden;padding:6px 16px 0;}
+
+  /* ─────────────── PHONE INNER COMPONENTS ─────────────── */
+  .label-up{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);}
+  .greeting{font-family:var(--font-display);font-size:22px;letter-spacing:-0.01em;margin:8px 0 12px;}
+
+  .stat-mini{background:var(--card);border-radius:12px;padding:10px;}
+  .stat-mini .lbl{font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);}
+  .stat-mini .val{font-family:var(--font-display);font-size:26px;line-height:26px;margin-top:4px;}
+  .stat-mini .val.lime{color:var(--lime);}
+
+  .next-mini{
+    background:linear-gradient(135deg,rgba(255,106,0,0.15),rgba(217,255,63,0.04));
+    border:1px solid var(--border);border-radius:14px;padding:12px;
+  }
+  .next-mini .lbl{font-size:8px;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;}
+  .next-mini .teams{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:11px;font-weight:700;}
+  .next-mini .flag{width:24px;height:16px;border-radius:2px;display:inline-block;vertical-align:middle;}
+  .next-mini .vs{color:var(--text-muted);font-size:10px;}
+  .next-mini .count{text-align:center;color:var(--text-secondary);font-size:10px;margin-bottom:10px;}
+  .btn-cta{display:block;background:var(--primary);color:#0b0b0d;height:36px;border-radius:9999px;font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center;letter-spacing:0.04em;font-family:var(--font-body);border:none;cursor:pointer;}
+
+  /* Match card */
+  .match-mini{
+    background:var(--card);border-radius:12px;padding:10px;margin-bottom:8px;
+    display:flex;align-items:center;gap:8px;justify-content:space-between;
+  }
+  .match-mini .team{display:flex;flex-direction:column;align-items:center;gap:3px;flex:0 0 44px;}
+  .match-mini .team .code{font-family:var(--font-display);font-size:10px;letter-spacing:0.04em;}
+  .match-mini .score{display:flex;gap:6px;}
+  .match-mini .score-cell{width:36px;height:44px;background:var(--surface);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:18px;}
+
+  /* Ranking row */
+  .rank-mini{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;font-size:11px;}
+  .rank-mini.self{background:var(--primary);color:#0b0b0d;}
+  .rank-mini.self .pts{color:#0b0b0d;}
+  .rank-mini .pos{font-family:var(--font-display);font-size:14px;color:var(--text-muted);width:18px;text-align:center;}
+  .rank-mini.self .pos{color:#0b0b0d;}
+  .rank-mini .av{width:24px;height:24px;border-radius:9999px;font-family:var(--font-display);font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .rank-mini .name{flex:1;font-weight:600;}
+  .rank-mini .pts{font-family:var(--font-display);font-size:13px;color:var(--lime);}
+
+  /* Post card */
+  .post-mini{background:var(--card);border-radius:12px;padding:10px;margin-bottom:8px;}
+  .post-mini .header{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .post-mini .header .av{width:24px;height:24px;border-radius:9999px;font-family:var(--font-display);font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .post-mini .header .name{font-size:11px;font-weight:600;}
+  .post-mini .header .time{font-size:9px;color:var(--text-muted);}
+  .post-mini .body{font-size:11px;line-height:15px;margin-bottom:6px;}
+  .post-mini .actions{display:flex;gap:14px;font-size:10px;color:var(--text-muted);}
+
+  /* Share card mini */
+  .share-mini{
+    flex:1;margin:0 -16px;padding:18px 16px;position:relative;overflow:hidden;
+    background:radial-gradient(ellipse at 78% 85%,rgba(255,106,0,0.25),transparent 55%),linear-gradient(160deg,#0a0608,#1a1410 60%,#050307);
+    display:flex;flex-direction:column;justify-content:space-between;
+  }
+  .share-mini::before{content:"";position:absolute;inset:0;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.12 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");opacity:0.5;mix-blend-mode:overlay;pointer-events:none;}
+  .share-mini .top{display:flex;justify-content:space-between;align-items:start;position:relative;z-index:1;}
+  .share-mini .label{font-size:8px;letter-spacing:0.2em;color:var(--text-muted);font-weight:700;text-transform:uppercase;}
+  .share-mini .o2-b{font-family:var(--font-display);font-size:18px;color:var(--primary);text-shadow:0 0 10px var(--primary-glow);}
+  .share-mini .mundial{font-family:var(--font-display);font-size:36px;line-height:30px;background:linear-gradient(180deg,#FFF,#FFE082 60%,#FFB300);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-0.01em;margin-top:6px;position:relative;z-index:1;}
+  .share-mini .year{font-family:var(--font-display);font-size:18px;color:var(--primary);letter-spacing:0.16em;position:relative;z-index:1;}
+  .share-mini .data{position:relative;z-index:1;display:flex;flex-direction:column;gap:8px;font-size:11px;}
+  .share-mini .data .lbl-mini{font-size:7px;letter-spacing:0.2em;color:var(--text-muted);font-weight:700;text-transform:uppercase;}
+  .share-mini .data .val{font-family:var(--font-display);font-size:15px;letter-spacing:0.02em;display:flex;align-items:center;gap:6px;}
+  .share-mini .data .val.celeste{color:var(--celeste);}
+  .share-mini .stats{display:grid;grid-template-columns:1fr 1fr;padding-top:6px;border-top:1px solid rgba(255,179,0,0.18);position:relative;z-index:1;}
+  .share-mini .stats .n{font-family:var(--font-display);font-size:28px;line-height:24px;}
+  .share-mini .stats .n.lime{color:var(--lime);}
+  .share-mini .hashtag{font-size:8px;letter-spacing:0.16em;color:var(--gold);font-weight:700;text-align:center;position:relative;z-index:1;}
+
+  /* Bottom nav mini */
+  .bnav-mini{
+    background:rgba(19,20,23,0.85);backdrop-filter:blur(20px);
+    border-top:1px solid rgba(255,255,255,0.06);
+    display:flex;justify-content:space-around;padding:8px 0 12px;
+  }
+  .bnav-mini .it{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text-muted);font-size:9px;font-weight:600;}
+  .bnav-mini .it.active{color:var(--primary);}
+  .bnav-mini .dot{width:16px;height:16px;border:1.5px solid currentColor;border-radius:4px;}
+
+  /* ─────────────── DECISION GRID ─────────────── */
+  .dec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:32px;}
+  .dec{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;}
+  .dec h3{font-family:var(--font-body);font-size:16px;font-weight:700;margin:0 0 8px;color:var(--text);}
+  .dec p{font-size:14px;line-height:21px;color:var(--text-secondary);margin:0;}
+  .dec .marker{
+    display:inline-block;width:6px;height:6px;border-radius:9999px;background:var(--primary);margin-right:8px;vertical-align:middle;
+  }
+
+  /* ─────────────── TIMELINE ─────────────── */
+  .timeline{display:grid;gap:16px;margin-top:32px;}
+  .phase{
+    background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;
+    display:grid;grid-template-columns:160px 1fr;gap:24px;align-items:start;
+  }
+  .phase.highlight{border-color:var(--primary);background:linear-gradient(135deg,rgba(255,106,0,0.08),var(--card));}
+  .phase .date{
+    font-family:var(--font-display);font-size:14px;letter-spacing:0.04em;color:var(--primary);
+  }
+  .phase h3{margin:0 0 4px;font-size:16px;font-weight:700;}
+  .phase p{margin:0;font-size:14px;line-height:21px;color:var(--text-secondary);}
+  @media (max-width:600px){
+    .phase{grid-template-columns:1fr;gap:6px;}
+  }
+
+  /* ─────────────── METHOD ─────────────── */
+  .method-block{
+    background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;
+    margin-top:24px;
+  }
+  .method-block p{margin:0;font-size:15px;line-height:24px;}
+
+  /* ─────────────── NEXT STEPS ─────────────── */
+  .next-list{margin-top:24px;padding:0;list-style:none;display:grid;gap:12px;}
+  .next-list li{
+    display:flex;gap:14px;align-items:start;background:var(--card);border:1px solid var(--border);
+    border-radius:12px;padding:16px 20px;font-size:15px;
+  }
+  .next-list li .step-dot{
+    flex-shrink:0;width:24px;height:24px;border-radius:9999px;background:var(--primary-glow);
+    color:var(--primary);font-family:var(--font-display);font-size:13px;
+    display:flex;align-items:center;justify-content:center;margin-top:-1px;
+  }
+
+  /* ─────────────── FOOTER ─────────────── */
+  footer{
+    padding:48px;border-top:1px solid var(--border);text-align:center;
+    color:var(--text-muted);font-size:13px;line-height:22px;
+  }
+  footer .brand-foot{font-family:var(--font-display);color:var(--primary);font-size:16px;letter-spacing:0.04em;margin-bottom:6px;}
+
+  /* Flags inline (SVG simplificada) */
+  .flag-svg{display:inline-block;border-radius:2px;vertical-align:middle;}
+</style>
+</head>
+<body>
+
+<!-- ── Sprite SVG inline (subset usado en mockups) ── -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="flag-ar" viewBox="0 0 24 16"><rect width="24" height="16" fill="#74ACDF"/><rect y="5.33" width="24" height="5.34" fill="#FFFFFF"/><circle cx="12" cy="8" r="1.6" fill="#F6B40E"/></symbol>
+  <symbol id="flag-br" viewBox="0 0 24 16"><rect width="24" height="16" fill="#009C3B"/><polygon points="12,2 22,8 12,14 2,8" fill="#FFDF00"/><circle cx="12" cy="8" r="2.6" fill="#002776"/></symbol>
+  <symbol id="flag-mx" viewBox="0 0 24 16"><rect width="8" height="16" fill="#006847"/><rect x="8" width="8" height="16" fill="#FFFFFF"/><rect x="16" width="8" height="16" fill="#CE1126"/></symbol>
+  <symbol id="flag-jp" viewBox="0 0 24 16"><rect width="24" height="16" fill="#FFFFFF"/><circle cx="12" cy="8" r="3" fill="#BC002D"/></symbol>
+  <symbol id="flag-fr" viewBox="0 0 24 16"><rect width="8" height="16" fill="#0055A4"/><rect x="8" width="8" height="16" fill="#FFFFFF"/><rect x="16" width="8" height="16" fill="#EF4135"/></symbol>
+  <symbol id="flag-de" viewBox="0 0 24 16"><rect width="24" height="5.33" fill="#000"/><rect y="5.33" width="24" height="5.34" fill="#DD0000"/><rect y="10.67" width="24" height="5.33" fill="#FFCE00"/></symbol>
+</svg>
+
+<!-- ─────────────── HERO ─────────────── -->
+<header class="hero">
+  <div class="brand"><span class="o2">O2</span> PRODE · WELLNESS CLUB</div>
+  <h1>El prode del<br>gimnasio para el<br>Mundial 2026.</h1>
+  <p class="tagline">Una aplicación para que los socios del club compitan entre sí prediciendo los partidos del Mundial. Pertenencia, conversación y branding orgánico durante los 38 días más vistos del año.</p>
+  <div class="meta">Presentación de producto · Mayo 2026</div>
+</header>
+
+<main>
+
+<!-- ─────────────── LA IDEA ─────────────── -->
+<section>
+  <div class="section-eyebrow">01 · La idea</div>
+  <h2>Convertir el Mundial en una excusa de club.</h2>
+  <p>O2 PRODE es una <strong>aplicación web mobile-first</strong>, exclusiva para los socios del gimnasio. Cada socio carga sus predicciones de los partidos, suma puntos por acierto, sube en un ranking interno y comparte sus jugadas en sus redes con branding del club.</p>
+  <p style="margin-top:16px;">No es una casa de apuestas. <strong>Sin dinero, premios simbólicos definidos por la marca aliada.</strong> La mecánica está pensada para profundizar el vínculo entre socios — y entre los socios y el club — durante las cinco semanas del torneo.</p>
+</section>
+
+<!-- ─────────────── CÓMO FUNCIONA ─────────────── -->
+<section>
+  <div class="section-eyebrow">02 · Cómo funciona</div>
+  <h2>Cinco gestos. Una temporada.</h2>
+  <ol class="steps">
+    <li>
+      <span class="num">01</span>
+      <div>
+        <h3>Activación con código</h3>
+        <p>Cada socio recibe un código de invitación por parte del club. Sin código, no entra. Mantener el círculo cerrado es lo que vuelve al espacio interesante.</p>
+      </div>
+    </li>
+    <li>
+      <span class="num">02</span>
+      <div>
+        <h3>Predicción de cada partido</h3>
+        <p>Antes del kickoff, el socio carga el resultado que cree. Acertar el score exacto vale más; acertar al ganador vale menos. Los partidos de eliminatorias valen más que los de fase de grupos. La final define el podio.</p>
+      </div>
+    </li>
+    <li>
+      <span class="num">03</span>
+      <div>
+        <h3>Ranking entre socios</h3>
+        <p>Tabla en vivo con los 800 socios. La posición personal siempre se muestra destacada. Podio para top 3, búsqueda para encontrar amigos rápido, vista semanal para mantener el interés vivo durante el torneo.</p>
+      </div>
+    </li>
+    <li>
+      <span class="num">04</span>
+      <div>
+        <h3>Muro social interno</h3>
+        <p>Espacio cerrado donde los socios discuten el Mundial entre ellos: posts, comentarios, reacciones, imágenes opcionales. El club también publica desde acá — anuncios de premios, novedades, fotos. Es el "vestuario digital" del gimnasio durante el torneo.</p>
+      </div>
+    </li>
+    <li>
+      <span class="num">05</span>
+      <div>
+        <h3>Compartir hacia afuera</h3>
+        <p>Cada socio puede generar una imagen cinematográfica de su prode, lista para subir a Stories de Instagram o WhatsApp. La marca del club aparece siempre — sutil pero presente. Cada share es un anuncio orgánico del gimnasio en el feed de un contacto cercano del socio.</p>
+      </div>
+    </li>
+  </ol>
+</section>
+
+<!-- ─────────────── MOCKUPS ─────────────── -->
+<section>
+  <div class="section-eyebrow">03 · Vistas del producto</div>
+  <h2>Cómo se ve.</h2>
+  <p>Cinco pantallas representativas. La aplicación está pensada para celular — el mismo diseño funciona también si el socio entra desde la computadora.</p>
+
+  <div class="gallery">
+
+    <!-- Phone 1: Home -->
+    <div>
+      <div class="phone"><div class="phone-screen">
+        <div class="status-bar"><span>9:41</span><span class="right">●●●● 100%</span></div>
+        <div class="screen-body">
+          <div style="font-family:var(--font-display);font-size:18px;color:var(--primary);">O2</div>
+          <div class="greeting">HOLA, MARTÍN</div>
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <div class="stat-mini" style="flex:1;"><div class="lbl">TU POSICIÓN</div><div class="val">#8</div></div>
+            <div class="stat-mini" style="flex:1;"><div class="lbl">TUS PUNTOS</div><div class="val lime">124</div></div>
+          </div>
+          <div class="next-mini">
+            <div class="lbl">PRÓXIMO PARTIDO</div>
+            <div class="teams">
+              <span><svg class="flag-svg" width="24" height="16"><use href="#flag-ar"/></svg> ARG</span>
+              <span class="vs">VS</span>
+              <span>BRA <svg class="flag-svg" width="24" height="16"><use href="#flag-br"/></svg></span>
+            </div>
+            <div class="count">Faltan 2h 14m</div>
+            <button class="btn-cta">IR A MI PRODE</button>
+          </div>
+          <div class="label-up" style="margin-top:12px;">ACTIVIDAD RECIENTE</div>
+          <div class="post-mini" style="margin-top:6px;">
+            <div class="header">
+              <div class="av" style="background:linear-gradient(135deg,#22C55E,#4ADE80);color:#0b0b0d;">L</div>
+              <div style="flex:1;">
+                <div class="name">Lucas</div>
+                <div class="time">predijo 2-1 ARG · hace 10 min</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bnav-mini">
+          <div class="it active"><div class="dot"></div>Inicio</div>
+          <div class="it"><div class="dot"></div>Prode</div>
+          <div class="it"><div class="dot"></div>Ranking</div>
+          <div class="it"><div class="dot"></div>Muro</div>
+          <div class="it"><div class="dot"></div>Perfil</div>
+        </div>
+      </div></div>
+      <div class="phone-label">Inicio · resumen diario</div>
+    </div>
+
+    <!-- Phone 2: Group Stage -->
+    <div>
+      <div class="phone"><div class="phone-screen">
+        <div class="status-bar"><span>9:41</span><span class="right">●●●● 100%</span></div>
+        <div class="screen-body">
+          <div style="font-family:var(--font-display);font-size:13px;letter-spacing:0.16em;text-align:center;padding:4px 0 8px;">MI PRODE</div>
+          <div style="display:flex;gap:14px;border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:10px;">
+            <div style="font-size:10px;font-weight:700;color:var(--text);letter-spacing:0.04em;border-bottom:2px solid var(--primary);padding-bottom:4px;">FASE DE GRUPOS</div>
+            <div style="font-size:10px;font-weight:700;color:var(--text-disabled);letter-spacing:0.04em;">ELIMINATORIAS</div>
+          </div>
+          <div class="match-mini">
+            <div class="team"><svg class="flag-svg" width="32" height="22"><use href="#flag-ar"/></svg><div class="code">ARG</div></div>
+            <div class="score"><div class="score-cell">2</div><div class="score-cell" style="border-color:var(--primary);box-shadow:0 0 12px var(--primary-glow);">0</div></div>
+            <div class="team"><svg class="flag-svg" width="32" height="22"><use href="#flag-jp"/></svg><div class="code">JPN</div></div>
+          </div>
+          <div class="match-mini">
+            <div class="team"><svg class="flag-svg" width="32" height="22"><use href="#flag-br"/></svg><div class="code">BRA</div></div>
+            <div class="score"><div class="score-cell">1</div><div class="score-cell">1</div></div>
+            <div class="team"><svg class="flag-svg" width="32" height="22"><use href="#flag-de"/></svg><div class="code">ALE</div></div>
+          </div>
+          <div class="match-mini">
+            <div class="team"><svg class="flag-svg" width="32" height="22"><use href="#flag-fr"/></svg><div class="code">FRA</div></div>
+            <div class="score"><div class="score-cell" style="color:#22C55E;border-color:#22C55E;">2</div><div class="score-cell" style="color:#22C55E;border-color:#22C55E;">1</div></div>
+            <div class="team"><svg class="flag-svg" width="32" height="22"><use href="#flag-mx"/></svg><div class="code">MEX</div></div>
+          </div>
+          <div style="font-size:9px;color:var(--text-muted);text-align:center;margin-top:6px;">3 de 6 cargados</div>
+        </div>
+        <div class="bnav-mini">
+          <div class="it"><div class="dot"></div>Inicio</div>
+          <div class="it active"><div class="dot"></div>Prode</div>
+          <div class="it"><div class="dot"></div>Ranking</div>
+          <div class="it"><div class="dot"></div>Muro</div>
+          <div class="it"><div class="dot"></div>Perfil</div>
+        </div>
+      </div></div>
+      <div class="phone-label">Carga de predicciones</div>
+    </div>
+
+    <!-- Phone 3: Ranking -->
+    <div>
+      <div class="phone"><div class="phone-screen">
+        <div class="status-bar"><span>9:41</span><span class="right">●●●● 100%</span></div>
+        <div class="screen-body">
+          <div style="font-family:var(--font-display);font-size:13px;letter-spacing:0.16em;text-align:center;padding:4px 0 12px;">RANKING</div>
+          <div style="display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:6px;align-items:end;margin-bottom:14px;">
+            <div style="background:var(--card);padding:10px 6px;border-radius:10px;text-align:center;">
+              <div style="width:28px;height:28px;background:linear-gradient(135deg,#3B82F6,#60A5FA);border-radius:9999px;margin:0 auto 4px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:11px;color:#fff;">L</div>
+              <div style="font-size:10px;font-weight:600;">Lucas</div>
+              <div style="font-family:var(--font-display);font-size:13px;color:var(--lime);">142</div>
+            </div>
+            <div style="background:linear-gradient(180deg,rgba(255,215,0,0.08),var(--card));padding:14px 6px;border-radius:10px;text-align:center;border:1px solid rgba(255,215,0,0.3);">
+              <div style="width:36px;height:36px;background:linear-gradient(135deg,#FF6A00,#FF8A33);border-radius:9999px;margin:0 auto 4px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:14px;color:#0b0b0d;">M</div>
+              <div style="font-size:10px;font-weight:700;">Martín</div>
+              <div style="font-family:var(--font-display);font-size:15px;color:var(--lime);">156</div>
+            </div>
+            <div style="background:var(--card);padding:10px 6px;border-radius:10px;text-align:center;">
+              <div style="width:28px;height:28px;background:linear-gradient(135deg,#22C55E,#4ADE80);border-radius:9999px;margin:0 auto 4px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:11px;color:#0b0b0d;">N</div>
+              <div style="font-size:10px;font-weight:600;">Nahuel</div>
+              <div style="font-family:var(--font-display);font-size:13px;color:var(--lime);">124</div>
+            </div>
+          </div>
+          <div class="rank-mini"><div class="pos">4</div><div class="av" style="background:linear-gradient(135deg,#22C55E,#4ADE80);color:#0b0b0d;">J</div><div class="name">Julián</div><div class="pts">120</div></div>
+          <div class="rank-mini"><div class="pos">5</div><div class="av" style="background:linear-gradient(135deg,#A855F7,#C084FC);color:#fff;">F</div><div class="name">Facu</div><div class="pts">118</div></div>
+          <div class="rank-mini"><div class="pos">6</div><div class="av" style="background:linear-gradient(135deg,#3B82F6,#60A5FA);color:#fff;">M</div><div class="name">Mati</div><div class="pts">115</div></div>
+          <div class="rank-mini self"><div class="pos">8</div><div class="av" style="background:linear-gradient(135deg,#FF6A00,#FF8A33);color:#0b0b0d;">N</div><div class="name">Vos</div><div class="pts">124</div></div>
+          <div class="rank-mini"><div class="pos">9</div><div class="av" style="background:linear-gradient(135deg,#22C55E,#4ADE80);color:#0b0b0d;">P</div><div class="name">Pablo</div><div class="pts">110</div></div>
+        </div>
+        <div class="bnav-mini">
+          <div class="it"><div class="dot"></div>Inicio</div>
+          <div class="it"><div class="dot"></div>Prode</div>
+          <div class="it active"><div class="dot"></div>Ranking</div>
+          <div class="it"><div class="dot"></div>Muro</div>
+          <div class="it"><div class="dot"></div>Perfil</div>
+        </div>
+      </div></div>
+      <div class="phone-label">Ranking entre socios</div>
+    </div>
+
+    <!-- Phone 4: Muro -->
+    <div>
+      <div class="phone"><div class="phone-screen">
+        <div class="status-bar"><span>9:41</span><span class="right">●●●● 100%</span></div>
+        <div class="screen-body">
+          <div style="font-family:var(--font-display);font-size:13px;letter-spacing:0.16em;text-align:center;padding:4px 0 8px;">MURO</div>
+          <div style="display:flex;gap:14px;border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:10px;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:0.04em;border-bottom:2px solid var(--primary);padding-bottom:4px;">DESTACADOS</div>
+            <div style="font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:0.04em;">RECIENTES</div>
+          </div>
+          <div class="post-mini">
+            <div class="header">
+              <div class="av" style="background:linear-gradient(135deg,#FFB300,#E65100);color:#0b0b0d;">O2</div>
+              <div style="flex:1;">
+                <div class="name">O2 Wellness Club</div>
+                <div class="time">hace 3h · oficial</div>
+              </div>
+            </div>
+            <div class="body">Los premios del prode ya están definidos. Mirá lo que vas a poder ganar.</div>
+            <div style="height:60px;border-radius:8px;margin-bottom:6px;background:linear-gradient(135deg,#1b1d22,#3d1f0a 50%,#1b1d22);display:flex;align-items:center;justify-content:center;border:1px solid var(--border);">
+              <div style="font-family:var(--font-display);font-size:11px;letter-spacing:0.16em;color:var(--gold);">PREMIOS 2026</div>
+            </div>
+            <div class="actions"><span>♡ 47</span><span>💬 14</span><span>↗ Compartir</span></div>
+          </div>
+          <div class="post-mini">
+            <div class="header">
+              <div class="av" style="background:linear-gradient(135deg,#22C55E,#4ADE80);color:#0b0b0d;">L</div>
+              <div style="flex:1;">
+                <div class="name">Luciano</div>
+                <div class="time">hace 20 min</div>
+              </div>
+            </div>
+            <div class="body">Yo tengo a Argentina campeón otra vez.</div>
+            <div class="actions"><span>♡ 24</span><span>💬 8</span><span>↗</span></div>
+          </div>
+        </div>
+        <div class="bnav-mini">
+          <div class="it"><div class="dot"></div>Inicio</div>
+          <div class="it"><div class="dot"></div>Prode</div>
+          <div class="it"><div class="dot"></div>Ranking</div>
+          <div class="it active"><div class="dot"></div>Muro</div>
+          <div class="it"><div class="dot"></div>Perfil</div>
+        </div>
+      </div></div>
+      <div class="phone-label">Muro social del club</div>
+    </div>
+
+    <!-- Phone 5: Share -->
+    <div>
+      <div class="phone"><div class="phone-screen">
+        <div class="status-bar"><span>9:41</span><span class="right">●●●● 100%</span></div>
+        <div style="font-family:var(--font-display);font-size:11px;letter-spacing:0.16em;text-align:center;padding:6px 0 4px;color:var(--text-muted);">COMPARTIR</div>
+        <div class="share-mini">
+          <div>
+            <div class="top">
+              <div class="label">— Mi prode</div>
+              <div class="o2-b">O2</div>
+            </div>
+            <div class="mundial">MUNDIAL</div>
+            <div class="year">2 0 2 6</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0;position:relative;z-index:1;">
+            <div style="width:1px;height:12px;background:linear-gradient(180deg,transparent,var(--gold));"></div>
+            <div style="font-size:7px;letter-spacing:0.4em;color:var(--gold);font-weight:700;text-transform:uppercase;">Mi predicción</div>
+            <div style="font-family:var(--font-display);font-size:42px;line-height:36px;letter-spacing:-0.04em;background:linear-gradient(180deg,#FFF 0%,#FFE082 50%,#C84800);-webkit-background-clip:text;background-clip:text;color:transparent;">N°1</div>
+            <div style="font-size:7px;letter-spacing:0.32em;color:var(--text-secondary);font-weight:600;text-transform:uppercase;">Socio O2 · Pro</div>
+            <div style="width:1px;height:12px;background:linear-gradient(180deg,var(--gold),transparent);"></div>
+          </div>
+          <div class="data">
+            <div>
+              <div class="lbl-mini">— Campeón</div>
+              <div class="val celeste">ARGENTINA <svg class="flag-svg" width="18" height="12"><use href="#flag-ar"/></svg></div>
+            </div>
+            <div>
+              <div class="lbl-mini">— Goleador</div>
+              <div class="val">MBAPPÉ <svg class="flag-svg" width="18" height="12"><use href="#flag-fr"/></svg></div>
+            </div>
+          </div>
+          <div class="stats">
+            <div>
+              <div class="lbl-mini">PUNTOS</div>
+              <div class="n lime">124</div>
+            </div>
+            <div>
+              <div class="lbl-mini">POSICIÓN</div>
+              <div class="n">#8</div>
+            </div>
+          </div>
+          <div class="hashtag">#PRODEMUNDIALO2</div>
+        </div>
+      </div></div>
+      <div class="phone-label">Imagen para compartir</div>
+    </div>
+
+  </div>
+
+  <p style="text-align:center;color:var(--text-muted);font-size:13px;margin-top:32px;">
+    Mockups en alta fidelidad disponibles aparte:<br>
+    <code style="background:var(--surface);padding:3px 8px;border-radius:4px;font-size:12px;color:var(--text);">design/screens.html</code>
+    &nbsp;·&nbsp;
+    <code style="background:var(--surface);padding:3px 8px;border-radius:4px;font-size:12px;color:var(--text);">design/share-argentina-cinematic.html</code>
+  </p>
+</section>
+
+<!-- ─────────────── DECISIONES ─────────────── -->
+<section>
+  <div class="section-eyebrow">04 · Decisiones que definen el producto</div>
+  <h2>Lo que sí, lo que no.</h2>
+  <p>Estas son las definiciones de producto que sostienen todo lo demás:</p>
+
+  <div class="dec-grid">
+    <div class="dec">
+      <h3><span class="marker"></span>Cerrado al club</h3>
+      <p>Solo socios entran. No hay registro abierto. La exclusividad es el feature, no la limitación.</p>
+    </div>
+    <div class="dec">
+      <h3><span class="marker"></span>Sin dinero</h3>
+      <p>Premios simbólicos definidos por la marca aliada. Se compite por reconocimiento entre conocidos, no por plata.</p>
+    </div>
+    <div class="dec">
+      <h3><span class="marker"></span>Estética premium</h3>
+      <p>Tipografía deportiva, fondo oscuro, naranja del club como acción. No parece app de apuestas, parece club de alto rendimiento.</p>
+    </div>
+    <div class="dec">
+      <h3><span class="marker"></span>Mobile-first</h3>
+      <p>El socio usa el teléfono. Toda decisión de diseño parte de ahí. Cabe en una mano, se carga en el subte.</p>
+    </div>
+    <div class="dec">
+      <h3><span class="marker"></span>Viralidad sin spam</h3>
+      <p>El share es opcional pero está cuidado al detalle. Cada socio que comparte funciona como pieza publicitaria orgánica del club.</p>
+    </div>
+    <div class="dec">
+      <h3><span class="marker"></span>Reutilizable</h3>
+      <p>La arquitectura no está atada al Mundial. Se puede reutilizar para Copa América, Libertadores u otros torneos del club.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── ROADMAP ─────────────── -->
+<section>
+  <div class="section-eyebrow">05 · Roadmap</div>
+  <h2>De acá al kick-off del Mundial.</h2>
+
+  <div class="timeline">
+    <div class="phase">
+      <div class="date">Hecho</div>
+      <div>
+        <h3>Diseño y arquitectura</h3>
+        <p>Estrategia de producto, sistema de diseño, mockups, lógica de juego y ranking, arquitectura técnica, accesibilidad, copy. Documentado y cerrado.</p>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="date">~3-4 semanas</div>
+      <div>
+        <h3>Desarrollo</h3>
+        <p>Construcción del producto sobre la base de diseño ya cerrada. Sprints semanales con entregables visibles. Validación contínua.</p>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="date">1 semana</div>
+      <div>
+        <h3>Beta cerrada</h3>
+        <p>Cinco a diez socios prueban la app antes del lanzamiento general. Se hace el ajuste final de copy, ritmo y notificaciones.</p>
+      </div>
+    </div>
+    <div class="phase highlight">
+      <div class="date">11 jun 2026</div>
+      <div>
+        <h3>Lanzamiento</h3>
+        <p>Inicio del Mundial. La app queda disponible para los 800 socios con sus códigos de invitación distribuidos por el club.</p>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="date">11 jun – 19 jul</div>
+      <div>
+        <h3>Operación durante el torneo</h3>
+        <p>Monitoreo de la app durante los 38 días del torneo. Resolución de incidentes, push de notificaciones, anuncios en el muro coordinados con la marca aliada.</p>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="date">20 jul +</div>
+      <div>
+        <h3>Cierre y siguiente torneo</h3>
+        <p>Resumen final del torneo, entrega de premios, encuesta de satisfacción. Conversación sobre el próximo prode (Libertadores, Copa América u otro que defina el club).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── METODOLOGÍA ─────────────── -->
+<section>
+  <div class="section-eyebrow">06 · Metodología</div>
+  <h2>Sobre cómo se trabajó.</h2>
+  <div class="method-block">
+    <p>El proyecto combinó <strong>dirección humana con herramientas de inteligencia artificial</strong> en cada fase del diseño: estrategia, sistema visual, lógica de juego, arquitectura técnica, accesibilidad y copy. Esto permitió producir una base sólida y documentada en menos tiempo que un proceso tradicional, sin sacrificar criterio en las decisiones que definen al producto.</p>
+    <p style="margin-top:16px;">Cada bloque del proyecto pasó por <strong>revisión humana antes de cerrar</strong>. El resultado: una arquitectura coherente, decisiones explícitas, y un repositorio listo para entrar en fase de desarrollo sin tener que volver a discutir lo ya decidido.</p>
+  </div>
+</section>
+
+<!-- ─────────────── NEXT STEPS ─────────────── -->
+<section>
+  <div class="section-eyebrow">07 · Próximos pasos</div>
+  <h2>Lo que sigue.</h2>
+  <ol class="next-list">
+    <li><span class="step-dot">1</span>Aprobación de esta presentación y feedback inicial del cliente.</li>
+    <li><span class="step-dot">2</span>Confirmación por parte de la marca aliada sobre los premios y el rol que quiere asumir en el muro.</li>
+    <li><span class="step-dot">3</span>Cotización formal del desarrollo — documento aparte, con detalle de horas, hitos y forma de pago.</li>
+    <li><span class="step-dot">4</span>Cuando FIFA confirme grupos definitivos (sorteo oficial), se cargan los datos reales al producto.</li>
+    <li><span class="step-dot">5</span>Inicio del desarrollo con sprints semanales.</li>
+  </ol>
+</section>
+
+</main>
+
+<footer>
+  <div class="brand-foot">O2 PRODE</div>
+  <div>Presentación de producto · Mundial 2026</div>
+  <div style="margin-top:8px;">Nahuel Carrera · Diseño y desarrollo</div>
+</footer>
+
+</body>
+</html>

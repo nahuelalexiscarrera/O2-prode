@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>O2 PRODE — Design System Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0b0b0d;
+    --surface: #131417;
+    --card: #1b1d22;
+    --elevated: #23262c;
+    --border: #2a2e36;
+    --border-strong: #3a3f49;
+    --text: #f5f7fa;
+    --text-secondary: #c7ccd4;
+    --text-muted: #9ca3af;
+    --text-disabled: #5a5f69;
+    --text-inverse: #0b0b0d;
+    --primary: #ff6a00;
+    --primary-hover: #ff7a1a;
+    --primary-pressed: #e65e00;
+    --primary-soft: #ff8a33;
+    --primary-glow: rgba(255,106,0,0.35);
+    --primary-bg: rgba(255,106,0,0.12);
+    --lime: #d9ff3f;
+    --lime-soft: rgba(217,255,63,0.18);
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --info: #3b82f6;
+    --live: #ff2d55;
+    --font-display: "Anton", "Bebas Neue", Impact, sans-serif;
+    --font-body: "Inter", system-ui, sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{background:var(--bg);}
+  body{
+    margin:0;font-family:var(--font-body);font-size:14px;line-height:20px;
+    color:var(--text);background:var(--bg);
+    -webkit-font-smoothing:antialiased;
+    background-image: radial-gradient(circle at 20% 0%, rgba(255,106,0,0.04) 0%, transparent 50%);
+    min-height:100vh;
+  }
+  .font-display{font-family:var(--font-display);font-feature-settings:"tnum" 1, "lnum" 1;}
+  .label-up{font-size:11px;line-height:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);}
+  ::selection{background:var(--primary-bg);color:var(--text);}
+  ::-webkit-scrollbar{width:6px;height:6px;}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:9999px;}
+  ::-webkit-scrollbar-thumb:hover{background:var(--border-strong);}
+
+  /* Layout */
+  .shell{display:grid;grid-template-columns:240px 1fr;min-height:100vh;}
+  @media(max-width:768px){.shell{grid-template-columns:1fr;}}
+  .nav{
+    background:var(--surface);border-right:1px solid var(--border);
+    padding:32px 16px;position:sticky;top:0;height:100vh;overflow-y:auto;
+  }
+  @media(max-width:768px){.nav{position:static;height:auto;}}
+  .nav-brand{display:flex;align-items:center;gap:10px;margin-bottom:32px;}
+  .nav-brand .dot{width:32px;height:32px;border-radius:9999px;background:var(--primary);box-shadow:0 0 24px var(--primary-glow);}
+  .nav-brand .name{font-family:var(--font-display);font-size:22px;letter-spacing:0.02em;}
+  .nav-brand .sub{font-size:10px;letter-spacing:0.08em;color:var(--text-muted);text-transform:uppercase;}
+  .nav a{
+    display:block;padding:10px 12px;color:var(--text-secondary);text-decoration:none;
+    border-radius:8px;font-size:13px;font-weight:500;margin-bottom:2px;transition:background 200ms;
+  }
+  .nav a:hover{background:var(--card);color:var(--text);}
+  .nav-section{margin-top:24px;}
+  .nav-section .label-up{font-size:10px;padding-left:12px;margin-bottom:8px;display:block;}
+
+  .main{padding:48px 64px;max-width:1100px;}
+  @media(max-width:768px){.main{padding:32px 20px;}}
+
+  h1.title{font-family:var(--font-display);font-size:56px;line-height:56px;letter-spacing:-0.02em;margin:0 0 16px;}
+  .lede{font-size:16px;color:var(--text-secondary);line-height:24px;max-width:680px;margin-bottom:48px;}
+  section{margin-bottom:80px;scroll-margin-top:24px;}
+  section h2{font-family:var(--font-display);font-size:32px;line-height:36px;letter-spacing:-0.01em;margin:0 0 6px;}
+  section .sub{color:var(--text-muted);font-size:14px;margin-bottom:32px;}
+  h3{font-family:var(--font-display);font-size:20px;letter-spacing:0.02em;margin:32px 0 16px;text-transform:uppercase;color:var(--text-secondary);}
+
+  /* Color swatches */
+  .swatch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;}
+  .swatch{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+  .swatch .chip{height:80px;}
+  .swatch .meta{padding:12px;}
+  .swatch .name{font-size:12px;font-weight:600;color:var(--text);}
+  .swatch .hex{font-size:11px;color:var(--text-muted);font-family:ui-monospace,monospace;margin-top:2px;}
+
+  /* Typography demo */
+  .type-row{display:flex;align-items:baseline;gap:24px;padding:16px 0;border-bottom:1px solid var(--border);}
+  .type-row:last-child{border-bottom:none;}
+  .type-label{width:180px;flex-shrink:0;}
+  .type-label .name{font-size:12px;font-weight:600;}
+  .type-label .meta{font-size:10px;color:var(--text-muted);font-family:ui-monospace,monospace;margin-top:2px;}
+
+  /* Spacing demo */
+  .space-row{display:flex;align-items:center;gap:16px;padding:8px 0;}
+  .space-block{background:var(--primary);height:24px;border-radius:4px;}
+  .space-label{width:80px;font-size:12px;color:var(--text-muted);font-family:ui-monospace,monospace;}
+
+  /* Radius demo */
+  .radius-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:16px;}
+  .radius-box{background:var(--card);border:1px solid var(--border);height:96px;display:flex;align-items:flex-end;justify-content:center;padding:8px;font-size:11px;color:var(--text-muted);font-family:ui-monospace,monospace;}
+
+  /* Shadow demo */
+  .shadow-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:24px;padding:24px;background:var(--bg);}
+  .shadow-card{background:var(--card);height:120px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text-muted);}
+
+  /* Component preview area */
+  .preview-area{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:16px;}
+  .preview-area.dark{background:var(--surface);}
+  .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;}
+  .row + .row{margin-top:16px;}
+
+  /* Button styles */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    font-family:var(--font-body);font-weight:600;border:none;cursor:pointer;
+    transition:all 200ms cubic-bezier(0.2,0,0,1);
+  }
+  .btn-primary{background:var(--primary);color:var(--text-inverse);padding:0 24px;height:48px;border-radius:9999px;font-size:14px;}
+  .btn-primary:hover{background:var(--primary-hover);box-shadow:0 0 24px var(--primary-glow);}
+  .btn-primary:active{background:var(--primary-pressed);transform:scale(0.98);}
+  .btn-secondary{background:transparent;color:var(--text);border:1px solid var(--border-strong);padding:0 24px;height:48px;border-radius:12px;font-size:14px;}
+  .btn-secondary:hover{background:var(--surface);}
+  .btn-ghost{background:transparent;color:var(--text);padding:0 24px;height:48px;border-radius:12px;font-size:14px;}
+  .btn-ghost:hover{background:var(--surface);}
+  .btn-danger{background:var(--error);color:var(--text);padding:0 24px;height:48px;border-radius:9999px;font-size:14px;}
+  .btn-link{background:transparent;color:var(--primary);padding:0 8px;font-size:14px;text-decoration:none;}
+  .btn-link:hover{text-decoration:underline;}
+  .btn-sm{height:36px;padding:0 16px;font-size:13px;}
+  .btn-lg{height:56px;padding:0 32px;font-size:16px;font-weight:700;}
+  .btn[disabled]{opacity:0.4;cursor:not-allowed;}
+
+  /* Avatar */
+  .avatar{position:relative;display:inline-flex;align-items:center;justify-content:center;border-radius:9999px;background:var(--card);overflow:visible;font-weight:700;font-family:var(--font-display);letter-spacing:0.02em;}
+  .avatar img{width:100%;height:100%;object-fit:cover;border-radius:9999px;}
+  .avatar.xs{width:24px;height:24px;font-size:10px;}
+  .avatar.sm{width:32px;height:32px;font-size:12px;}
+  .avatar.md{width:40px;height:40px;font-size:14px;}
+  .avatar.lg{width:56px;height:56px;font-size:18px;}
+  .avatar.xl{width:96px;height:96px;font-size:32px;}
+  .avatar .level-badge{
+    position:absolute;bottom:-2px;right:-2px;width:22px;height:22px;border-radius:9999px;
+    background:var(--card);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;
+    font-size:10px;font-weight:700;color:var(--text);font-family:var(--font-body);
+  }
+  .avatar .level-badge.l5{background:var(--lime);color:var(--text-inverse);box-shadow:0 0 12px var(--lime-soft);}
+  .avatar .level-badge.l4{background:var(--lime);color:var(--text-inverse);}
+  .avatar .level-badge.l3{background:var(--primary);color:var(--text-inverse);}
+  .avatar .level-badge.l2{background:var(--primary-soft);color:var(--text-inverse);}
+  .avatar .level-badge.l1{background:var(--border-strong);color:var(--text);}
+  .avatar .crown{position:absolute;top:-12px;left:50%;transform:translateX(-50%);font-size:18px;}
+
+  .avatar-color-1{background:linear-gradient(135deg,#FF6A00,#FF8A33);color:var(--text-inverse);}
+  .avatar-color-2{background:linear-gradient(135deg,#3B82F6,#60A5FA);color:#fff;}
+  .avatar-color-3{background:linear-gradient(135deg,#22C55E,#4ADE80);color:var(--text-inverse);}
+  .avatar-color-4{background:linear-gradient(135deg,#A855F7,#C084FC);color:#fff;}
+
+  /* Badge */
+  .badge{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px;border-radius:6px;font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;font-family:var(--font-body);}
+  .badge-default{background:transparent;border:1px solid var(--border);color:var(--text-muted);}
+  .badge-primary{background:var(--primary-bg);color:var(--primary);}
+  .badge-accent{background:var(--lime-soft);color:var(--lime);}
+  .badge-success{background:rgba(34,197,94,0.12);color:var(--success);}
+  .badge-warning{background:rgba(245,158,11,0.12);color:var(--warning);}
+  .badge-error{background:rgba(239,68,68,0.12);color:var(--error);}
+
+  /* Chip */
+  .chip{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 16px;border-radius:9999px;font-size:13px;font-weight:600;cursor:pointer;transition:all 200ms;}
+  .chip-default{background:transparent;border:1px solid var(--border);color:var(--text-muted);}
+  .chip-active{background:var(--primary);color:var(--text-inverse);border:none;}
+
+  /* Tag */
+  .tag{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:6px;font-size:11px;font-weight:600;font-family:var(--font-body);}
+  .tag-kickoff{background:var(--surface);color:var(--text-secondary);border:1px solid var(--border);}
+  .tag-live{background:rgba(255,45,85,0.12);color:var(--live);}
+  .tag-live .dot{width:6px;height:6px;border-radius:9999px;background:var(--live);animation:pulse 1.8s infinite;}
+  .tag-closed{background:rgba(34,197,94,0.10);color:var(--success);}
+  .tag-locked{background:var(--surface);color:var(--text-muted);border:1px dashed var(--border-strong);}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.4);opacity:0.5;}}
+
+  /* Input */
+  .input{
+    width:100%;height:56px;padding:0 16px;background:var(--surface);border:1px solid var(--border);
+    border-radius:12px;color:var(--text);font-family:var(--font-body);font-size:16px;
+    transition:border-color 200ms, box-shadow 200ms;outline:none;
+  }
+  .input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-bg);}
+  .input::placeholder{color:var(--text-disabled);}
+
+  /* Score Input */
+  .score-input-pair{display:flex;align-items:center;gap:24px;justify-content:center;}
+  .score-input{
+    width:64px;height:80px;background:var(--card);border:1px solid var(--border);border-radius:16px;
+    display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:32px;
+    color:var(--text);cursor:pointer;transition:all 200ms;
+  }
+  .score-input:hover{border-color:var(--border-strong);}
+  .score-input.focused{border-color:var(--primary);box-shadow:0 0 24px var(--primary-glow);transform:scale(1.05);}
+  .score-input.empty{color:var(--text-muted);}
+  .score-input.locked{position:relative;opacity:0.6;}
+  .score-input.locked::after{content:"🔒";position:absolute;top:8px;right:8px;font-size:12px;}
+  .score-input.correct{color:var(--success);border-color:var(--success);}
+  .score-input.wrong{color:var(--error);border-color:var(--error);}
+
+  /* Skeleton */
+  .skeleton{position:relative;background:var(--surface);overflow:hidden;border-radius:12px;}
+  .skeleton::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%, rgba(255,255,255,0.04) 50%, transparent 100%);animation:shimmer 1.4s infinite;}
+  @keyframes shimmer{0%{transform:translateX(-100%);}100%{transform:translateX(100%);}}
+
+  /* Progress bar */
+  .progress-linear{height:6px;background:var(--border);border-radius:9999px;overflow:hidden;}
+  .progress-linear .fill{height:100%;background:var(--primary);border-radius:9999px;transition:width 400ms;}
+
+  /* Switch */
+  .switch{position:relative;width:56px;height:32px;background:var(--border);border-radius:9999px;cursor:pointer;transition:background 200ms;}
+  .switch.on{background:var(--primary);}
+  .switch .thumb{position:absolute;top:4px;left:4px;width:24px;height:24px;background:var(--text);border-radius:9999px;transition:transform 200ms cubic-bezier(0.2,0,0,1);}
+  .switch.on .thumb{transform:translateX(24px);}
+
+  /* MatchCard */
+  .match-card{background:var(--card);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px;}
+  .match-card .teams{display:flex;align-items:center;justify-content:space-between;gap:16px;}
+  .match-card .team{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;}
+  .match-card .team .flag{width:32px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+  .match-card .team .name{font-size:13px;font-weight:600;}
+  .match-card .vs{color:var(--text-muted);font-size:11px;font-weight:600;letter-spacing:0.06em;}
+  .match-card .tag-wrap{display:flex;justify-content:center;}
+
+  /* RankingRow */
+  .rank-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;}
+  .rank-row.self{background:var(--primary);color:var(--text-inverse);}
+  .rank-row.self .pts{color:var(--text-inverse);}
+  .rank-row .pos{width:24px;text-align:center;font-family:var(--font-display);font-size:18px;color:var(--text-muted);}
+  .rank-row.self .pos{color:var(--text-inverse);}
+  .rank-row .name{flex:1;font-size:14px;font-weight:600;}
+  .rank-row .pts{font-family:var(--font-display);font-size:18px;color:var(--lime);}
+
+  /* PodiumCard */
+  .podium{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:8px;align-items:end;}
+  .podium .col{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 8px;background:var(--card);border-radius:16px;}
+  .podium .col.gold{padding-bottom:32px;border:1px solid rgba(255,215,0,0.3);}
+  .podium .medal{font-size:24px;}
+  .podium .name{font-size:13px;font-weight:600;}
+  .podium .pts{font-family:var(--font-display);font-size:18px;color:var(--lime);}
+
+  /* PostCard */
+  .post-card{background:var(--card);border-radius:16px;padding:16px;}
+  .post-card .header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .post-card .header .name{font-weight:600;font-size:14px;}
+  .post-card .header .time{font-size:11px;color:var(--text-muted);}
+  .post-card .body{font-size:14px;line-height:20px;color:var(--text);margin-bottom:12px;}
+  .post-card .actions{display:flex;gap:24px;color:var(--text-muted);font-size:12px;}
+  .post-card .action{display:inline-flex;align-items:center;gap:6px;cursor:pointer;}
+  .post-card .action:hover{color:var(--text);}
+
+  /* StatCard */
+  .stat-card{background:var(--card);border-radius:16px;padding:20px;flex:1;}
+  .stat-card .delta{display:inline-flex;align-items:center;gap:2px;font-size:11px;font-weight:700;color:var(--success);float:right;}
+  .stat-card .label{font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);}
+  .stat-card .value{font-family:var(--font-display);font-size:40px;line-height:40px;margin-top:8px;}
+  .stat-card .value.lime{color:var(--lime);}
+
+  /* NextMatchHero */
+  .next-hero{background:linear-gradient(135deg,rgba(255,106,0,0.15),rgba(217,255,63,0.05));border:1px solid var(--border);border-radius:20px;padding:20px;}
+  .next-hero .label{font-size:11px;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;}
+  .next-hero .teams{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .next-hero .team{display:flex;align-items:center;gap:8px;}
+  .next-hero .team .flag{font-size:24px;}
+  .next-hero .team .name{font-weight:700;}
+  .next-hero .vs{color:var(--text-muted);font-size:12px;font-weight:700;}
+  .next-hero .count{text-align:center;color:var(--text-secondary);font-size:13px;margin-bottom:16px;}
+
+  /* PhaseProgress */
+  .phase{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .phase-node{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;text-align:center;}
+  .phase-node .ico{width:40px;height:40px;border-radius:9999px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;}
+  .phase-node.done .ico{background:var(--lime);color:var(--text-inverse);}
+  .phase-node.current .ico{background:var(--primary);color:var(--text-inverse);box-shadow:0 0 24px var(--primary-glow);}
+  .phase-node.locked .ico{background:var(--surface);color:var(--text-muted);border:1px solid var(--border);}
+  .phase-node .lbl{font-size:10px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--text-muted);}
+  .phase-node.done .lbl, .phase-node.current .lbl{color:var(--text);}
+  .phase-line{flex-shrink:0;height:1px;background:var(--border);width:8px;}
+
+  /* AchievementCard */
+  .ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;}
+  .ach-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;text-align:center;}
+  .ach-card .ico{font-size:32px;margin-bottom:8px;}
+  .ach-card.locked .ico{filter:grayscale(1) brightness(0.5);}
+  .ach-card.done .ico{filter:drop-shadow(0 0 12px var(--primary-glow));}
+  .ach-card .title{font-size:13px;font-weight:700;margin-bottom:4px;}
+  .ach-card.locked .title{color:var(--text-muted);}
+  .ach-card .desc{font-size:11px;color:var(--text-muted);line-height:14px;}
+
+  /* BottomNav */
+  .bnav-frame{max-width:380px;margin:24px auto 0;background:var(--bg);border:1px solid var(--border-strong);border-radius:24px;overflow:hidden;}
+  .bnav-content{padding:32px 24px;min-height:200px;}
+  .bnav{display:flex;justify-content:space-around;background:rgba(19,20,23,0.72);backdrop-filter:blur(20px) saturate(140%);border-top:1px solid rgba(255,255,255,0.06);padding:8px 0 12px;}
+  .bnav .item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 8px;cursor:pointer;color:var(--text-muted);}
+  .bnav .item.active{color:var(--primary);}
+  .bnav .item .ico{font-size:20px;}
+  .bnav .item .lbl{font-size:10px;font-weight:600;letter-spacing:0.04em;}
+
+  /* Empty/Locked state */
+  .empty-state{text-align:center;padding:48px 24px;background:var(--card);border-radius:16px;}
+  .empty-state .ico{font-size:48px;margin-bottom:16px;opacity:0.7;}
+  .empty-state .title{font-family:var(--font-display);font-size:24px;margin-bottom:8px;}
+  .empty-state .body{color:var(--text-muted);font-size:14px;}
+
+  .locked-state{text-align:center;padding:48px 24px;background:var(--card);border-radius:16px;border:1px dashed var(--border-strong);}
+  .locked-state .ico{font-size:36px;margin-bottom:12px;color:var(--text-muted);}
+  .locked-state .label{font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;}
+  .locked-state .count{font-family:var(--font-display);font-size:32px;color:var(--text);}
+
+  /* Toast */
+  .toast{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--elevated);border:1px solid var(--border-strong);border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.5);max-width:360px;}
+  .toast .ico{width:24px;height:24px;border-radius:9999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
+  .toast.success .ico{background:rgba(34,197,94,0.16);color:var(--success);}
+  .toast.error .ico{background:rgba(239,68,68,0.16);color:var(--error);}
+  .toast.info .ico{background:rgba(59,130,246,0.16);color:var(--info);}
+  .toast .msg{font-size:13px;}
+
+  /* Anim demo */
+  .anim-demo{display:flex;gap:16px;flex-wrap:wrap;}
+  .anim-box{
+    width:80px;height:80px;background:var(--primary);border-radius:16px;
+    display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-inverse);font-weight:700;cursor:pointer;
+  }
+  .anim-box.tap{transition:transform 200ms cubic-bezier(0.2,0,0,1);}
+  .anim-box.tap:active{transform:scale(0.92);}
+  .anim-box.glow{box-shadow:0 0 24px var(--primary-glow);animation:glowPulse 2s infinite;}
+  @keyframes glowPulse{0%,100%{box-shadow:0 0 12px var(--primary-glow);}50%{box-shadow:0 0 32px var(--primary-glow);}}
+
+  /* Pre code samples */
+  pre{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;overflow-x:auto;font-size:12px;line-height:18px;color:var(--text-secondary);font-family:ui-monospace,monospace;}
+
+  /* Live demo helpers */
+  .micro-note{font-size:11px;color:var(--text-muted);margin-top:8px;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="nav">
+    <div class="nav-brand">
+      <div class="dot"></div>
+      <div>
+        <div class="name">O2 PRODE</div>
+        <div class="sub">Design System</div>
+      </div>
+    </div>
+    <div class="nav-section">
+      <span class="label-up">Foundations</span>
+      <a href="#colors">Colores</a>
+      <a href="#typography">Tipografía</a>
+      <a href="#spacing">Spacing</a>
+      <a href="#radius">Radius</a>
+      <a href="#shadows">Shadows</a>
+      <a href="#motion">Motion</a>
+    </div>
+    <div class="nav-section">
+      <span class="label-up">Primitivas</span>
+      <a href="#buttons">Buttons</a>
+      <a href="#avatars">Avatars</a>
+      <a href="#badges">Badges & Tags</a>
+      <a href="#chips">Chips</a>
+      <a href="#inputs">Inputs</a>
+      <a href="#score-input">Score Input</a>
+      <a href="#switch-progress">Switch & Progress</a>
+      <a href="#skeleton">Skeleton</a>
+      <a href="#toast">Toasts</a>
+    </div>
+    <div class="nav-section">
+      <span class="label-up">Compuestos</span>
+      <a href="#match-card">Match Card</a>
+      <a href="#ranking">Ranking</a>
+      <a href="#podium">Podium</a>
+      <a href="#post">Post Card</a>
+      <a href="#stats">Stat Card</a>
+      <a href="#hero">Next Match Hero</a>
+      <a href="#phase">Phase Progress</a>
+      <a href="#achievements">Achievements</a>
+      <a href="#bottom-nav">Bottom Nav</a>
+      <a href="#states">Empty / Locked</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <h1 class="title">O2 PRODE Design System</h1>
+    <p class="lede">Preview navegable del sistema de diseño. Todos los tokens, primitivas y compuestos que va a usar el Agente 4 (UI Designer) para componer las 15 pantallas del producto.</p>
+
+    <!-- ─── Colors ─────────────────────────── -->
+    <section id="colors">
+      <h2>Colores</h2>
+      <p class="sub">Surfaces, text, brand, accent, semantic. Naranja = acción, lime = celebración.</p>
+
+      <h3>Surfaces (4 niveles)</h3>
+      <div class="swatch-grid">
+        <div class="swatch"><div class="chip" style="background:#0b0b0d;border-bottom:1px solid var(--border);"></div><div class="meta"><div class="name">bg</div><div class="hex">#0B0B0D</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#131417;"></div><div class="meta"><div class="name">surface</div><div class="hex">#131417</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#1b1d22;"></div><div class="meta"><div class="name">card</div><div class="hex">#1B1D22</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#23262c;"></div><div class="meta"><div class="name">elevated</div><div class="hex">#23262C</div></div></div>
+      </div>
+
+      <h3>Brand</h3>
+      <div class="swatch-grid">
+        <div class="swatch"><div class="chip" style="background:#ff6a00;"></div><div class="meta"><div class="name">primary</div><div class="hex">#FF6A00</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#ff7a1a;"></div><div class="meta"><div class="name">primary.hover</div><div class="hex">#FF7A1A</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#e65e00;"></div><div class="meta"><div class="name">primary.pressed</div><div class="hex">#E65E00</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#ff8a33;"></div><div class="meta"><div class="name">primary.soft</div><div class="hex">#FF8A33</div></div></div>
+      </div>
+
+      <h3>Accent (celebración)</h3>
+      <div class="swatch-grid">
+        <div class="swatch"><div class="chip" style="background:#d9ff3f;"></div><div class="meta"><div class="name">accent.lime</div><div class="hex">#D9FF3F</div></div></div>
+        <div class="swatch"><div class="chip" style="background:rgba(217,255,63,0.18);border:1px dashed var(--border);"></div><div class="meta"><div class="name">accent.lime.soft</div><div class="hex">rgba lime 18%</div></div></div>
+      </div>
+
+      <h3>Texto</h3>
+      <div class="swatch-grid">
+        <div class="swatch"><div class="chip" style="background:#f5f7fa;"></div><div class="meta"><div class="name">text.primary</div><div class="hex">#F5F7FA</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#c7ccd4;"></div><div class="meta"><div class="name">text.secondary</div><div class="hex">#C7CCD4</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#9ca3af;"></div><div class="meta"><div class="name">text.muted</div><div class="hex">#9CA3AF</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#5a5f69;"></div><div class="meta"><div class="name">text.disabled</div><div class="hex">#5A5F69</div></div></div>
+      </div>
+
+      <h3>Estados</h3>
+      <div class="swatch-grid">
+        <div class="swatch"><div class="chip" style="background:#22c55e;"></div><div class="meta"><div class="name">success</div><div class="hex">#22C55E</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#f59e0b;"></div><div class="meta"><div class="name">warning</div><div class="hex">#F59E0B</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#ef4444;"></div><div class="meta"><div class="name">error</div><div class="hex">#EF4444</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#3b82f6;"></div><div class="meta"><div class="name">info</div><div class="hex">#3B82F6</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#ff2d55;"></div><div class="meta"><div class="name">live</div><div class="hex">#FF2D55</div></div></div>
+      </div>
+    </section>
+
+    <!-- ─── Typography ─────────────────────────── -->
+    <section id="typography">
+      <h2>Tipografía</h2>
+      <p class="sub">Anton para display y números. Inter para body y UI.</p>
+
+      <div class="preview-area">
+        <div class="type-row">
+          <div class="type-label"><div class="name">display.xl</div><div class="meta">Anton 56/56</div></div>
+          <div class="font-display" style="font-size:56px;line-height:56px;letter-spacing:-0.02em;">PRODE MUNDIAL</div>
+        </div>
+        <div class="type-row">
+          <div class="type-label"><div class="name">display.lg</div><div class="meta">Anton 40/44</div></div>
+          <div class="font-display" style="font-size:40px;line-height:44px;letter-spacing:-0.01em;">MI POSICIÓN</div>
+        </div>
+        <div class="type-row">
+          <div class="type-label"><div class="name">display.md</div><div class="meta">Anton 32/36</div></div>
+          <div class="font-display" style="font-size:32px;line-height:36px;">RANKING</div>
+        </div>
+        <div class="type-row">
+          <div class="type-label"><div class="name">heading.lg</div><div class="meta">Inter 700 24/28</div></div>
+          <div style="font-size:24px;line-height:28px;font-weight:700;">Fase de grupos</div>
+        </div>
+        <div class="type-row">
+          <div class="type-label"><div class="name">heading.md</div><div class="meta">Inter 700 20/24</div></div>
+          <div style="font-size:20px;line-height:24px;font-weight:700;">Próximo partido</div>
+        </div>
+        <div class="type-row">
+          <div class="type-label"><div class="name">body.lg</div><div class="meta">Inter 400 16/24</div></div>
+          <div style="font-size:16px;line-height:24px;">Competí con tus compañeros. Demostrá que sabés de fútbol.</div>
+        </div>
+        <div class="type-row">
+          <div class="type-label"><div class="name">body.md</div><div class="meta">Inter 400 14/20</div></div>
+          <div style="font-size:14px;line-height:20px;color:var(--text-secondary);">Lucas predijo 2-1 para Argentina · hace 10 min</div>
+        </div>
+        <div class="type-row">
+          <div class="type-label"><div class="name">body.sm</div><div class="meta">Inter 400 12/16</div></div>
+          <div style="font-size:12px;line-height:16px;color:var(--text-muted);">Disponible el 30/06</div>
+        </div>
+        <div class="type-row">
+          <div class="type-label"><div class="name">numeric.xl</div><div class="meta">Anton 48/48</div></div>
+          <div class="font-display" style="font-size:48px;line-height:48px;letter-spacing:-0.02em;">124</div>
+        </div>
+        <div class="type-row">
+          <div class="type-label"><div class="name">numeric.lg</div><div class="meta">Anton 32/32</div></div>
+          <div class="font-display" style="font-size:32px;line-height:32px;">2 — 1</div>
+        </div>
+        <div class="type-row">
+          <div class="type-label"><div class="name">label.uppercase</div><div class="meta">Inter 700 11/14, tracking 0.08em</div></div>
+          <div class="label-up">TU POSICIÓN</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Spacing ─────────────────────────── -->
+    <section id="spacing">
+      <h2>Spacing</h2>
+      <p class="sub">Escala base-4. Container mobile 480px max. Padding lateral 24px (space.6).</p>
+      <div class="preview-area">
+        <div class="space-row"><div class="space-label">space.1 (4)</div><div class="space-block" style="width:4px;"></div></div>
+        <div class="space-row"><div class="space-label">space.2 (8)</div><div class="space-block" style="width:8px;"></div></div>
+        <div class="space-row"><div class="space-label">space.3 (12)</div><div class="space-block" style="width:12px;"></div></div>
+        <div class="space-row"><div class="space-label">space.4 (16)</div><div class="space-block" style="width:16px;"></div></div>
+        <div class="space-row"><div class="space-label">space.5 (20)</div><div class="space-block" style="width:20px;"></div></div>
+        <div class="space-row"><div class="space-label">space.6 (24)</div><div class="space-block" style="width:24px;"></div></div>
+        <div class="space-row"><div class="space-label">space.8 (32)</div><div class="space-block" style="width:32px;"></div></div>
+        <div class="space-row"><div class="space-label">space.10 (40)</div><div class="space-block" style="width:40px;"></div></div>
+        <div class="space-row"><div class="space-label">space.12 (48)</div><div class="space-block" style="width:48px;"></div></div>
+        <div class="space-row"><div class="space-label">space.16 (64)</div><div class="space-block" style="width:64px;"></div></div>
+        <div class="space-row"><div class="space-label">space.20 (80)</div><div class="space-block" style="width:80px;"></div></div>
+      </div>
+    </section>
+
+    <!-- ─── Radius ─────────────────────────── -->
+    <section id="radius">
+      <h2>Radius</h2>
+      <p class="sub">7 niveles. Máximo 3 radios distintos visibles por pantalla.</p>
+      <div class="radius-grid">
+        <div class="radius-box" style="border-radius:6px;">sm · 6</div>
+        <div class="radius-box" style="border-radius:12px;">md · 12</div>
+        <div class="radius-box" style="border-radius:16px;">lg · 16</div>
+        <div class="radius-box" style="border-radius:20px;">xl · 20</div>
+        <div class="radius-box" style="border-radius:28px;">2xl · 28</div>
+        <div class="radius-box" style="border-radius:9999px;">full</div>
+      </div>
+    </section>
+
+    <!-- ─── Shadows ─────────────────────────── -->
+    <section id="shadows">
+      <h2>Shadows</h2>
+      <p class="sub">Sutiles. El sistema oscuro NO usa profundidad de Material claro.</p>
+      <div class="shadow-grid">
+        <div class="shadow-card" style="box-shadow:0 1px 2px rgba(0,0,0,0.4);">shadow.sm</div>
+        <div class="shadow-card" style="box-shadow:0 4px 12px rgba(0,0,0,0.5);">shadow.md</div>
+        <div class="shadow-card" style="box-shadow:0 12px 32px rgba(0,0,0,0.6);">shadow.lg</div>
+        <div class="shadow-card" style="box-shadow:0 0 24px rgba(255,106,0,0.35);">glow.primary</div>
+        <div class="shadow-card" style="box-shadow:0 0 24px rgba(217,255,63,0.35);">glow.accent</div>
+      </div>
+    </section>
+
+    <!-- ─── Motion ─────────────────────────── -->
+    <section id="motion">
+      <h2>Motion</h2>
+      <p class="sub">5 duraciones + 4 easings. Cada animación cuenta algo.</p>
+      <div class="preview-area">
+        <div class="anim-demo">
+          <div class="anim-box tap">TAP</div>
+          <div class="anim-box glow">GLOW</div>
+          <div class="anim-box" style="animation:slideUp 480ms cubic-bezier(0,0,0,1) infinite alternate;">SLIDE</div>
+          <div class="anim-box" style="animation:rotate 4s linear infinite;">SPIN</div>
+        </div>
+        <p class="micro-note">Tap → escala 0.92 en active. Glow → pulso cada 2s. Estos son ejemplos; el catálogo completo lo entrega el Agente 6 con variants de Framer Motion.</p>
+      </div>
+    </section>
+    <style>
+      @keyframes slideUp{from{transform:translateY(8px);}to{transform:translateY(-8px);}}
+      @keyframes rotate{to{transform:rotate(360deg);}}
+    </style>
+
+    <!-- ─── Buttons ─────────────────────────── -->
+    <section id="buttons">
+      <h2>Buttons</h2>
+      <p class="sub">5 variants × 3 tamaños. Primary y danger son pill (radius full). Secondary y ghost son radius md.</p>
+      <div class="preview-area">
+        <h3 style="margin-top:0;">Primary</h3>
+        <div class="row">
+          <button class="btn btn-primary btn-sm">Entrar</button>
+          <button class="btn btn-primary">Ir a mi prode</button>
+          <button class="btn btn-primary btn-lg">Compartir mi prode</button>
+          <button class="btn btn-primary" disabled>Disabled</button>
+        </div>
+        <h3>Secondary / Ghost / Link</h3>
+        <div class="row">
+          <button class="btn btn-secondary">Cancelar</button>
+          <button class="btn btn-ghost">Ver más</button>
+          <a href="#" class="btn-link">Registrate</a>
+        </div>
+        <h3>Danger</h3>
+        <div class="row">
+          <button class="btn btn-danger">Cerrar sesión</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Avatars ─────────────────────────── -->
+    <section id="avatars">
+      <h2>Avatars</h2>
+      <p class="sub">6 tamaños. Level badge (1-5) y corona para el #1 del ranking.</p>
+      <div class="preview-area">
+        <h3 style="margin-top:0;">Tamaños</h3>
+        <div class="row" style="align-items:flex-end;">
+          <div class="avatar xs avatar-color-1">N</div>
+          <div class="avatar sm avatar-color-2">L</div>
+          <div class="avatar md avatar-color-3">M</div>
+          <div class="avatar lg avatar-color-4">F</div>
+          <div class="avatar xl avatar-color-1">N</div>
+        </div>
+        <h3>Con level badge</h3>
+        <div class="row">
+          <div class="avatar lg avatar-color-1">N<div class="level-badge l1">1</div></div>
+          <div class="avatar lg avatar-color-2">L<div class="level-badge l2">2</div></div>
+          <div class="avatar lg avatar-color-3">M<div class="level-badge l3">3</div></div>
+          <div class="avatar lg avatar-color-4">F<div class="level-badge l4">4</div></div>
+          <div class="avatar lg avatar-color-1">N<div class="level-badge l5">5</div></div>
+        </div>
+        <p class="micro-note">L1 Rookie · L2 Aplicado · L3 Pro · L4 Crack · L5 Leyenda O2 (con glow).</p>
+        <h3>Con corona (#1 del ranking)</h3>
+        <div class="row">
+          <div class="avatar xl avatar-color-1">M<div class="crown">👑</div><div class="level-badge l5">5</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Badges & Tags ─────────────────────── -->
+    <section id="badges">
+      <h2>Badges & Tags</h2>
+      <p class="sub">Badge = etiqueta no interactiva. Tag = metadata de partido (kickoff, live, closed, locked).</p>
+      <div class="preview-area">
+        <h3 style="margin-top:0;">Badges</h3>
+        <div class="row">
+          <span class="badge badge-default">Default</span>
+          <span class="badge badge-primary">Nuevo</span>
+          <span class="badge badge-accent">Logro</span>
+          <span class="badge badge-success">Acertaste</span>
+          <span class="badge badge-warning">Cierra pronto</span>
+          <span class="badge badge-error">Cerrado</span>
+        </div>
+        <h3>Tags de partido</h3>
+        <div class="row">
+          <span class="tag tag-kickoff">⏱ Faltan 2h 14m</span>
+          <span class="tag tag-live"><span class="dot"></span> EN VIVO</span>
+          <span class="tag tag-closed">✓ Cerrado</span>
+          <span class="tag tag-locked">🔒 Disponible 30/06</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Chips ─────────────────────────── -->
+    <section id="chips">
+      <h2>Chips</h2>
+      <p class="sub">Interactivos. Estados default/active. Usados en filtros y selección de grupo.</p>
+      <div class="preview-area">
+        <div class="row">
+          <span class="chip chip-active">GRUPO A</span>
+          <span class="chip chip-default">GRUPO B</span>
+          <span class="chip chip-default">GRUPO C</span>
+          <span class="chip chip-default">GRUPO D</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Inputs ─────────────────────────── -->
+    <section id="inputs">
+      <h2>Inputs</h2>
+      <p class="sub">Bg surface, border 1px, height 56. Focus con border primary + glow.</p>
+      <div class="preview-area">
+        <div style="display:flex;flex-direction:column;gap:16px;max-width:360px;">
+          <input class="input" type="text" placeholder="Nombre completo" />
+          <input class="input" type="email" placeholder="email@example.com" />
+          <input class="input" type="text" placeholder="Código de invitación" value="O2-2026-NHL" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Score Input ─────────────────────── -->
+    <section id="score-input">
+      <h2>Score Input</h2>
+      <p class="sub">El componente nuclear de la app. Tap abre numpad propio (no teclado del SO). Auto-save 600ms.</p>
+      <div class="preview-area">
+        <h3 style="margin-top:0;">Estados</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:24px;">
+          <div>
+            <div class="score-input-pair">
+              <div class="score-input empty">—</div>
+              <div class="score-input empty">—</div>
+            </div>
+            <p class="micro-note" style="text-align:center;">Empty</p>
+          </div>
+          <div>
+            <div class="score-input-pair">
+              <div class="score-input">2</div>
+              <div class="score-input focused">1</div>
+            </div>
+            <p class="micro-note" style="text-align:center;">Filled + focus</p>
+          </div>
+          <div>
+            <div class="score-input-pair">
+              <div class="score-input locked">1</div>
+              <div class="score-input locked">0</div>
+            </div>
+            <p class="micro-note" style="text-align:center;">Locked (cerrado)</p>
+          </div>
+          <div>
+            <div class="score-input-pair">
+              <div class="score-input correct">2</div>
+              <div class="score-input correct">0</div>
+            </div>
+            <p class="micro-note" style="text-align:center;">Settled · acertaste</p>
+          </div>
+          <div>
+            <div class="score-input-pair">
+              <div class="score-input wrong">1</div>
+              <div class="score-input wrong">1</div>
+            </div>
+            <p class="micro-note" style="text-align:center;">Settled · fallaste</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Switch & Progress ─────────────── -->
+    <section id="switch-progress">
+      <h2>Switch & Progress</h2>
+      <div class="preview-area">
+        <h3 style="margin-top:0;">Switch</h3>
+        <div class="row">
+          <div class="switch on" onclick="this.classList.toggle('on')"><div class="thumb"></div></div>
+          <div class="switch" onclick="this.classList.toggle('on')"><div class="thumb"></div></div>
+        </div>
+        <h3>Progress linear</h3>
+        <div style="display:flex;flex-direction:column;gap:12px;max-width:320px;">
+          <div class="progress-linear"><div class="fill" style="width:25%;"></div></div>
+          <div class="progress-linear"><div class="fill" style="width:60%;background:var(--lime);"></div></div>
+          <div class="progress-linear"><div class="fill" style="width:90%;"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Skeleton ─────────────────────────── -->
+    <section id="skeleton">
+      <h2>Skeleton</h2>
+      <p class="sub">Shimmer animado. Nunca spinner centrado en pantalla principal.</p>
+      <div class="preview-area">
+        <div style="display:flex;flex-direction:column;gap:12px;max-width:360px;">
+          <div class="skeleton" style="height:80px;border-radius:16px;"></div>
+          <div class="skeleton" style="height:16px;width:60%;"></div>
+          <div class="skeleton" style="height:16px;width:80%;"></div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="skeleton" style="width:40px;height:40px;border-radius:9999px;"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+              <div class="skeleton" style="height:14px;width:50%;"></div>
+              <div class="skeleton" style="height:12px;width:30%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Toasts ─────────────────────────── -->
+    <section id="toast">
+      <h2>Toasts</h2>
+      <p class="sub">Top, no center. Auto-dismiss 2.5s (4s en errores).</p>
+      <div class="preview-area">
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="toast success"><div class="ico">✓</div><div class="msg">Predicción guardada. Suerte con tu prode.</div></div>
+          <div class="toast info"><div class="ico">i</div><div class="msg">Las eliminatorias se desbloquean el 30/06.</div></div>
+          <div class="toast error"><div class="ico">!</div><div class="msg">Sin conexión. Sincronizamos cuando vuelva.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Match Card ─────────────────────── -->
+    <section id="match-card">
+      <h2>Match Card</h2>
+      <p class="sub">Núcleo de la pantalla Group Stage. Altura ~112px. Score input + tag de estado.</p>
+      <div class="preview-area" style="max-width:380px;">
+        <div class="match-card">
+          <div class="teams">
+            <div class="team"><div class="flag">🇦🇷</div><div class="name">Argentina</div></div>
+            <div class="vs">VS</div>
+            <div class="team"><div class="flag">🇯🇵</div><div class="name">Japón</div></div>
+          </div>
+          <div class="score-input-pair">
+            <div class="score-input">2</div>
+            <div class="score-input">0</div>
+          </div>
+          <div class="tag-wrap"><span class="tag tag-kickoff">⏱ Faltan 2h 14m</span></div>
+        </div>
+      </div>
+      <div class="preview-area" style="max-width:380px;margin-top:12px;">
+        <div class="match-card">
+          <div class="teams">
+            <div class="team"><div class="flag">🇧🇷</div><div class="name">Brasil</div></div>
+            <div class="vs">VS</div>
+            <div class="team"><div class="flag">🇩🇪</div><div class="name">Alemania</div></div>
+          </div>
+          <div class="score-input-pair">
+            <div class="score-input">1</div>
+            <div class="score-input">1</div>
+          </div>
+          <div class="tag-wrap"><span class="tag tag-live"><span class="dot"></span> EN VIVO</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Ranking ─────────────────────────── -->
+    <section id="ranking">
+      <h2>Ranking Row</h2>
+      <p class="sub">Mi fila siempre destacada con bg primary. Tap → /usuario/[id].</p>
+      <div class="preview-area" style="max-width:380px;">
+        <div class="rank-row"><div class="pos">4</div><div class="avatar md avatar-color-3">J</div><div class="name">Julián</div><div class="pts">120</div></div>
+        <div class="rank-row"><div class="pos">5</div><div class="avatar md avatar-color-4">F</div><div class="name">Facu</div><div class="pts">118</div></div>
+        <div class="rank-row"><div class="pos">6</div><div class="avatar md avatar-color-2">M</div><div class="name">Mati</div><div class="pts">115</div></div>
+        <div class="rank-row"><div class="pos">7</div><div class="avatar md avatar-color-1">N</div><div class="name">Nico</div><div class="pts">112</div></div>
+        <div class="rank-row self"><div class="pos">8</div><div class="avatar md avatar-color-1">N</div><div class="name">Vos</div><div class="pts">124</div></div>
+      </div>
+    </section>
+
+    <!-- ─── Podium ─────────────────────────── -->
+    <section id="podium">
+      <h2>Podium</h2>
+      <p class="sub">Top 3 con animación de entrada secuencial (3 → 2 → 1).</p>
+      <div class="preview-area" style="max-width:380px;">
+        <div class="podium">
+          <div class="col">
+            <div class="avatar lg avatar-color-2">L<div class="level-badge l4">4</div></div>
+            <div class="medal">🥈</div>
+            <div class="name">Lucas</div>
+            <div class="pts">142</div>
+          </div>
+          <div class="col gold">
+            <div class="avatar xl avatar-color-1">M<div class="crown">👑</div><div class="level-badge l5">5</div></div>
+            <div class="medal">🥇</div>
+            <div class="name">Martín</div>
+            <div class="pts">156</div>
+          </div>
+          <div class="col">
+            <div class="avatar lg avatar-color-3">N<div class="level-badge l3">3</div></div>
+            <div class="medal">🥉</div>
+            <div class="name">Nahuel</div>
+            <div class="pts">124</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Post Card ─────────────────────── -->
+    <section id="post">
+      <h2>Post Card</h2>
+      <p class="sub">Muro social. Reacciones con optimistic UI. Sin threads anidados.</p>
+      <div class="preview-area" style="max-width:380px;">
+        <div class="post-card" style="margin-bottom:12px;">
+          <div class="header">
+            <div class="avatar md avatar-color-3">L<div class="level-badge l3">3</div></div>
+            <div style="flex:1;"><div class="name">Luciano</div><div class="time">hace 20 min</div></div>
+          </div>
+          <div class="body">Yo tengo a Argentina campeón otra vez 🇦🇷🏆</div>
+          <div class="actions">
+            <span class="action">♡ 24</span>
+            <span class="action">💬 8</span>
+            <span class="action">↗ Compartir</span>
+          </div>
+        </div>
+        <div class="post-card">
+          <div class="header">
+            <div class="avatar md avatar-color-2">M<div class="level-badge l4">4</div></div>
+            <div style="flex:1;"><div class="name">Martín</div><div class="time">hace 1h</div></div>
+          </div>
+          <div class="body">Brasil llega a la final. No tengo dudas 🇧🇷</div>
+          <div class="actions">
+            <span class="action">♡ 18</span>
+            <span class="action">💬 5</span>
+            <span class="action">↗ Compartir</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Stat Card ─────────────────────── -->
+    <section id="stats">
+      <h2>Stat Card</h2>
+      <p class="sub">Bloque KPI personal. Label uppercase + valor display + delta opcional.</p>
+      <div class="preview-area">
+        <div class="row">
+          <div class="stat-card"><span class="delta">↑ 2</span><div class="label">Tu posición</div><div class="value">#8</div></div>
+          <div class="stat-card"><span class="delta">+12</span><div class="label">Tus puntos</div><div class="value lime">124</div></div>
+          <div class="stat-card"><div class="label">Prode completado</div><div class="value">85<span style="font-size:24px;color:var(--text-muted);">%</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Next Match Hero ───────────────── -->
+    <section id="hero">
+      <h2>Next Match Hero</h2>
+      <p class="sub">El protagonista de Home. CTA primario fullwidth.</p>
+      <div class="preview-area" style="max-width:380px;">
+        <div class="next-hero">
+          <div class="label">Próximo partido</div>
+          <div class="teams">
+            <div class="team"><div class="flag">🇦🇷</div><div class="name">Argentina</div></div>
+            <div class="vs">VS</div>
+            <div class="team"><div class="flag">🇧🇷</div><div class="name">Brasil</div></div>
+          </div>
+          <div class="count">Faltan 2h 14m</div>
+          <button class="btn btn-primary" style="width:100%;">IR A MI PRODE</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Phase Progress ──────────────────── -->
+    <section id="phase">
+      <h2>Phase Progress</h2>
+      <p class="sub">Stepper de 5 nodos. Done (lime), current (primary + glow), locked (gris).</p>
+      <div class="preview-area" style="max-width:380px;">
+        <div class="phase">
+          <div class="phase-node current"><div class="ico">G</div><div class="lbl">Grupos</div></div>
+          <div class="phase-line"></div>
+          <div class="phase-node locked"><div class="ico">🔒</div><div class="lbl">Octavos</div></div>
+          <div class="phase-line"></div>
+          <div class="phase-node locked"><div class="ico">🔒</div><div class="lbl">Cuartos</div></div>
+          <div class="phase-line"></div>
+          <div class="phase-node locked"><div class="ico">🔒</div><div class="lbl">Semis</div></div>
+          <div class="phase-line"></div>
+          <div class="phase-node locked"><div class="ico">🔒</div><div class="lbl">Final</div></div>
+        </div>
+      </div>
+      <div class="preview-area" style="max-width:380px;margin-top:12px;">
+        <div class="phase">
+          <div class="phase-node done"><div class="ico">✓</div><div class="lbl">Grupos</div></div>
+          <div class="phase-line"></div>
+          <div class="phase-node done"><div class="ico">✓</div><div class="lbl">Octavos</div></div>
+          <div class="phase-line"></div>
+          <div class="phase-node current"><div class="ico">C</div><div class="lbl">Cuartos</div></div>
+          <div class="phase-line"></div>
+          <div class="phase-node locked"><div class="ico">🔒</div><div class="lbl">Semis</div></div>
+          <div class="phase-line"></div>
+          <div class="phase-node locked"><div class="ico">🔒</div><div class="lbl">Final</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Achievements ─────────────────── -->
+    <section id="achievements">
+      <h2>Achievements</h2>
+      <p class="sub">4 categorías × estados (locked / in-progress / done).</p>
+      <div class="preview-area">
+        <div class="ach-grid">
+          <div class="ach-card done"><div class="ico">🎯</div><div class="title">El que sabe</div><div class="desc">5 resultados exactos seguidos</div></div>
+          <div class="ach-card done"><div class="ico">🔥</div><div class="title">Constante</div><div class="desc">7 días seguidos prediciendo</div></div>
+          <div class="ach-card locked"><div class="ico">👑</div><div class="title">Líder</div><div class="desc">Llegá al #1 del ranking</div></div>
+          <div class="ach-card locked"><div class="ico">🚀</div><div class="title">Remontada</div><div class="desc">Subí +10 posiciones en una semana</div></div>
+          <div class="ach-card locked"><div class="ico">⭐</div><div class="title">Visionario</div><div class="desc">Acertá al campeón pre-torneo</div></div>
+          <div class="ach-card done"><div class="ico">💬</div><div class="title">Inicio fuerte</div><div class="desc">Tu primer post en el muro</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Bottom Nav ─────────────────────── -->
+    <section id="bottom-nav">
+      <h2>Bottom Nav</h2>
+      <p class="sub">Glass. 5 slots. Tab activo en primary.</p>
+      <div class="bnav-frame">
+        <div class="bnav-content">
+          <p class="label-up" style="margin:0 0 8px;">Inicio</p>
+          <div class="font-display" style="font-size:32px;">Hola, Nahuel 👋</div>
+        </div>
+        <div class="bnav">
+          <div class="item active"><div class="ico">🏠</div><div class="lbl">Inicio</div></div>
+          <div class="item"><div class="ico">🏆</div><div class="lbl">Prode</div></div>
+          <div class="item"><div class="ico">📊</div><div class="lbl">Ranking</div></div>
+          <div class="item"><div class="ico">💬</div><div class="lbl">Muro</div></div>
+          <div class="item"><div class="ico">👤</div><div class="lbl">Perfil</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── States ─────────────────────────── -->
+    <section id="states">
+      <h2>Empty & Locked States</h2>
+      <p class="sub">Tono motivador en empty. Countdown en locked.</p>
+      <div class="preview-area" style="max-width:380px;margin-bottom:16px;">
+        <div class="empty-state">
+          <div class="ico">💬</div>
+          <div class="title">El muro está vacío</div>
+          <div class="body">Animate vos a postear primero.</div>
+        </div>
+      </div>
+      <div class="preview-area" style="max-width:380px;">
+        <div class="locked-state">
+          <div class="ico">🔒</div>
+          <div class="label">Octavos de final</div>
+          <div class="count">12d 04:32:18</div>
+          <p class="micro-note">Disponible el 30 de junio.</p>
+        </div>
+      </div>
+    </section>
+
+    <div style="padding:32px 0;border-top:1px solid var(--border);color:var(--text-muted);font-size:12px;">
+      O2 PRODE Design System v1.0 · Agente 3 · 2026-05-18 · Mundial 2026
+    </div>
+  </main>
+</div>
+</body>
+</html>

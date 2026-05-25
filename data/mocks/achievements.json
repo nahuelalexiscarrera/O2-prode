@@ -1,0 +1,176 @@
+{
+  "$comment": "Catálogo de logros del Agente 2 §10.2 + Agente 11. Cada item es un AchievementCatalogItem.",
+  "catalog": [
+    {
+      "id": "A01",
+      "category": "skill",
+      "name": "El que sabe",
+      "description": "Acertá 5 resultados exactos seguidos.",
+      "iconRef": "target",
+      "pointsBonus": 15,
+      "triggerKey": "streak_exact_5"
+    },
+    {
+      "id": "A02",
+      "category": "skill",
+      "name": "Visionario",
+      "description": "Acertá al campeón del Mundial antes del torneo.",
+      "iconRef": "crown",
+      "pointsBonus": 40,
+      "triggerKey": "champion_correct"
+    },
+    {
+      "id": "A03",
+      "category": "skill",
+      "name": "Mufa controlada",
+      "description": "Acertá un upset (no-favorito gana).",
+      "iconRef": "flame",
+      "pointsBonus": 10,
+      "triggerKey": "upset_correct"
+    },
+    {
+      "id": "A04",
+      "category": "skill",
+      "name": "Pleno",
+      "description": "Acertá TODOS los partidos de un grupo.",
+      "iconRef": "check",
+      "pointsBonus": 20,
+      "triggerKey": "group_complete_correct"
+    },
+    {
+      "id": "A05",
+      "category": "skill",
+      "name": "Eliminator",
+      "description": "Acertá todos los cruces de octavos.",
+      "iconRef": "medal",
+      "pointsBonus": 25,
+      "triggerKey": "knockout_round_correct"
+    },
+    {
+      "id": "C01",
+      "category": "consistency",
+      "name": "Constante",
+      "description": "7 días seguidos con predicción cargada.",
+      "iconRef": "flame",
+      "pointsBonus": 10,
+      "triggerKey": "streak_days_7"
+    },
+    {
+      "id": "C02",
+      "category": "consistency",
+      "name": "Maratonista",
+      "description": "21 días seguidos prediciendo.",
+      "iconRef": "flame",
+      "pointsBonus": 30,
+      "triggerKey": "streak_days_21"
+    },
+    {
+      "id": "C03",
+      "category": "consistency",
+      "name": "Todoterreno",
+      "description": "Cargaste el 100% del torneo.",
+      "iconRef": "ball",
+      "pointsBonus": 50,
+      "triggerKey": "tournament_100"
+    },
+    {
+      "id": "C04",
+      "category": "consistency",
+      "name": "Madrugador",
+      "description": "Cargaste un grupo completo el 1er día disponible.",
+      "iconRef": "clock",
+      "pointsBonus": 5,
+      "triggerKey": "group_first_day"
+    },
+    {
+      "id": "S01",
+      "category": "social",
+      "name": "Inicio fuerte",
+      "description": "Primer post en el muro.",
+      "iconRef": "comment",
+      "pointsBonus": 5,
+      "triggerKey": "first_post"
+    },
+    {
+      "id": "S02",
+      "category": "social",
+      "name": "Popular",
+      "description": "10 reacciones en un solo post.",
+      "iconRef": "heart",
+      "pointsBonus": 5,
+      "triggerKey": "post_10_reactions"
+    },
+    {
+      "id": "S03",
+      "category": "social",
+      "name": "Embajador",
+      "description": "Compartiste 5 prodes externamente.",
+      "iconRef": "share",
+      "pointsBonus": 10,
+      "triggerKey": "external_shares_5"
+    },
+    {
+      "id": "S04",
+      "category": "social",
+      "name": "Conector",
+      "description": "Comentaste en 10 posts distintos.",
+      "iconRef": "comment",
+      "pointsBonus": 5,
+      "triggerKey": "comments_made_10"
+    },
+    {
+      "id": "S05",
+      "category": "social",
+      "name": "Tribu",
+      "description": "Tus 3 mejores amigos del gym también activaron la app.",
+      "iconRef": "nav-user",
+      "pointsBonus": 10,
+      "triggerKey": "friends_active_3"
+    },
+    {
+      "id": "P01",
+      "category": "position",
+      "name": "Top 10",
+      "description": "Llegaste al top 10 del ranking.",
+      "iconRef": "nav-chart",
+      "pointsBonus": 10,
+      "triggerKey": "position_top_10"
+    },
+    {
+      "id": "P02",
+      "category": "position",
+      "name": "Podio",
+      "description": "Llegaste al top 3.",
+      "iconRef": "medal",
+      "pointsBonus": 25,
+      "triggerKey": "position_top_3"
+    },
+    {
+      "id": "P03",
+      "category": "position",
+      "name": "Líder",
+      "description": "Liderás el ranking.",
+      "iconRef": "crown",
+      "pointsBonus": 50,
+      "triggerKey": "position_1"
+    },
+    {
+      "id": "P04",
+      "category": "position",
+      "name": "Remontada",
+      "description": "Subiste +10 posiciones en una semana.",
+      "iconRef": "arrow-up",
+      "pointsBonus": 15,
+      "triggerKey": "weekly_rise_10"
+    },
+    {
+      "id": "P05",
+      "category": "position",
+      "name": "Campeón",
+      "description": "Ganador final del torneo.",
+      "iconRef": "world-trophy",
+      "pointsBonus": 100,
+      "triggerKey": "tournament_winner"
+    }
+  ]
+}

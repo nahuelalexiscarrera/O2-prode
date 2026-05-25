@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>O2 PRODE — Motion System (preview en vivo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0b0b0d; --surface: #131417; --card: #1b1d22; --border: #2a2e36;
+    --text: #f5f7fa; --muted: #9ca3af; --primary: #ff6a00; --primary-glow: rgba(255,106,0,0.35);
+    --lime: #d9ff3f; --gold: #FFB300; --celeste: #74ACDF; --error: #ef4444; --live: #ff2d55;
+    --font-display: "Anton", Impact, sans-serif;
+    --font-body: "Inter", system-ui, sans-serif;
+    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    --ease-decelerate: cubic-bezier(0, 0, 0, 1);
+    --ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:var(--font-body);background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;background-image:radial-gradient(circle at 20% 0%, rgba(255,106,0,0.05) 0%, transparent 50%);}
+  header{padding:32px 48px;border-bottom:1px solid var(--border);}
+  header h1{font-family:var(--font-display);font-size:48px;line-height:48px;margin:0 0 8px;letter-spacing:-0.01em;}
+  header h1 .o2{color:var(--primary);text-shadow:0 0 24px var(--primary-glow);}
+  header p{color:var(--muted);margin:0;max-width:680px;font-size:14px;line-height:20px;}
+  main{padding:48px;max-width:1200px;}
+  section{margin-bottom:48px;}
+  section h2{font-family:var(--font-display);font-size:24px;letter-spacing:0.04em;text-transform:uppercase;margin:0 0 4px;}
+  section .sub{color:var(--muted);font-size:13px;margin-bottom:24px;}
+
+  .demo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
+  .demo{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;min-height:200px;display:flex;flex-direction:column;}
+  .demo .meta{margin-bottom:16px;}
+  .demo .meta .id{font-family:ui-monospace,monospace;font-size:11px;color:var(--primary);}
+  .demo .meta .name{font-size:14px;font-weight:600;margin-top:2px;}
+  .demo .meta .desc{font-size:11px;color:var(--muted);margin-top:4px;line-height:15px;}
+  .demo .stage{flex:1;display:flex;align-items:center;justify-content:center;background:var(--surface);border-radius:12px;min-height:120px;position:relative;overflow:hidden;}
+  .demo .replay{margin-top:12px;align-self:flex-start;background:transparent;border:1px solid var(--border);color:var(--muted);height:32px;padding:0 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:var(--font-body);}
+  .demo .replay:hover{border-color:var(--primary);color:var(--primary);}
+
+  /* Tap */
+  .tap-btn{background:var(--primary);color:#0b0b0d;border:none;height:44px;padding:0 20px;border-radius:9999px;font-weight:700;font-size:13px;cursor:pointer;transition:transform 200ms var(--ease-standard), box-shadow 200ms var(--ease-standard);font-family:var(--font-body);}
+  .tap-btn:hover{transform:scale(1.02);box-shadow:0 0 24px var(--primary-glow);}
+  .tap-btn:active{transform:scale(0.96);}
+
+  /* Fade in */
+  .fade-box{width:120px;height:60px;background:var(--card);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text);}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  .fade-box.animate{animation:fadeIn 320ms var(--ease-decelerate);}
+
+  /* Modal slide */
+  .modal-stage{position:relative;height:160px;width:100%;}
+  .modal-bd{position:absolute;inset:0;background:rgba(0,0,0,0.5);border-radius:12px;opacity:0;transition:opacity 200ms;}
+  .modal-bd.on{opacity:1;}
+  .modal-sheet{position:absolute;left:8px;right:8px;bottom:0;height:90px;background:var(--card);border:1px solid var(--border);border-top-left-radius:14px;border-top-right-radius:14px;transform:translateY(100%);transition:transform 320ms var(--ease-decelerate);display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:11px;}
+  .modal-sheet.on{transform:translateY(0%);}
+  .modal-sheet .handle{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:40px;height:4px;background:var(--border);border-radius:9999px;}
+
+  /* Toast */
+  .toast-stage{position:relative;width:100%;height:80px;}
+  .toast{position:absolute;top:0;left:50%;transform:translate(-50%, -40px) scale(0.9);opacity:0;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 14px;display:flex;align-items:center;gap:8px;font-size:12px;transition:transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 200ms;}
+  .toast.on{transform:translate(-50%, 16px) scale(1);opacity:1;}
+  .toast .ico{width:18px;height:18px;border-radius:9999px;background:rgba(34,197,94,0.16);color:#22c55e;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+
+  /* Skeleton */
+  .skeleton{position:relative;width:200px;height:48px;background:var(--surface);border-radius:10px;overflow:hidden;}
+  .skeleton::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.06) 50%,transparent 100%);animation:shimmer 1.4s linear infinite;}
+  @keyframes shimmer{0%{transform:translateX(-100%);}100%{transform:translateX(100%);}}
+
+  /* Live pulse */
+  .live-stage{display:flex;align-items:center;gap:6px;background:rgba(255,45,85,0.12);color:var(--live);padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;letter-spacing:0.04em;}
+  .live-stage .dot{width:6px;height:6px;border-radius:9999px;background:var(--live);animation:livePulse 1.8s ease-in-out infinite;}
+  @keyframes livePulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.5);opacity:0.4;}}
+
+  /* Score focus */
+  .score-pair{display:flex;gap:12px;}
+  .score{width:48px;height:60px;border-radius:12px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:24px;transition:all 300ms var(--ease-decelerate);}
+  .score.focused{border-color:var(--primary);box-shadow:0 0 24px var(--primary-glow);transform:scale(1.08);}
+
+  /* Heart pop */
+  .heart-stage{position:relative;}
+  .heart-btn{background:none;border:none;cursor:pointer;font-size:20px;color:var(--muted);padding:8px;}
+  .heart-btn.on{color:var(--live);}
+  .heart-icon{display:inline-block;transition:transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1);}
+  .heart-btn.on .heart-icon{animation:heartPop 400ms;}
+  @keyframes heartPop{0%{transform:scale(1);}50%{transform:scale(1.4);}100%{transform:scale(1);}}
+  .heart-ghost{position:absolute;left:50%;top:50%;transform:translate(-50%, -50%);font-size:20px;color:var(--live);opacity:0;pointer-events:none;}
+  .heart-ghost.on{animation:heartGhost 600ms var(--ease-decelerate);}
+  @keyframes heartGhost{
+    0%{transform:translate(-50%, -50%) scale(1);opacity:1;}
+    100%{transform:translate(-50%, -160%) scale(1.6);opacity:0;}
+  }
+  .heart-count{font-size:13px;color:var(--muted);margin-left:6px;}
+
+  /* Podium */
+  .podium-stage{position:relative;height:180px;display:flex;align-items:end;gap:6px;}
+  .pod-col{flex:1;background:var(--card);border-radius:10px;display:flex;flex-direction:column;align-items:center;padding:8px;opacity:0;transform:translateY(40px) scale(0.92);}
+  .pod-col .name{font-family:var(--font-display);font-size:11px;margin-top:4px;}
+  .pod-col .pts{font-family:var(--font-display);font-size:14px;color:var(--lime);}
+  .pod-col .medal{width:18px;height:18px;border-radius:9999px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--bg);}
+  .pod-col.gold{background:linear-gradient(180deg,rgba(255,215,0,0.1),var(--card));border:1px solid rgba(255,215,0,0.3);height:130px;}
+  .pod-col.silver{height:100px;}
+  .pod-col.bronze{height:80px;}
+  .pod-col .av{width:32px;height:32px;border-radius:9999px;background:linear-gradient(135deg,#FF6A00,#FF8A33);color:var(--bg);font-family:var(--font-display);font-size:14px;display:flex;align-items:center;justify-content:center;position:relative;}
+  .pod-col .av.av2{background:linear-gradient(135deg,#3B82F6,#60A5FA);color:#fff;}
+  .pod-col .av.av3{background:linear-gradient(135deg,#22C55E,#4ADE80);color:var(--bg);}
+  .pod-col.animate.bronze{animation:podEnter 600ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;}
+  .pod-col.animate.silver{animation:podEnter 600ms cubic-bezier(0.34, 1.56, 0.64, 1) 200ms forwards;}
+  .pod-col.animate.gold{animation:podEnter 700ms cubic-bezier(0.34, 1.56, 0.64, 1) 400ms forwards;}
+  @keyframes podEnter{
+    0%{opacity:0;transform:translateY(40px) scale(0.92);}
+    100%{opacity:1;transform:translateY(0) scale(1);}
+  }
+  .crown-pop{position:absolute;top:-14px;left:50%;transform:translateX(-50%) scale(0) rotate(-20deg);opacity:0;font-size:14px;color:var(--gold);}
+  .pod-col.animate .crown-pop{animation:crownEnter 600ms cubic-bezier(0.34, 1.56, 0.64, 1) 700ms forwards;}
+  @keyframes crownEnter{
+    0%{transform:translateX(-50%) scale(0) rotate(-20deg);opacity:0;}
+    100%{transform:translateX(-50%) scale(1) rotate(0);opacity:1;}
+  }
+
+  /* Phase unlock */
+  .phase-stage{display:flex;gap:6px;align-items:center;}
+  .phase-node{width:40px;height:40px;border-radius:9999px;background:var(--surface);border:1px solid var(--border);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:14px;transition:all 600ms var(--ease-standard);}
+  .phase-node.unlocked{background:var(--primary);color:var(--bg);border-color:transparent;box-shadow:0 0 32px var(--primary-glow);animation:unlockPulse 800ms var(--ease-standard);}
+  @keyframes unlockPulse{
+    0%{transform:scale(1);}
+    30%{transform:scale(1.2);}
+    100%{transform:scale(1);}
+  }
+  .phase-line{width:24px;height:1px;background:var(--border);transition:background 400ms;}
+  .phase-line.lit{background:var(--primary);}
+
+  /* Counter */
+  .counter-stage{font-family:var(--font-display);font-size:48px;line-height:48px;color:var(--lime);text-shadow:0 0 16px rgba(217,255,63,0.3);}
+
+  /* Page transition demo */
+  .page-stage{position:relative;width:100%;height:100px;background:var(--surface);border-radius:10px;overflow:hidden;}
+  .page-content{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:24px;color:var(--text);opacity:0;transform:translateY(8px);}
+  .page-content.active{opacity:1;transform:translateY(0);transition:all 320ms var(--ease-decelerate);}
+
+  /* FAB scroll */
+  .fab{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--primary);color:var(--bg);height:48px;border-radius:9999px;padding:0 20px;font-weight:700;font-size:13px;cursor:pointer;transition:width 320ms var(--ease-standard), padding 320ms var(--ease-standard);width:200px;overflow:hidden;white-space:nowrap;}
+  .fab.contracted{width:48px;padding:0;}
+  .fab.contracted span{display:none;}
+
+  .row-controls{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+  .row-controls button{font-family:var(--font-body);font-size:11px;background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;cursor:pointer;}
+  .row-controls button:hover{border-color:var(--primary);color:var(--primary);}
+
+  .note{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-top:24px;}
+  .note h3{font-family:var(--font-display);font-size:18px;letter-spacing:0.04em;text-transform:uppercase;margin:0 0 12px;}
+  .note ul{margin:0;padding-left:20px;color:var(--text);font-size:13px;line-height:22px;}
+  .note ul li b{color:var(--gold);}
+</style>
+</head>
+<body>
+
+<header>
+  <h1><span class="o2">O2</span> PRODE — Motion System</h1>
+  <p>Demos en vivo de las 20 animaciones del catálogo. Click "Replay" en cada una para verla de nuevo. Para inspeccionar las curvas exactas, ver <code style="background:var(--surface);padding:2px 6px;border-radius:4px;font-size:11px;">lib/motion/variants.ts</code>.</p>
+</header>
+
+<main>
+
+<section>
+  <h2>Foundations</h2>
+  <div class="sub">Tap feedback · Fade · Modal · Toast — la base de cada interacción.</div>
+  <div class="demo-grid">
+
+    <div class="demo">
+      <div class="meta">
+        <div class="id">M01 · tapVariants</div>
+        <div class="name">Tap feedback</div>
+        <div class="desc">Spring stiffness 500 damping 30. Hover scale 1.02 + glow.</div>
+      </div>
+      <div class="stage">
+        <button class="tap-btn">PRESIONAME</button>
+      </div>
+    </div>
+
+    <div class="demo">
+      <div class="meta">
+        <div class="id">M02 · pageTransition</div>
+        <div class="name">Page transition</div>
+        <div class="desc">y: 8→0 + opacity. Duración medium (320ms). Ease decelerate.</div>
+      </div>
+      <div class="stage">
+        <div class="page-stage">
+          <div class="page-content active" id="page1">INICIO</div>
+        </div>
+      </div>
+      <button class="replay" onclick="cyclePage(this)">Replay</button>
+    </div>
+
+    <div class="demo">
+      <div class="meta">
+        <div class="id">M03 · modalSlide</div>
+        <div class="name">Modal bottom sheet</div>
+        <div class="desc">y: 100% → 0 con spring modal. Backdrop fade paralelo.</div>
+      </div>
+      <div class="stage">
+        <div class="modal-stage">
+          <div class="modal-bd"></div>
+          <div class="modal-sheet"><div class="handle"></div>Modal content</div>
+        </div>
+      </div>
+      <button class="replay" onclick="toggleModal(this)">Replay</button>
+    </div>
+
+    <div class="demo">
+      <div class="meta">
+        <div class="id">M04 · toastSlide</div>
+        <div class="name">Toast appear</div>
+        <div class="desc">y: -32→0 + opacity + scale 0.92→1. Spring bounce.</div>
+      </div>
+      <div class="stage">
+        <div class="toast-stage">
+          <div class="toast"><div class="ico">✓</div>Predicción guardada</div>
+        </div>
+      </div>
+      <button class="replay" onclick="fireToast(this)">Replay</button>
+    </div>
+
+  </div>
+</section>
+
+<section>
+  <h2>Loading & state</h2>
+  <div class="sub">Skeleton shimmer · Live pulse · Score focus — feedback continuo.</div>
+  <div class="demo-grid">
+
+    <div class="demo">
+      <div class="meta">
+        <div class="id">M05 · skeleton</div>
+        <div class="name">Skeleton shimmer</div>
+        <div class="desc">CSS-only. translate -100% → 100% linear, loop 1.4s.</div>
+      </div>
+      <div class="stage">
+        <div class="skeleton"></div>
+      </div>
+    </div>
+
+    <div class="demo">
+      <div class="meta">
+        <div class="id">M06 · livePulse</div>
+        <div class="name">Live pulse</div>
+        <div class="desc">Scale 1→1.5 + opacity 1→0.4, loop 1.8s.</div>
+      </div>
+      <div class="stage">
+        <div class="live-stage"><span class="dot"></span>EN VIVO</div>
+      </div>
+    </div>
+
+    <div class="demo">
+      <div class="meta">
+        <div class="id">M08 · scoreInputFocus</div>
+        <div class="name">Score input focus</div>
+        <div class="desc">Border primary + glow + scale 1.05. Ease decelerate.</div>
+      </div>
+      <div class="stage">
+        <div class="score-pair">
+          <div class="score" id="sc1">2</div>
+          <div class="score focused" id="sc2">0</div>
+        </div>
+      </div>
+      <button class="replay" onclick="toggleFocus(this)">Toggle</button>
+    </div>
+
+    <div class="demo">
+      <div class="meta">
+        <div class="id">M12 · numberCounter</div>
+        <div class="name">Number counter</div>
+        <div class="desc">Conteo suave 100→124 (spring counter).</div>
+      </div>
+      <div class="stage">
+        <div class="counter-stage" id="counter">100</div>
+      </div>
+      <button class="replay" onclick="runCounter(this)">Replay</button>
+    </div>
+
+  </div>
+</section>
+
+<section>
+  <h2>Reveals (orquestadas)</h2>
+  <div class="sub">Podium · Phase unlock — momentos cinematográficos clave.</div>
+  <div class="demo-grid">
+
+    <div class="demo" style="grid-column:span 2;">
+      <div class="meta">
+        <div class="id">M11 · podiumReveal</div>
+        <div class="name">Podium reveal</div>
+        <div class="desc">Stagger 3→2→1 con spring bounce. Crown del #1 entra al final con rotate -20→0.</div>
+      </div>
+      <div class="stage" style="min-height:200px;">
+        <div class="podium-stage" id="podiumStage">
+          <div class="pod-col bronze"><div class="av av3">N</div><div class="medal" style="background:#CD7F32;color:#fff;">3</div><div class="name">Nahuel</div><div class="pts">124</div></div>
+          <div class="pod-col gold"><div class="av">M<div class="crown-pop">♛</div></div><div class="medal" style="background:#FFD700;">1</div><div class="name">Martín</div><div class="pts">156</div></div>
+          <div class="pod-col silver"><div class="av av2">L</div><div class="medal" style="background:#C0C0C0;">2</div><div class="name">Lucas</div><div class="pts">142</div></div>
+        </div>
+      </div>
+      <button class="replay" onclick="replayPodium(this)">Replay</button>
+    </div>
+
+    <div class="demo" style="grid-column:span 2;">
+      <div class="meta">
+        <div class="id">M10 · phaseUnlock</div>
+        <div class="name">Phase unlock</div>
+        <div class="desc">Scale 1→1.2→1 + glow primary aparece + línea conectora se enciende. Duración 800ms.</div>
+      </div>
+      <div class="stage" style="min-height:120px;">
+        <div class="phase-stage" id="phaseStage">
+          <div class="phase-node" id="p1">G</div>
+          <div class="phase-line" id="l1"></div>
+          <div class="phase-node" id="p2">O</div>
+          <div class="phase-line" id="l2"></div>
+          <div class="phase-node" id="p3">C</div>
+          <div class="phase-line" id="l3"></div>
+          <div class="phase-node" id="p4">S</div>
+          <div class="phase-line" id="l4"></div>
+          <div class="phase-node" id="p5">F</div>
+        </div>
+      </div>
+      <button class="replay" onclick="replayUnlock(this)">Replay</button>
+    </div>
+
+  </div>
+</section>
+
+<section>
+  <h2>Social & celebration</h2>
+  <div class="sub">Heart pop · FAB contract — interacciones del muro.</div>
+  <div class="demo-grid">
+
+    <div class="demo">
+      <div class="meta">
+        <div class="id">M13 · heartPop</div>
+        <div class="name">Heart pop (reacción)</div>
+        <div class="desc">Outline → filled + scale 1→1.4→1 + ghost heart float up.</div>
+      </div>
+      <div class="stage">
+        <div class="heart-stage">
+          <button class="heart-btn" id="heartBtn"><span class="heart-icon">♡</span></button>
+          <span class="heart-ghost" id="heartGhost">♥</span>
+          <span class="heart-count" id="heartCount">24</span>
+        </div>
+      </div>
+      <button class="replay" onclick="triggerHeart(this)">Replay</button>
+    </div>
+
+    <div class="demo">
+      <div class="meta">
+        <div class="id">M17 · fabContract</div>
+        <div class="name">FAB scroll contract</div>
+        <div class="desc">width 200→56 con ease standard al scrollear feed.</div>
+      </div>
+      <div class="stage">
+        <div class="fab" id="fab"><span style="font-size:14px;">⊕</span> <span>COMPARTIR PRODE</span></div>
+      </div>
+      <button class="replay" onclick="toggleFab(this)">Toggle</button>
+    </div>
+
+  </div>
+</section>
+
+<div class="note">
+  <h3>Reglas no negociables</h3>
+  <ul>
+    <li><b>Solo `transform` y `opacity`.</b> Nunca `width/height/top/left`. Garantiza 60fps en mobile.</li>
+    <li><b>5 duraciones + 4 easings + 3 springs.</b> Sistema cerrado. Toda animación nueva encaja en estos tokens.</li>
+    <li><b>Reduced motion respetado.</b> Toda animación de translate/scale/rotate degrada a fade simple cuando el OS lo pide.</li>
+    <li><b>Significado siempre.</b> Si una animación no comunica algo (cambio de estado, posición, progreso), sale del producto.</li>
+    <li><b>Cap duración 1.2s.</b> Salvo achievement unlock (justos 1.2s), nada excede.</li>
+    <li><b>Source of truth en `lib/motion/variants.ts`.</b> Componentes importan variants, no definen inline.</li>
+  </ul>
+</div>
+
+</main>
+
+<script>
+  // ─── M02 page transition cycle ───
+  const pageContents = ["INICIO", "PRODE", "RANKING", "MURO", "PERFIL"];
+  let pageIdx = 0;
+  function cyclePage(btn){
+    const stage = btn.parentElement.querySelector('.page-stage');
+    pageIdx = (pageIdx + 1) % pageContents.length;
+    stage.innerHTML = `<div class="page-content" id="pcur">${pageContents[pageIdx]}</div>`;
+    requestAnimationFrame(()=>{ stage.querySelector('.page-content').classList.add('active'); });
+  }
+
+  // ─── M03 modal toggle ───
+  function toggleModal(btn){
+    const bd = btn.parentElement.querySelector('.modal-bd');
+    const sh = btn.parentElement.querySelector('.modal-sheet');
+    const wasOn = bd.classList.contains('on');
+    bd.classList.remove('on'); sh.classList.remove('on');
+    if (!wasOn) {
+      setTimeout(()=>{ bd.classList.add('on'); sh.classList.add('on'); }, 50);
+    }
+  }
+
+  // ─── M04 toast ───
+  function fireToast(btn){
+    const toast = btn.parentElement.querySelector('.toast');
+    toast.classList.remove('on');
+    requestAnimationFrame(()=>{
+      toast.classList.add('on');
+      setTimeout(()=>{ toast.classList.remove('on'); }, 2500);
+    });
+  }
+
+  // ─── M08 score focus toggle ───
+  function toggleFocus(btn){
+    const a = document.getElementById('sc1');
+    const b = document.getElementById('sc2');
+    a.classList.toggle('focused');
+    b.classList.toggle('focused');
+  }
+
+  // ─── M12 number counter ───
+  function runCounter(btn){
+    const el = document.getElementById('counter');
+    const target = 124;
+    const start = 100;
+    el.textContent = start;
+    const duration = 800;
+    const startTime = performance.now();
+    function tick(t){
+      const p = Math.min((t - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(start + (target - start) * eased);
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // ─── M11 podium replay ───
+  function replayPodium(btn){
+    const cols = document.querySelectorAll('#podiumStage .pod-col');
+    cols.forEach(c => c.classList.remove('animate'));
+    void document.getElementById('podiumStage').offsetWidth;
+    requestAnimationFrame(()=>{
+      cols.forEach(c => c.classList.add('animate'));
+    });
+  }
+
+  // ─── M10 phase unlock replay ───
+  function replayUnlock(btn){
+    const nodes = ['p1','p2','p3','p4','p5'];
+    const lines = ['l1','l2','l3','l4'];
+    nodes.forEach(id => document.getElementById(id).classList.remove('unlocked'));
+    lines.forEach(id => document.getElementById(id).classList.remove('lit'));
+    let i = 0;
+    const interval = setInterval(()=>{
+      if (i > 0) document.getElementById(lines[i-1]).classList.add('lit');
+      document.getElementById(nodes[i]).classList.add('unlocked');
+      i++;
+      if (i >= nodes.length) clearInterval(interval);
+    }, 600);
+  }
+
+  // ─── M13 heart pop ───
+  let heartCount = 24;
+  function triggerHeart(btn){
+    const heart = document.getElementById('heartBtn');
+    const ghost = document.getElementById('heartGhost');
+    const cnt = document.getElementById('heartCount');
+    if (heart.classList.contains('on')) {
+      heart.classList.remove('on');
+      heart.querySelector('.heart-icon').textContent = '♡';
+      heartCount--;
+    } else {
+      heart.classList.add('on');
+      heart.querySelector('.heart-icon').textContent = '♥';
+      heartCount++;
+      ghost.classList.remove('on');
+      void ghost.offsetWidth;
+      ghost.classList.add('on');
+    }
+    cnt.textContent = heartCount;
+  }
+
+  // ─── M17 fab toggle ───
+  function toggleFab(btn){
+    document.getElementById('fab').classList.toggle('contracted');
+  }
+
+  // ─── Auto-replay initials ───
+  window.addEventListener('load', ()=>{
+    setTimeout(()=>{ replayPodium(); }, 600);
+    setTimeout(()=>{ replayUnlock(); }, 1800);
+  });
+</script>
+
+</body>
+</html>

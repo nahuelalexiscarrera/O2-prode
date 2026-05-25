@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>O2 PRODE — Pantallas v2 (icon system custom)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0b0b0d; --surface: #131417; --card: #1b1d22; --elevated: #23262c;
+    --border: #2a2e36; --border-strong: #3a3f49;
+    --text: #f5f7fa; --text-secondary: #c7ccd4; --text-muted: #9ca3af; --text-disabled: #5a5f69; --text-inverse: #0b0b0d;
+    --primary: #ff6a00; --primary-hover: #ff7a1a; --primary-soft: #ff8a33; --primary-glow: rgba(255,106,0,0.35); --primary-bg: rgba(255,106,0,0.12);
+    --lime: #d9ff3f; --lime-soft: rgba(217,255,63,0.18);
+    --gold: #FFB300; --celeste: #74ACDF;
+    --success: #22c55e; --warning: #f59e0b; --error: #ef4444; --info: #3b82f6; --live: #ff2d55;
+    --font-display: "Anton", "Bebas Neue", Impact, sans-serif;
+    --font-body: "Inter", system-ui, sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;font-family:var(--font-body);background:#050507;color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;background-image:radial-gradient(circle at 50% -10%,rgba(255,106,0,0.06) 0%,transparent 50%);}
+  .label-up{font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);}
+  .font-display{font-family:var(--font-display);}
+
+  header.top{padding:24px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  header.top .title{font-family:var(--font-display);font-size:24px;letter-spacing:0.02em;}
+  header.top .sub{color:var(--text-muted);font-size:13px;flex:1;}
+  header.top .tag{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold);padding:4px 10px;border-radius:9999px;font-weight:700;}
+
+  .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:32px;padding:32px;justify-items:center;}
+
+  .phone{width:360px;background:#000;border-radius:36px;padding:8px;box-shadow:0 24px 60px rgba(0,0,0,0.6), 0 0 0 1px var(--border-strong);}
+  .phone-screen{background:var(--bg);border-radius:28px;height:760px;overflow:hidden;position:relative;display:flex;flex-direction:column;}
+  .phone-label{text-align:center;margin-top:12px;font-size:11px;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;font-weight:700;}
+
+  .status-bar{display:flex;justify-content:space-between;align-items:center;padding:14px 20px 8px;font-size:13px;font-weight:600;flex-shrink:0;}
+  .status-bar .right{display:flex;gap:6px;align-items:center;font-size:11px;}
+  .screen-body{flex:1;overflow-y:auto;padding:8px 20px 0;}
+  .screen-body::-webkit-scrollbar{display:none;}
+  .screen-body{scrollbar-width:none;}
+
+  .bnav{background:rgba(19,20,23,0.85);backdrop-filter:blur(20px) saturate(140%);border-top:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-around;padding:10px 0 14px;flex-shrink:0;}
+  .bnav .item{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text-muted);cursor:pointer;}
+  .bnav .item.active{color:var(--primary);}
+  .bnav .item svg{width:22px;height:22px;}
+  .bnav .item .lbl{font-size:10px;font-weight:600;letter-spacing:0.04em;}
+
+  .scr-header{padding:8px 0 16px;display:flex;align-items:center;justify-content:space-between;}
+  .scr-header .icon-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);}
+  .scr-header .icon-btn svg{width:22px;height:22px;}
+  .scr-header .title{font-family:var(--font-display);font-size:18px;letter-spacing:0.04em;text-transform:uppercase;}
+  .scr-header .action{color:var(--primary);font-size:14px;font-weight:600;}
+
+  .btn-primary{display:inline-flex;align-items:center;justify-content:center;background:var(--primary);color:var(--text-inverse);height:48px;padding:0 24px;border-radius:9999px;font-weight:700;font-size:14px;border:none;cursor:pointer;width:100%;letter-spacing:0.02em;font-family:var(--font-body);}
+  .btn-primary:hover{background:var(--primary-hover);box-shadow:0 0 24px var(--primary-glow);}
+  .btn-secondary{display:inline-flex;align-items:center;justify-content:center;background:transparent;color:var(--text);height:48px;padding:0 24px;border-radius:12px;font-weight:600;font-size:14px;border:1px solid var(--border-strong);cursor:pointer;width:100%;font-family:var(--font-body);}
+
+  .avatar{display:inline-flex;align-items:center;justify-content:center;border-radius:9999px;font-weight:700;font-family:var(--font-display);letter-spacing:0.02em;position:relative;flex-shrink:0;}
+  .av-md{width:36px;height:36px;font-size:13px;}
+  .av-lg{width:52px;height:52px;font-size:17px;}
+  .av-xl{width:80px;height:80px;font-size:28px;}
+  .av-1{background:linear-gradient(135deg,#FF6A00,#FF8A33);color:#0b0b0d;}
+  .av-2{background:linear-gradient(135deg,#3B82F6,#60A5FA);color:#fff;}
+  .av-3{background:linear-gradient(135deg,#22C55E,#4ADE80);color:#0b0b0d;}
+  .av-4{background:linear-gradient(135deg,#A855F7,#C084FC);color:#fff;}
+  .av-5{background:linear-gradient(135deg,#EF4444,#F87171);color:#fff;}
+  .level{position:absolute;bottom:-3px;right:-3px;width:20px;height:20px;border-radius:9999px;background:var(--card);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--text);font-family:var(--font-body);font-weight:700;}
+  .level.l3{background:var(--primary);color:var(--text-inverse);}
+  .level.l4,.level.l5{background:var(--lime);color:var(--text-inverse);}
+  .level.l5{box-shadow:0 0 8px var(--lime-soft);}
+  .crown-svg{position:absolute;top:-12px;left:50%;transform:translateX(-50%);width:18px;height:18px;color:var(--gold);filter:drop-shadow(0 0 4px rgba(255,179,0,0.6));}
+
+  .badge{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;border-radius:6px;font-size:10px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;}
+  .badge-primary{background:var(--primary-bg);color:var(--primary);}
+
+  .tag{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:6px;font-size:10px;font-weight:600;}
+  .tag svg{width:11px;height:11px;}
+  .tag-kickoff{background:var(--surface);color:var(--text-secondary);border:1px solid var(--border);}
+  .tag-live{background:rgba(255,45,85,0.12);color:var(--live);}
+  .tag-live .dot{width:5px;height:5px;border-radius:9999px;background:var(--live);animation:pulse 1.8s infinite;}
+  .tag-closed{background:rgba(34,197,94,0.10);color:var(--success);}
+  .tag-locked{background:var(--surface);color:var(--text-muted);border:1px dashed var(--border-strong);}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.5);opacity:0.4;}}
+
+  .stat-card{background:var(--card);border-radius:14px;padding:14px;flex:1;}
+  .stat-card .lbl{font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);}
+  .stat-card .val{font-family:var(--font-display);font-size:32px;line-height:32px;margin-top:6px;}
+  .stat-card .val.lime{color:var(--lime);}
+  .stat-card .delta{display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:700;color:var(--success);float:right;}
+  .stat-card .delta svg{width:10px;height:10px;}
+
+  .next-hero{background:linear-gradient(135deg,rgba(255,106,0,0.15),rgba(217,255,63,0.04));border:1px solid var(--border);border-radius:18px;padding:16px;}
+  .next-hero .lbl{font-size:10px;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;}
+  .next-hero .teams{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .next-hero .team{display:flex;align-items:center;gap:8px;}
+  .next-hero .team .flag{width:28px;height:18px;border-radius:3px;box-shadow:0 0 0 1px rgba(255,255,255,0.08);}
+  .next-hero .team .name{font-weight:700;font-size:14px;}
+  .next-hero .vs{color:var(--text-muted);font-size:11px;font-weight:700;}
+  .next-hero .count{text-align:center;color:var(--text-secondary);font-size:12px;margin-bottom:14px;}
+
+  .phase{display:flex;align-items:center;justify-content:space-between;gap:4px;padding:8px 0;}
+  .phase-node{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;}
+  .phase-node .ico{width:32px;height:32px;border-radius:9999px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+  .phase-node .ico svg{width:14px;height:14px;}
+  .phase-node.done .ico{background:var(--lime);color:var(--text-inverse);}
+  .phase-node.current .ico{background:var(--primary);color:var(--text-inverse);box-shadow:0 0 14px var(--primary-glow);}
+  .phase-node.locked .ico{background:var(--surface);color:var(--text-muted);border:1px solid var(--border);}
+  .phase-node .lbl{font-size:9px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--text-muted);}
+  .phase-node.done .lbl,.phase-node.current .lbl{color:var(--text);}
+  .phase-line{height:1px;background:var(--border);flex:1;}
+
+  .match-card{background:var(--card);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;margin-bottom:10px;}
+  .match-card .teams{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .match-card .team{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;}
+  .match-card .team .flag{width:32px;height:22px;border-radius:3px;box-shadow:0 0 0 1px rgba(255,255,255,0.08);}
+  .match-card .team .name{font-size:12px;font-weight:600;}
+  .match-card .vs{color:var(--text-muted);font-size:10px;font-weight:600;letter-spacing:0.06em;}
+  .score-pair{display:flex;align-items:center;gap:18px;justify-content:center;}
+  .score-input{width:54px;height:64px;background:var(--surface);border:1px solid var(--border);border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:26px;color:var(--text);}
+  .score-input.empty{color:var(--text-muted);}
+  .score-input.focused{border-color:var(--primary);box-shadow:0 0 16px var(--primary-glow);}
+  .score-input.correct{color:var(--success);border-color:var(--success);}
+  .match-card .tag-wrap{display:flex;justify-content:center;}
+
+  .post-card{background:var(--card);border-radius:14px;padding:14px;margin-bottom:10px;}
+  .post-card .header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .post-card .header .name{font-weight:600;font-size:13px;}
+  .post-card .header .time{font-size:10px;color:var(--text-muted);}
+  .post-card .body{font-size:13px;line-height:18px;color:var(--text);margin-bottom:10px;}
+  .post-card .actions{display:flex;gap:18px;color:var(--text-muted);font-size:11px;}
+  .post-card .action{display:inline-flex;align-items:center;gap:5px;cursor:pointer;}
+  .post-card .action svg{width:14px;height:14px;}
+
+  .rank-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;}
+  .rank-row.self{background:var(--primary);color:var(--text-inverse);}
+  .rank-row.self .pts{color:var(--text-inverse);}
+  .rank-row .pos{width:20px;text-align:center;font-family:var(--font-display);font-size:16px;color:var(--text-muted);}
+  .rank-row.self .pos{color:var(--text-inverse);}
+  .rank-row .name{flex:1;font-size:13px;font-weight:600;}
+  .rank-row .pts{font-family:var(--font-display);font-size:16px;color:var(--lime);}
+
+  .podium{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:6px;align-items:end;margin:8px 0;}
+  .podium .col{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;background:var(--card);border-radius:14px;}
+  .podium .col.gold{padding-bottom:24px;border:1px solid rgba(255,215,0,0.3);}
+  .podium .medal-svg{width:22px;height:22px;}
+  .podium .medal-svg.gold{color:#FFD700;}
+  .podium .medal-svg.silver{color:#C0C0C0;}
+  .podium .medal-svg.bronze{color:#CD7F32;}
+  .podium .name{font-size:12px;font-weight:600;}
+  .podium .pts{font-family:var(--font-display);font-size:16px;color:var(--lime);}
+
+  .nav-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--card);border-bottom:1px solid var(--border);}
+  .nav-row:first-child{border-radius:14px 14px 0 0;}
+  .nav-row:last-child{border-radius:0 0 14px 14px;border-bottom:none;}
+  .nav-row .lbl{font-size:14px;}
+  .nav-row .right{display:flex;align-items:center;gap:8px;color:var(--text-muted);}
+  .nav-row .right svg{width:14px;height:14px;}
+
+  /* Splash with cinematic Argentina vibes */
+  .splash{height:100%;position:relative;overflow:hidden;background:radial-gradient(ellipse at 50% 100%, rgba(255,106,0,0.25) 0%, transparent 60%), radial-gradient(ellipse at 50% 0%, rgba(116,172,223,0.08) 0%, transparent 40%), linear-gradient(180deg,#0a0a0c 0%,#1a1410 100%);padding:40px 24px;display:flex;flex-direction:column;justify-content:space-between;color:var(--text);}
+  .splash::before{content:"";position:absolute;inset:0;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.12 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");opacity:0.5;mix-blend-mode:overlay;pointer-events:none;}
+  .splash .sol-bg{position:absolute;top:-40px;right:-60px;width:240px;height:240px;opacity:0.05;transform:rotate(-15deg);pointer-events:none;}
+  .splash .titles{margin-top:60px;position:relative;z-index:2;}
+  .splash h1{font-family:var(--font-display);font-size:64px;line-height:56px;letter-spacing:-0.02em;margin:0;}
+  .splash h1 .o2{color:var(--primary);text-shadow:0 0 24px var(--primary-glow);}
+  .splash .lede{margin:24px 0 0;font-size:14px;color:var(--text-secondary);line-height:20px;max-width:240px;}
+  .splash .bot{display:flex;flex-direction:column;gap:14px;align-items:center;padding-bottom:24px;position:relative;z-index:2;}
+  .splash .brand{font-family:var(--font-display);font-size:16px;color:var(--text-muted);letter-spacing:0.12em;}
+  .splash .brand .o2{color:var(--primary);}
+
+  /* Share section */
+  .share-section{background:radial-gradient(ellipse at 78% 85%, rgba(255,106,0,0.20) 0%, transparent 55%), radial-gradient(ellipse at 20% 15%, rgba(116,172,223,0.10) 0%, transparent 50%), linear-gradient(160deg, #0a0a0c 0%, #1a1410 60%, #050307 100%);height:100%;padding:0 16px;display:flex;flex-direction:column;color:var(--text);position:relative;}
+  .share-section::before{content:"";position:absolute;inset:0;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.15 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");opacity:0.5;mix-blend-mode:overlay;pointer-events:none;}
+  .share-card-mini{flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:20px 4px;position:relative;z-index:2;}
+  .share-card-mini .top-row{display:flex;justify-content:space-between;align-items:center;}
+  .share-card-mini .top-row .label{font-size:9px;letter-spacing:0.2em;color:var(--text-muted);font-weight:700;text-transform:uppercase;}
+  .share-card-mini .top-row .o2-b{font-family:var(--font-display);font-size:20px;color:var(--primary);text-shadow:0 0 10px var(--primary-glow);}
+  .share-card-mini .mundial{font-family:var(--font-display);font-size:42px;line-height:38px;background:linear-gradient(180deg, #FFFFFF 0%, #FFE082 60%, #FFB300 100%);-webkit-background-clip:text;background-clip:text;color:transparent;margin-top:8px;letter-spacing:-0.01em;}
+  .share-card-mini .year{font-family:var(--font-display);font-size:24px;color:var(--primary);letter-spacing:0.16em;margin-top:2px;}
+  .share-card-mini .trophy-mini{display:flex;justify-content:center;align-items:center;flex-direction:column;gap:4px;padding:8px 0;}
+  .share-card-mini .trophy-mini svg.t{width:90px;height:auto;filter:drop-shadow(0 0 16px rgba(255,179,0,0.4));}
+  .share-card-mini .stars-mini{display:flex;gap:10px;}
+  .share-card-mini .stars-mini svg{width:12px;height:12px;color:var(--gold);}
+  .share-card-mini .divider{height:1px;background:linear-gradient(90deg, transparent 0%, var(--gold) 50%, transparent 100%);margin:6px 0;}
+  .share-card-mini .data{display:flex;flex-direction:column;gap:8px;font-size:11px;}
+  .share-card-mini .data .row{display:flex;flex-direction:column;}
+  .share-card-mini .data .lbl{font-size:8px;letter-spacing:0.2em;color:var(--text-muted);font-weight:700;text-transform:uppercase;margin-bottom:2px;}
+  .share-card-mini .data .val{font-family:var(--font-display);font-size:18px;letter-spacing:0.02em;display:flex;align-items:center;gap:8px;}
+  .share-card-mini .data .val.celeste{color:var(--celeste);}
+  .share-card-mini .data .val .mini-flag{width:18px;height:12px;border-radius:2px;}
+  .share-card-mini .data .val .vs{color:var(--text-muted);font-size:14px;}
+  .share-card-mini .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-top:8px;border-top:1px solid rgba(255,179,0,0.15);}
+  .share-card-mini .stats .s .lbl{font-size:8px;letter-spacing:0.2em;color:var(--text-muted);font-weight:700;text-transform:uppercase;}
+  .share-card-mini .stats .s .n{font-family:var(--font-display);font-size:36px;line-height:32px;letter-spacing:-0.02em;}
+  .share-card-mini .stats .s .n.lime{color:var(--lime);}
+  .share-card-mini .hashtag{font-size:9px;letter-spacing:0.16em;color:var(--gold);font-weight:700;text-align:center;}
+  .share-ctas-mini{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:0 0 12px;position:relative;z-index:2;}
+  .share-cta-mini{height:48px;background:rgba(27,29,34,0.6);border:1px solid var(--border);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--text);}
+  .share-cta-mini svg{width:16px;height:16px;}
+  .share-cta-mini .lbl{font-size:9px;color:var(--text-muted);font-weight:600;}
+  .share-cta-mini.primary{background:rgba(255,106,0,0.12);border-color:var(--primary);}
+  .share-cta-mini.primary svg, .share-cta-mini.primary .lbl{color:var(--primary);}
+
+  .chip-row{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px;}
+  .chip-row::-webkit-scrollbar{display:none;}
+  .chip{display:inline-flex;align-items:center;height:30px;padding:0 14px;border-radius:9999px;font-size:11px;font-weight:600;flex-shrink:0;}
+  .chip-default{background:transparent;border:1px solid var(--border);color:var(--text-muted);}
+  .chip-active{background:var(--primary);color:var(--text-inverse);}
+
+  .tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:14px;align-items:center;gap:24px;}
+  .tabs .tab{padding:12px 0;font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--text-muted);position:relative;cursor:pointer;display:flex;align-items:center;gap:5px;}
+  .tabs .tab.active{color:var(--text);}
+  .tabs .tab.active::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--primary);}
+  .tabs .tab.locked{color:var(--text-disabled);}
+  .tabs .tab svg{width:11px;height:11px;}
+
+  .progress{height:4px;background:var(--border);border-radius:9999px;overflow:hidden;margin-top:8px;}
+  .progress .fill{height:100%;background:var(--primary);}
+
+  .locked-card{background:var(--card);border:1px dashed var(--border-strong);border-radius:14px;padding:18px;text-align:center;margin-bottom:10px;}
+  .locked-card svg.ic{width:22px;height:22px;color:var(--text-muted);margin-bottom:6px;}
+  .locked-card .lbl{font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;}
+  .locked-card .count{font-family:var(--font-display);font-size:18px;color:var(--text);}
+
+  .input{width:100%;height:48px;padding:0 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:var(--font-body);font-size:14px;outline:none;margin-bottom:10px;}
+  .input:focus{border-color:var(--primary);}
+  .input::placeholder{color:var(--text-disabled);}
+  .notif-dot{position:absolute;top:-2px;right:-2px;width:8px;height:8px;background:var(--primary);border-radius:9999px;border:1.5px solid var(--bg);}
+  .icon-pos{position:relative;display:inline-flex;}
+  .small-label{font-size:10px;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;font-weight:700;}
+</style>
+</head>
+<body>
+
+<!-- ╔══ CUSTOM ICON SPRITE ══╗ -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="nav-home" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" stroke-linejoin="miter" d="M3 11 L12 3 L21 11 M5.5 9 L5.5 21 L18.5 21 L18.5 9 M10 21 L10 14 L14 14 L14 21"/></symbol>
+  <symbol id="nav-trophy" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" stroke-linejoin="miter" d="M8 4 L16 4 L16 11 C16 13.5 14.2 15 12 15 C9.8 15 8 13.5 8 11 L8 4 Z M4 5 L4 8 C4 10 5.5 11 7.5 11 M20 5 L20 8 C20 10 18.5 11 16.5 11 M12 15 L12 18.5 M8.5 21 L15.5 21 L15.5 18.5 L8.5 18.5 L8.5 21 Z"/></symbol>
+  <symbol id="nav-chart" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" stroke-linejoin="miter" d="M3 21 L21 21 M6 21 L6 14 M12 21 L12 8 M18 21 L18 11"/><circle cx="6" cy="14" r="0.8" fill="currentColor"/><circle cx="12" cy="8" r="0.8" fill="currentColor"/><circle cx="18" cy="11" r="0.8" fill="currentColor"/></symbol>
+  <symbol id="nav-chat" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" stroke-linejoin="miter" d="M3 5 L21 5 L21 17 L13 17 L8 21 L8 17 L3 17 Z"/><circle cx="8.5" cy="11" r="0.9" fill="currentColor"/><circle cx="12" cy="11" r="0.9" fill="currentColor"/><circle cx="15.5" cy="11" r="0.9" fill="currentColor"/></symbol>
+  <symbol id="nav-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.75"/><path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" d="M4 22 C4 17 7.5 15 12 15 C16.5 15 20 17 20 22"/></symbol>
+  <symbol id="arrow-left" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" d="M14 6 L8 12 L14 18 M8 12 L20 12"/></symbol>
+  <symbol id="arrow-right" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" d="M10 6 L16 12 L10 18 M4 12 L16 12"/></symbol>
+  <symbol id="arrow-up" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" d="M6 11 L12 5 L18 11 M12 5 L12 20"/></symbol>
+  <symbol id="close" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" d="M6 6 L18 18 M18 6 L6 18"/></symbol>
+  <symbol id="share" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" stroke-linejoin="miter" d="M5 11 L5 21 L19 21 L19 11 M12 16 L12 3 M7 8 L12 3 L17 8"/></symbol>
+  <symbol id="download" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" stroke-linejoin="miter" d="M5 14 L5 21 L19 21 L19 14 M12 4 L12 16 M7 11 L12 16 L17 11"/></symbol>
+  <symbol id="lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" fill="none" stroke="currentColor" stroke-width="1.75"/><path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" d="M8 11 L8 7 C8 4.8 9.8 3 12 3 C14.2 3 16 4.8 16 7 L16 11"/><rect x="11" y="14" width="2" height="4" fill="currentColor"/></symbol>
+  <symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.75"/><path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" d="M12 7 L12 12 L15.5 14.5"/></symbol>
+  <symbol id="bell" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" stroke-linejoin="miter" d="M5 17 L5 16 L7 14 L7 10 C7 6.5 9.5 4 12 4 C14.5 4 17 6.5 17 10 L17 14 L19 16 L19 17 L5 17 Z M10 20 C10 21.1 10.9 22 12 22 C13.1 22 14 21.1 14 20"/></symbol>
+  <symbol id="check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="square" stroke-linejoin="miter" d="M4 12 L10 18 L20 6"/></symbol>
+  <symbol id="heart" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" stroke-linejoin="miter" d="M12 21 L4 13 C2 11 2 7.5 4.5 5.5 C7 3.5 10 4.5 12 7 C14 4.5 17 3.5 19.5 5.5 C22 7.5 22 11 20 13 L12 21 Z"/></symbol>
+  <symbol id="comment" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" stroke-linejoin="miter" d="M4 4 L20 4 L20 16 L13 16 L9 20 L9 16 L4 16 Z"/></symbol>
+  <symbol id="settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.75"/><path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" stroke-linejoin="miter" d="M12 2 L12 5 M12 19 L12 22 M22 12 L19 12 M5 12 L2 12 M19.07 4.93 L17 7 M7 17 L4.93 19.07 M19.07 19.07 L17 17 M7 7 L4.93 4.93"/></symbol>
+  <symbol id="medal" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" stroke-linejoin="miter" d="M7 3 L10 12 L17 12 L14 3 L7 3 Z"/><circle cx="12" cy="16" r="5.5" fill="currentColor" opacity="0.9"/><path fill="none" stroke="#0a0a0c" stroke-width="1.5" d="M10.5 14.5 L12 16 L13.5 14.5"/></symbol>
+  <symbol id="star" viewBox="0 0 24 24"><polygon fill="currentColor" points="12,2 14.5,9 22,9 16,13.5 18.5,21 12,16.5 5.5,21 8,13.5 2,9 9.5,9"/></symbol>
+  <symbol id="crown" viewBox="0 0 24 24"><path fill="currentColor" d="M3 8 L7 13 L12 6 L17 13 L21 8 L20 19 L4 19 Z"/><circle cx="3" cy="8" r="1.5" fill="currentColor"/><circle cx="21" cy="8" r="1.5" fill="currentColor"/><circle cx="12" cy="6" r="1.5" fill="currentColor"/></symbol>
+  <symbol id="flame" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3 C12 6 8 9 8 13 C8 16 9.5 19 12 21 C14.5 19 16 16 16 13 C16 12 15.5 11 14.5 10 C14 11 13 12 12 12 C12 9 13 6 12 3 Z"/></symbol>
+  <symbol id="sol-mayo" viewBox="0 0 100 100"><defs><radialGradient id="sun-g"><stop offset="0%" stop-color="#FFE082"/><stop offset="100%" stop-color="#FFB300"/></radialGradient></defs><g fill="url(#sun-g)"><polygon points="50,4 47,28 53,28"/><polygon points="50,96 47,72 53,72"/><polygon points="4,50 28,47 28,53"/><polygon points="96,50 72,47 72,53"/><polygon points="17,17 34,32 32,34"/><polygon points="83,83 66,68 68,66"/><polygon points="83,17 68,32 66,34"/><polygon points="17,83 32,68 34,66"/></g><circle cx="50" cy="50" r="16" fill="url(#sun-g)" stroke="#E65100" stroke-width="0.4"/><ellipse cx="44" cy="48" rx="1.2" ry="1.6" fill="#5D4037"/><ellipse cx="56" cy="48" rx="1.2" ry="1.6" fill="#5D4037"/><path d="M44 56 Q 50 60, 56 56" fill="none" stroke="#5D4037" stroke-width="1" stroke-linecap="round"/></symbol>
+  <symbol id="world-trophy" viewBox="0 0 200 320"><defs><linearGradient id="gld3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FFE082"/><stop offset="30%" stop-color="#FFB300"/><stop offset="55%" stop-color="#F57C00"/><stop offset="80%" stop-color="#FFB300"/><stop offset="100%" stop-color="#FFE082"/></linearGradient><linearGradient id="gld3-deep" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFCA28"/><stop offset="100%" stop-color="#E65100"/></linearGradient></defs><g><path d="M60 300 L60 290 L65 285 L135 285 L140 290 L140 300 Z" fill="url(#gld3-deep)"/><path d="M55 285 L60 280 L140 280 L145 285 L140 290 L60 290 Z" fill="url(#gld3)"/><rect x="68" y="260" width="64" height="20" fill="#3E2723" stroke="url(#gld3)" stroke-width="0.8"/><text x="100" y="274" font-family="Anton, Bebas Neue, Impact, sans-serif" font-size="11" fill="url(#gld3)" text-anchor="middle" letter-spacing="0.5">FIFA WORLD CUP</text><path d="M55 260 L65 250 L135 250 L145 260 L140 280 L60 280 Z" fill="url(#gld3)"/><path d="M65 250 L75 230 L125 230 L135 250 Z" fill="url(#gld3-deep)"/><path d="M75 230 C 70 200, 75 180, 85 165 C 80 150, 78 135, 85 120 C 75 105, 78 90, 90 78" fill="none" stroke="url(#gld3)" stroke-width="6" stroke-linecap="round"/><path d="M125 230 C 130 200, 125 180, 115 165 C 120 150, 122 135, 115 120 C 125 105, 122 90, 110 78" fill="none" stroke="url(#gld3)" stroke-width="6" stroke-linecap="round"/><ellipse cx="100" cy="155" rx="12" ry="6" fill="url(#gld3-deep)"/><circle cx="100" cy="58" r="32" fill="url(#gld3)" stroke="url(#gld3-deep)" stroke-width="1.5"/><ellipse cx="100" cy="58" rx="32" ry="10" fill="none" stroke="url(#gld3-deep)" stroke-width="1.2"/><ellipse cx="100" cy="58" rx="18" ry="32" fill="none" stroke="url(#gld3-deep)" stroke-width="1.2"/><path d="M88 50 Q 95 45, 105 50 Q 112 55, 108 62 Q 100 68, 92 64 Q 85 58, 88 50" fill="url(#gld3-deep)" opacity="0.5"/><ellipse cx="92" cy="48" rx="8" ry="14" fill="white" opacity="0.18"/></g></symbol>
+  <symbol id="flag-ar" viewBox="0 0 24 16"><rect width="24" height="16" fill="#74ACDF"/><rect y="5.33" width="24" height="5.34" fill="#FFFFFF"/><circle cx="12" cy="8" r="1.6" fill="#F6B40E" stroke="#85340A" stroke-width="0.2"/></symbol>
+  <symbol id="flag-br" viewBox="0 0 24 16"><rect width="24" height="16" fill="#009C3B"/><polygon points="12,2 22,8 12,14 2,8" fill="#FFDF00"/><circle cx="12" cy="8" r="2.6" fill="#002776"/></symbol>
+  <symbol id="flag-jp" viewBox="0 0 24 16"><rect width="24" height="16" fill="#FFFFFF"/><circle cx="12" cy="8" r="3" fill="#BC002D"/></symbol>
+  <symbol id="flag-de" viewBox="0 0 24 16"><rect width="24" height="5.33" fill="#000000"/><rect y="5.33" width="24" height="5.34" fill="#DD0000"/><rect y="10.67" width="24" height="5.33" fill="#FFCE00"/></symbol>
+  <symbol id="flag-fr" viewBox="0 0 24 16"><rect width="8" height="16" fill="#0055A4"/><rect x="8" width="8" height="16" fill="#FFFFFF"/><rect x="16" width="8" height="16" fill="#EF4135"/></symbol>
+  <symbol id="flag-sn" viewBox="0 0 24 16"><rect width="8" height="16" fill="#00853F"/><rect x="8" width="8" height="16" fill="#FDEF42"/><rect x="16" width="8" height="16" fill="#E31B23"/><polygon points="12,5.5 12.7,7.6 14.9,7.6 13.1,9 13.8,11.1 12,9.8 10.2,11.1 10.9,9 9.1,7.6 11.3,7.6" fill="#00853F"/></symbol>
+  <symbol id="flag-hr" viewBox="0 0 24 16"><rect width="24" height="5.33" fill="#FF0000"/><rect y="5.33" width="24" height="5.34" fill="#FFFFFF"/><rect y="10.67" width="24" height="5.33" fill="#171796"/></symbol>
+  <symbol id="flag-ma" viewBox="0 0 24 16"><rect width="24" height="16" fill="#C1272D"/><polygon points="12,5 13,8 16,8 13.5,10 14.5,13 12,11 9.5,13 10.5,10 8,8 11,8" fill="none" stroke="#006233" stroke-width="0.7"/></symbol>
+  <symbol id="flag-mx" viewBox="0 0 24 16"><rect width="8" height="16" fill="#006847"/><rect x="8" width="8" height="16" fill="#FFFFFF"/><rect x="16" width="8" height="16" fill="#CE1126"/></symbol>
+</svg>
+
+<header class="top">
+  <div class="title">O2 PRODE</div>
+  <div class="sub">Mockup v2 · Icon system custom + Share cinematográfica Argentina · Agente 4 extension</div>
+  <span class="tag">Custom icons</span>
+</header>
+
+<div class="gallery">
+
+  <!-- 01 SPLASH cinematic -->
+  <div>
+    <div class="phone"><div class="phone-screen">
+      <div class="splash">
+        <svg class="sol-bg"><use href="#sol-mayo"/></svg>
+        <div class="titles">
+          <h1>PRODE<br>MUNDIAL<br><span class="o2">O2</span></h1>
+          <p class="lede">Competí con tus compañeros. Demostrá que sabés de fútbol. Ganá premios.</p>
+        </div>
+        <div class="bot">
+          <button class="btn-primary">ENTRAR</button>
+          <div style="font-size:13px;color:var(--text-muted);">¿No tenés cuenta? <span style="color:var(--primary);font-weight:600;">Registrate</span></div>
+          <div class="brand"><span class="o2">O2</span> · WELLNESS CLUB</div>
+        </div>
+      </div>
+    </div></div>
+    <div class="phone-label">01 · Splash cinematográfico</div>
+  </div>
+
+  <!-- 02 LOGIN -->
+  <div>
+    <div class="phone"><div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><span class="right">●●●● 100%</span></div>
+      <div class="screen-body">
+        <div class="scr-header"><div class="icon-btn"><svg><use href="#arrow-left"/></svg></div><span></span><span></span></div>
+        <div style="font-family:var(--font-display);font-size:32px;letter-spacing:-0.01em;line-height:36px;">INICIÁ SESIÓN</div>
+        <div style="color:var(--text-secondary);font-size:13px;margin:8px 0 24px;">Entrá con tu cuenta de socio O2.</div>
+        <input class="input" placeholder="Email" />
+        <input class="input" type="password" placeholder="Contraseña" />
+        <div style="font-size:13px;color:var(--primary);text-align:right;margin:4px 0 24px;">¿Olvidaste tu contraseña?</div>
+        <button class="btn-primary">INGRESAR</button>
+        <div style="text-align:center;color:var(--text-muted);font-size:11px;margin:24px 0;">— o —</div>
+        <button class="btn-secondary">Continuar con Google</button>
+        <div style="text-align:center;color:var(--text-muted);font-size:13px;margin-top:24px;">¿Sos socio nuevo? <span style="color:var(--primary);">Registrate</span></div>
+      </div>
+    </div></div>
+    <div class="phone-label">02 · Login</div>
+  </div>
+
+  <!-- 03 HOME -->
+  <div>
+    <div class="phone"><div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><span class="right">●●●● 100%</span></div>
+      <div class="screen-body">
+        <div class="scr-header">
+          <div class="font-display" style="font-size:22px;color:var(--primary);text-shadow:0 0 12px var(--primary-glow);">O2</div>
+          <div class="icon-pos" style="color:var(--text);"><svg width="22" height="22"><use href="#bell"/></svg><div class="notif-dot"></div></div>
+        </div>
+        <div style="font-family:var(--font-display);font-size:26px;letter-spacing:-0.01em;margin-bottom:16px;">HOLA, NAHUEL</div>
+        <div style="display:flex;gap:10px;margin-bottom:16px;">
+          <div class="stat-card"><span class="delta"><svg><use href="#arrow-up"/></svg> 2</span><div class="lbl">TU POSICIÓN</div><div class="val">#8</div></div>
+          <div class="stat-card"><span class="delta">+12</span><div class="lbl">TUS PUNTOS</div><div class="val lime">124</div></div>
+        </div>
+        <div class="next-hero" style="margin-bottom:16px;">
+          <div class="lbl">PRÓXIMO PARTIDO</div>
+          <div class="teams">
+            <div class="team"><svg class="flag"><use href="#flag-ar"/></svg><div class="name">Argentina</div></div>
+            <div class="vs">VS</div>
+            <div class="team"><svg class="flag"><use href="#flag-br"/></svg><div class="name">Brasil</div></div>
+          </div>
+          <div class="count">Faltan 2h 14m</div>
+          <button class="btn-primary">IR A MI PRODE</button>
+        </div>
+        <div class="label-up" style="margin-bottom:10px;">PROGRESO DEL TORNEO</div>
+        <div class="phase" style="background:var(--card);border-radius:14px;padding:10px;margin-bottom:16px;">
+          <div class="phase-node current"><div class="ico"><svg><use href="#nav-trophy"/></svg></div><div class="lbl">Grupos</div></div>
+          <div class="phase-line"></div>
+          <div class="phase-node locked"><div class="ico"><svg><use href="#lock"/></svg></div><div class="lbl">Octav.</div></div>
+          <div class="phase-line"></div>
+          <div class="phase-node locked"><div class="ico"><svg><use href="#lock"/></svg></div><div class="lbl">Cuartos</div></div>
+          <div class="phase-line"></div>
+          <div class="phase-node locked"><div class="ico"><svg><use href="#lock"/></svg></div><div class="lbl">Semis</div></div>
+          <div class="phase-line"></div>
+          <div class="phase-node locked"><div class="ico"><svg><use href="#lock"/></svg></div><div class="lbl">Final</div></div>
+        </div>
+        <div class="label-up" style="margin-bottom:10px;">ACTIVIDAD RECIENTE</div>
+        <div class="post-card">
+          <div class="header">
+            <div class="avatar av-md av-3">L</div>
+            <div style="flex:1;"><div class="name">Lucas</div><div class="time">predijo 2-1 para Argentina · hace 10 min</div></div>
+            <div style="color:var(--text-muted);"><svg width="14" height="14"><use href="#arrow-right"/></svg></div>
+          </div>
+        </div>
+      </div>
+      <div class="bnav">
+        <div class="item active"><svg><use href="#nav-home"/></svg><div class="lbl">Inicio</div></div>
+        <div class="item"><svg><use href="#nav-trophy"/></svg><div class="lbl">Prode</div></div>
+        <div class="item"><svg><use href="#nav-chart"/></svg><div class="lbl">Ranking</div></div>
+        <div class="item"><svg><use href="#nav-chat"/></svg><div class="lbl">Muro</div></div>
+        <div class="item"><svg><use href="#nav-user"/></svg><div class="lbl">Perfil</div></div>
+      </div>
+    </div></div>
+    <div class="phone-label">03 · Home Dashboard</div>
+  </div>
+
+  <!-- 04 GROUP STAGE -->
+  <div>
+    <div class="phone"><div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><span class="right">●●●● 100%</span></div>
+      <div class="screen-body">
+        <div class="scr-header"><div class="icon-btn"><svg><use href="#arrow-left"/></svg></div><span class="title">MI PRODE</span><span></span></div>
+        <div class="tabs">
+          <span class="tab active">FASE DE GRUPOS</span>
+          <span class="tab locked">ELIMINATORIAS <svg><use href="#lock"/></svg></span>
+        </div>
+        <div class="chip-row">
+          <span class="chip chip-active">GRUPO A</span>
+          <span class="chip chip-default">GRUPO B</span>
+          <span class="chip chip-default">GRUPO C</span>
+          <span class="chip chip-default">GRUPO D</span>
+          <span class="chip chip-default">GRUPO E</span>
+        </div>
+        <div class="match-card">
+          <div class="teams">
+            <div class="team"><svg class="flag"><use href="#flag-ar"/></svg><div class="name">Argentina</div></div>
+            <div class="vs">VS</div>
+            <div class="team"><svg class="flag"><use href="#flag-jp"/></svg><div class="name">Japón</div></div>
+          </div>
+          <div class="score-pair">
+            <div class="score-input">2</div>
+            <div class="score-input focused">0</div>
+          </div>
+          <div class="tag-wrap"><span class="tag tag-kickoff"><svg><use href="#clock"/></svg> Faltan 2h 14m</span></div>
+        </div>
+        <div class="match-card">
+          <div class="teams">
+            <div class="team"><svg class="flag"><use href="#flag-br"/></svg><div class="name">Brasil</div></div>
+            <div class="vs">VS</div>
+            <div class="team"><svg class="flag"><use href="#flag-de"/></svg><div class="name">Alemania</div></div>
+          </div>
+          <div class="score-pair">
+            <div class="score-input">1</div>
+            <div class="score-input">1</div>
+          </div>
+          <div class="tag-wrap"><span class="tag tag-live"><span class="dot"></span>EN VIVO</span></div>
+        </div>
+        <div class="match-card">
+          <div class="teams">
+            <div class="team"><svg class="flag"><use href="#flag-hr"/></svg><div class="name">Croacia</div></div>
+            <div class="vs">VS</div>
+            <div class="team"><svg class="flag"><use href="#flag-ma"/></svg><div class="name">Marruecos</div></div>
+          </div>
+          <div class="score-pair">
+            <div class="score-input correct">2</div>
+            <div class="score-input correct">1</div>
+          </div>
+          <div class="tag-wrap"><span class="tag tag-closed"><svg><use href="#check"/></svg> +5 pts</span></div>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:8px;">3 de 6 cargados</div>
+        <div class="progress"><div class="fill" style="width:50%;"></div></div>
+      </div>
+      <div class="bnav">
+        <div class="item"><svg><use href="#nav-home"/></svg><div class="lbl">Inicio</div></div>
+        <div class="item active"><svg><use href="#nav-trophy"/></svg><div class="lbl">Prode</div></div>
+        <div class="item"><svg><use href="#nav-chart"/></svg><div class="lbl">Ranking</div></div>
+        <div class="item"><svg><use href="#nav-chat"/></svg><div class="lbl">Muro</div></div>
+        <div class="item"><svg><use href="#nav-user"/></svg><div class="lbl">Perfil</div></div>
+      </div>
+    </div></div>
+    <div class="phone-label">04 · Group Stage</div>
+  </div>
+
+  <!-- 05 KNOCKOUT -->
+  <div>
+    <div class="phone"><div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><span class="right">●●●● 100%</span></div>
+      <div class="screen-body">
+        <div class="scr-header"><div class="icon-btn"><svg><use href="#arrow-left"/></svg></div><span class="title">ELIMINATORIAS</span><span></span></div>
+        <div style="background:linear-gradient(135deg,rgba(255,106,0,0.2),rgba(217,255,63,0.05));border-radius:14px;padding:14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div class="small-label">OCTAVOS · ACTIVO</div>
+            <div style="font-family:var(--font-display);font-size:18px;margin-top:2px;">Multiplicador <span style="color:var(--primary);">x2</span></div>
+          </div>
+          <svg width="28" height="28" style="color:var(--primary);"><use href="#flame"/></svg>
+        </div>
+        <div class="match-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:0 0 60px;">
+              <svg width="36" height="24" style="border-radius:3px;"><use href="#flag-ar"/></svg>
+              <div style="font-family:var(--font-display);font-size:14px;letter-spacing:0.04em;">ARG</div>
+            </div>
+            <div class="score-pair" style="gap:10px;"><div class="score-input" style="width:46px;height:54px;font-size:22px;">2</div><div class="score-input" style="width:46px;height:54px;font-size:22px;">0</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:0 0 60px;">
+              <svg width="36" height="24" style="border-radius:3px;"><use href="#flag-mx"/></svg>
+              <div style="font-family:var(--font-display);font-size:14px;letter-spacing:0.04em;">MEX</div>
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);text-align:center;">30/06 · 14:00</div>
+        </div>
+        <div class="match-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:0 0 60px;">
+              <svg width="36" height="24" style="border-radius:3px;"><use href="#flag-br"/></svg>
+              <div style="font-family:var(--font-display);font-size:14px;letter-spacing:0.04em;">BRA</div>
+            </div>
+            <div class="score-pair" style="gap:10px;"><div class="score-input" style="width:46px;height:54px;font-size:22px;">3</div><div class="score-input" style="width:46px;height:54px;font-size:22px;">1</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:0 0 60px;">
+              <svg width="36" height="24" style="border-radius:3px;"><use href="#flag-sn"/></svg>
+              <div style="font-family:var(--font-display);font-size:14px;letter-spacing:0.04em;">SEN</div>
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);text-align:center;">30/06 · 17:00</div>
+        </div>
+        <div class="locked-card">
+          <svg class="ic"><use href="#lock"/></svg>
+          <div class="lbl">CUARTOS</div>
+          <div class="count">Disponible 04/07</div>
+        </div>
+        <div class="locked-card">
+          <svg class="ic"><use href="#lock"/></svg>
+          <div class="lbl">SEMIS</div>
+          <div class="count">Disponible 09/07</div>
+        </div>
+        <div class="locked-card" style="border-color:var(--gold);">
+          <svg class="ic" style="color:var(--gold);"><use href="#nav-trophy"/></svg>
+          <div class="lbl" style="color:var(--gold);">FINAL</div>
+          <div class="count">Disponible 14/07</div>
+        </div>
+      </div>
+      <div class="bnav">
+        <div class="item"><svg><use href="#nav-home"/></svg><div class="lbl">Inicio</div></div>
+        <div class="item active"><svg><use href="#nav-trophy"/></svg><div class="lbl">Prode</div></div>
+        <div class="item"><svg><use href="#nav-chart"/></svg><div class="lbl">Ranking</div></div>
+        <div class="item"><svg><use href="#nav-chat"/></svg><div class="lbl">Muro</div></div>
+        <div class="item"><svg><use href="#nav-user"/></svg><div class="lbl">Perfil</div></div>
+      </div>
+    </div></div>
+    <div class="phone-label">05 · Knockout</div>
+  </div>
+
+  <!-- 06 RANKING -->
+  <div>
+    <div class="phone"><div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><span class="right">●●●● 100%</span></div>
+      <div class="screen-body">
+        <div class="scr-header"><div class="icon-btn"><svg><use href="#arrow-left"/></svg></div><span class="title">RANKING</span><span></span></div>
+        <div class="tabs">
+          <span class="tab active">GLOBAL</span>
+          <span class="tab">SEMANAL</span>
+          <span class="tab">POR FASE</span>
+        </div>
+        <div class="podium">
+          <div class="col">
+            <div class="avatar av-lg av-2">L<div class="level l4">4</div></div>
+            <svg class="medal-svg silver"><use href="#medal"/></svg>
+            <div class="name">Lucas</div>
+            <div class="pts">142</div>
+          </div>
+          <div class="col gold">
+            <div class="avatar av-lg av-1">M<svg class="crown-svg"><use href="#crown"/></svg><div class="level l5">5</div></div>
+            <svg class="medal-svg gold"><use href="#medal"/></svg>
+            <div class="name">Martín</div>
+            <div class="pts">156</div>
+          </div>
+          <div class="col">
+            <div class="avatar av-lg av-3">N<div class="level l3">3</div></div>
+            <svg class="medal-svg bronze"><use href="#medal"/></svg>
+            <div class="name">Nahuel</div>
+            <div class="pts">124</div>
+          </div>
+        </div>
+        <div style="margin-top:14px;">
+          <div class="rank-row"><div class="pos">4</div><div class="avatar av-md av-3">J</div><div class="name">Julián</div><div class="pts">120</div></div>
+          <div class="rank-row"><div class="pos">5</div><div class="avatar av-md av-4">F</div><div class="name">Facu</div><div class="pts">118</div></div>
+          <div class="rank-row"><div class="pos">6</div><div class="avatar av-md av-2">M</div><div class="name">Mati</div><div class="pts">115</div></div>
+          <div class="rank-row"><div class="pos">7</div><div class="avatar av-md av-5">N</div><div class="name">Nico</div><div class="pts">112</div></div>
+          <div class="rank-row self"><div class="pos">8</div><div class="avatar av-md av-1">N</div><div class="name">Vos</div><div class="pts">124</div></div>
+          <div class="rank-row"><div class="pos">9</div><div class="avatar av-md av-3">P</div><div class="name">Pablo</div><div class="pts">110</div></div>
+          <div class="rank-row"><div class="pos">10</div><div class="avatar av-md av-4">S</div><div class="name">Sofi</div><div class="pts">108</div></div>
+        </div>
+      </div>
+      <div class="bnav">
+        <div class="item"><svg><use href="#nav-home"/></svg><div class="lbl">Inicio</div></div>
+        <div class="item"><svg><use href="#nav-trophy"/></svg><div class="lbl">Prode</div></div>
+        <div class="item active"><svg><use href="#nav-chart"/></svg><div class="lbl">Ranking</div></div>
+        <div class="item"><svg><use href="#nav-chat"/></svg><div class="lbl">Muro</div></div>
+        <div class="item"><svg><use href="#nav-user"/></svg><div class="lbl">Perfil</div></div>
+      </div>
+    </div></div>
+    <div class="phone-label">06 · Ranking</div>
+  </div>
+
+  <!-- 07 WALL -->
+  <div>
+    <div class="phone"><div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><span class="right">●●●● 100%</span></div>
+      <div class="screen-body" style="position:relative;">
+        <div class="scr-header"><span></span><span class="title">MURO</span><span></span></div>
+        <div class="tabs">
+          <span class="tab active">DESTACADOS</span>
+          <span class="tab">RECIENTES</span>
+        </div>
+        <div class="post-card">
+          <div class="header">
+            <div class="avatar av-md av-3">L<div class="level l3">3</div></div>
+            <div style="flex:1;"><div class="name">Luciano</div><div class="time">hace 20 min</div></div>
+          </div>
+          <div class="body">Yo tengo a Argentina campeón otra vez <svg width="14" height="9" style="vertical-align:middle;"><use href="#flag-ar"/></svg></div>
+          <div class="actions">
+            <span class="action"><svg><use href="#heart"/></svg> 24</span>
+            <span class="action"><svg><use href="#comment"/></svg> 8</span>
+            <span class="action"><svg><use href="#share"/></svg> Compartir</span>
+          </div>
+        </div>
+        <div class="post-card">
+          <div class="header">
+            <div class="avatar av-md av-2">M<div class="level l4">4</div></div>
+            <div style="flex:1;"><div class="name">Martín</div><div class="time">hace 1h</div></div>
+          </div>
+          <div class="body">Brasil llega a la final. No tengo dudas <svg width="14" height="9" style="vertical-align:middle;"><use href="#flag-br"/></svg></div>
+          <div class="actions">
+            <span class="action"><svg><use href="#heart"/></svg> 18</span>
+            <span class="action"><svg><use href="#comment"/></svg> 5</span>
+            <span class="action"><svg><use href="#share"/></svg> Compartir</span>
+          </div>
+        </div>
+        <div class="post-card">
+          <div class="header">
+            <div class="avatar av-md av-4">J</div>
+            <div style="flex:1;"><div class="name">Julián</div><div class="time">hace 2h</div></div>
+          </div>
+          <div class="body">Acabo de cargar todo el Grupo C. Tengo a MAR pasando.</div>
+          <div class="actions">
+            <span class="action"><svg><use href="#heart"/></svg> 12</span>
+            <span class="action"><svg><use href="#comment"/></svg> 3</span>
+            <span class="action"><svg><use href="#share"/></svg> Compartir</span>
+          </div>
+        </div>
+        <div class="post-card">
+          <div class="header">
+            <div class="avatar av-md av-5" style="background:linear-gradient(135deg,#FFB300,#E65100);color:#0b0b0d;">O2</div>
+            <div style="flex:1;"><div class="name">O2 Wellness Club</div><div class="time">hace 3h · oficial</div></div>
+          </div>
+          <div class="body">Los premios del prode ya están definidos. Mirá lo que vas a poder ganar.</div>
+          <div style="height:140px;border-radius:12px;margin-bottom:10px;background:linear-gradient(135deg,#1b1d22 0%,#3d1f0a 50%,#1b1d22 100%);display:flex;align-items:center;justify-content:center;border:1px solid var(--border);position:relative;overflow:hidden;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--gold);z-index:2;">
+              <svg width="32" height="32"><use href="#nav-trophy"/></svg>
+              <div style="font-family:var(--font-display);font-size:13px;letter-spacing:0.16em;">PREMIOS 2026</div>
+            </div>
+            <div style="position:absolute;inset:0;background-image:url('data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 100 100&quot;><filter id=&quot;n&quot;><feTurbulence type=&quot;fractalNoise&quot; baseFrequency=&quot;0.9&quot;/><feColorMatrix values=&quot;0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.12 0&quot;/></filter><rect width=&quot;100%&quot; height=&quot;100%&quot; filter=&quot;url(%23n)&quot;/></svg>');opacity:0.5;mix-blend-mode:overlay;"></div>
+          </div>
+          <div class="actions">
+            <span class="action"><svg><use href="#heart"/></svg> 47</span>
+            <span class="action"><svg><use href="#comment"/></svg> 14</span>
+            <span class="action"><svg><use href="#share"/></svg> Compartir</span>
+          </div>
+        </div>
+        <div style="position:sticky;bottom:8px;display:flex;justify-content:center;padding-top:8px;">
+          <button class="btn-primary" style="width:auto;padding:0 20px;box-shadow:0 8px 24px var(--primary-glow);display:inline-flex;align-items:center;gap:8px;"><svg width="16" height="16"><use href="#share"/></svg> COMPARTIR MI PRODE</button>
+        </div>
+      </div>
+      <div class="bnav">
+        <div class="item"><svg><use href="#nav-home"/></svg><div class="lbl">Inicio</div></div>
+        <div class="item"><svg><use href="#nav-trophy"/></svg><div class="lbl">Prode</div></div>
+        <div class="item"><svg><use href="#nav-chart"/></svg><div class="lbl">Ranking</div></div>
+        <div class="item active"><svg><use href="#nav-chat"/></svg><div class="lbl">Muro</div></div>
+        <div class="item"><svg><use href="#nav-user"/></svg><div class="lbl">Perfil</div></div>
+      </div>
+    </div></div>
+    <div class="phone-label">07 · Muro</div>
+  </div>
+
+  <!-- 08 PROFILE -->
+  <div>
+    <div class="phone"><div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><span class="right">●●●● 100%</span></div>
+      <div class="screen-body">
+        <div class="scr-header"><span></span><span class="title">PERFIL</span><div class="icon-btn"><svg><use href="#settings"/></svg></div></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin:8px 0 20px;">
+          <div class="avatar av-xl av-1">N<div class="level l3">3</div></div>
+          <div style="font-family:var(--font-display);font-size:28px;letter-spacing:-0.01em;">NAHUEL</div>
+          <div style="font-size:12px;color:var(--primary);font-weight:600;letter-spacing:0.04em;">SOCIO O2 · PRO</div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:20px;">
+          <div class="stat-card"><div class="lbl">POSICIÓN</div><div class="val">#8</div></div>
+          <div class="stat-card"><div class="lbl">PUNTOS</div><div class="val lime">124</div></div>
+          <div class="stat-card"><div class="lbl">COMPLETADO</div><div class="val" style="font-size:28px;">85<span style="font-size:18px;color:var(--text-muted);">%</span></div></div>
+        </div>
+        <div style="border-radius:14px;overflow:hidden;margin-bottom:20px;">
+          <div class="nav-row"><div class="lbl">Mis predicciones</div><div class="right"><svg><use href="#arrow-right"/></svg></div></div>
+          <div class="nav-row"><div class="lbl">Historial</div><div class="right"><svg><use href="#arrow-right"/></svg></div></div>
+          <div class="nav-row"><div class="lbl">Logros</div><div class="right"><span class="badge badge-primary">Nuevo</span><svg><use href="#arrow-right"/></svg></div></div>
+          <div class="nav-row"><div class="lbl">Configuración</div><div class="right"><svg><use href="#arrow-right"/></svg></div></div>
+        </div>
+        <button class="btn-primary" style="display:inline-flex;align-items:center;gap:8px;"><svg width="16" height="16"><use href="#share"/></svg> COMPARTIR MI PRODE</button>
+      </div>
+      <div class="bnav">
+        <div class="item"><svg><use href="#nav-home"/></svg><div class="lbl">Inicio</div></div>
+        <div class="item"><svg><use href="#nav-trophy"/></svg><div class="lbl">Prode</div></div>
+        <div class="item"><svg><use href="#nav-chart"/></svg><div class="lbl">Ranking</div></div>
+        <div class="item"><svg><use href="#nav-chat"/></svg><div class="lbl">Muro</div></div>
+        <div class="item active"><svg><use href="#nav-user"/></svg><div class="lbl">Perfil</div></div>
+      </div>
+    </div></div>
+    <div class="phone-label">08 · Perfil</div>
+  </div>
+
+  <!-- 09 SHARE — CINEMATIC ARGENTINA -->
+  <div>
+    <div class="phone"><div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><span class="right">●●●● 100%</span></div>
+      <div class="scr-header" style="padding:6px 16px 8px;"><div class="icon-btn"><svg><use href="#arrow-left"/></svg></div><span class="title">COMPARTIR</span><div class="icon-btn"><svg><use href="#close"/></svg></div></div>
+      <div class="share-section">
+        <div class="share-card-mini">
+          <div>
+            <div class="top-row">
+              <span class="label">— MI PRODE</span>
+              <span class="o2-b">O2</span>
+            </div>
+            <div class="mundial">MUNDIAL</div>
+            <div class="year">2 0 2 6</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 0;">
+            <div style="width:1px;height:16px;background:linear-gradient(180deg,transparent,var(--gold));"></div>
+            <div style="font-size:8px;letter-spacing:0.4em;color:var(--gold);font-weight:700;text-transform:uppercase;">Mi predicción</div>
+            <div style="font-family:var(--font-display);font-size:64px;line-height:54px;letter-spacing:-0.04em;background:linear-gradient(180deg,#FFFFFF 0%,#FFE082 50%,#C84800 100%);-webkit-background-clip:text;background-clip:text;color:transparent;">N°1</div>
+            <div style="font-size:8px;letter-spacing:0.32em;color:var(--text-secondary);font-weight:600;text-transform:uppercase;">Socio O2 · Nivel Pro</div>
+            <div style="width:1px;height:16px;background:linear-gradient(180deg,var(--gold),transparent);"></div>
+          </div>
+          <div>
+            <div class="divider"></div>
+            <div class="data">
+              <div class="row">
+                <div class="lbl">— Campeón</div>
+                <div class="val celeste">ARGENTINA <svg class="mini-flag"><use href="#flag-ar"/></svg></div>
+              </div>
+              <div class="row">
+                <div class="lbl">— Goleador</div>
+                <div class="val">MBAPPÉ <svg class="mini-flag"><use href="#flag-fr"/></svg></div>
+              </div>
+              <div class="row">
+                <div class="lbl">— Final</div>
+                <div class="val" style="font-size:14px;"><span class="celeste">ARGENTINA</span> <span class="vs">2 — 1</span> BRASIL <svg class="mini-flag"><use href="#flag-br"/></svg></div>
+              </div>
+            </div>
+            <div class="stats">
+              <div class="s"><div class="lbl">Puntos</div><div class="n lime">124</div></div>
+              <div class="s"><div class="lbl">Posición</div><div class="n">#8</div></div>
+            </div>
+          </div>
+          <div class="hashtag">#PRODEMUNDIALO2</div>
+        </div>
+        <div class="share-ctas-mini">
+          <div class="share-cta-mini"><svg><use href="#download"/></svg><div class="lbl">Descargar</div></div>
+          <div class="share-cta-mini primary"><svg><use href="#share"/></svg><div class="lbl">Instagram</div></div>
+          <div class="share-cta-mini"><svg><use href="#share"/></svg><div class="lbl">WhatsApp</div></div>
+          <div class="share-cta-mini"><svg><use href="#share"/></svg><div class="lbl">Más</div></div>
+        </div>
+      </div>
+    </div></div>
+    <div class="phone-label">09 · Share — Cinematic Argentina ★</div>
+  </div>
+
+</div>
+
+<footer style="padding:24px 32px;color:var(--text-muted);font-size:12px;border-top:1px solid var(--border);">
+  O2 PRODE · 9 pantallas v2 · Icon system custom · Share cinematográfica · Agente 4 extension · 2026-05-18
+</footer>
+</body>
+</html>
