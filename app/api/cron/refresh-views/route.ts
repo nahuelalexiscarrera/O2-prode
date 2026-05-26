@@ -18,7 +18,7 @@ function authOk(req: NextRequest): boolean {
   return req.headers.get("authorization") === `Bearer ${secret}`;
 }
 
-export async function POST(req: NextRequest) {
+async function handle(req: NextRequest) {
   if (!authOk(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -32,3 +32,7 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ ok: true, refreshed: ["mv_user_summary", "mv_ranking_global"] });
 }
+
+// Vercel Cron dispara GET; mantenemos POST para invocación manual.
+export const GET = handle;
+export const POST = handle;

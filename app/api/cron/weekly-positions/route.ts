@@ -24,9 +24,18 @@ function authOk(req: NextRequest): boolean {
   return req.headers.get("authorization") === `Bearer ${secret}`;
 }
 
-export async function POST(req: NextRequest) {
+async function handle(req: NextRequest) {
   if (!authOk(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // En plan Hobby de Vercel los crons solo corren 1×/día. Este cron está
+  // calendarizado diario pero la lógica de "weekly position" solo tiene
+  // sentido los lunes (UTC), comparando contra el snapshot de la semana
+  // anterior. Los demás días retornamos 200 sin tocar nada.
+  const todayUTC = new Date().getUTCDay(); // 0 = domingo, 1 = lunes
+  if (todayUTC !== 1) {
+    return NextResponse.json({ ok: true, skipped: "weekly-positions solo corre los lunes (UTC)" });
   }
 
   const supabase = createAdminClient();
@@ -110,3 +119,7 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ ok: true, processed: users?.length ?? 0, results });
 }
+
+// Vercel Cron dispara GET; mantenemos POST para invocación manual.
+export const GET = handle;
+export const POST = handle;
