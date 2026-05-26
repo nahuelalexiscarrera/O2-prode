@@ -2,19 +2,19 @@
   "crons": [
     {
       "path": "/api/cron/daily-streaks",
-      "schedule": "0 5 * * *"
+      "schedule": "0 0 * * *"
     },
     {
       "path": "/api/cron/weekly-positions",
-      "schedule": "0 6 * * 1"
+      "schedule": "0 0 * * *"
     },
     {
       "path": "/api/cron/refresh-views",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 0 * * *"
     },
     {
       "path": "/api/cron/weekly-digest",
-      "schedule": "0 23 * * 0"
+      "schedule": "0 0 * * *"
     }
   ]
 }
