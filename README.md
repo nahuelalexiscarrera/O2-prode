@@ -163,4 +163,4 @@ El gimnasio se llama **O2**.
 
 ---
 
-*Mundial 2026. Inicio 11/06/2026. Release objetivo: 04/06/2026.*
+*Mundial 2026. KaiStudio
