@@ -250,6 +250,38 @@ async function seedMatches() {
   console.log(`✓ matches (${rows.length} — fase de grupos)`);
 }
 
+// ─── Achievement catalog ─────────────────────────────────────────────
+//
+// Source of truth: lib/achievements/catalog.ts (TS).
+// Mirror legible para seed: data/mocks/achievements.json.
+// Si cambia el catálogo, actualizar ambos en paralelo (regla CLAUDE.md §4).
+
+async function seedAchievements() {
+  const file = join(__dir, "../data/mocks/achievements.json");
+  const raw = JSON.parse(readFileSync(file, "utf8"));
+  const items = raw.catalog ?? [];
+
+  if (items.length === 0) {
+    throw new Error("data/mocks/achievements.json vacío o malformado");
+  }
+
+  const rows = items.map((a) => ({
+    id: a.id,
+    category: a.category,
+    name: a.name,
+    description: a.description,
+    icon_ref: a.iconRef,
+    points_bonus: a.pointsBonus,
+    trigger_key: a.triggerKey,
+  }));
+
+  const { error } = await supabase
+    .from("achievement_catalog")
+    .upsert(rows, { onConflict: "id" });
+  if (error) throw error;
+  console.log(`✓ achievement_catalog (${rows.length} logros)`);
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────
 
 async function main() {
@@ -259,6 +291,7 @@ async function main() {
     await seedGroups();
     await seedTeams();
     await seedMatches();
+    await seedAchievements();
     console.log("\nSeed completado.");
   } catch (err) {
     console.error("\nError en seed:", err.message ?? err);

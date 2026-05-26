@@ -1,0 +1,17 @@
+{
+  "$comment": "Template editable. Copialo a beta-testers.json y completá con los datos reales. La columna 'label' es solo para tu referencia interna (a quién le mandaste cada código) — la DB no la guarda.",
+  "$instructions": "1) cp data/seed/beta-testers.example.json data/seed/beta-testers.json   2) editar con los 5-10 socios beta   3) pnpm seed:invites",
+  "expiresAt": "2026-07-26T23:59:59-03:00",
+  "testers": [
+    { "code": "BETA-01", "label": "Socio 1 — nombre + contacto" },
+    { "code": "BETA-02", "label": "Socio 2 — nombre + contacto" },
+    { "code": "BETA-03", "label": "Socio 3 — nombre + contacto" },
+    { "code": "BETA-04", "label": "Socio 4 — nombre + contacto" },
+    { "code": "BETA-05", "label": "Socio 5 — nombre + contacto" },
+    { "code": "BETA-06", "label": "Socio 6 — nombre + contacto" },
+    { "code": "BETA-07", "label": "Socio 7 — nombre + contacto" },
+    { "code": "BETA-08", "label": "Socio 8 — nombre + contacto" },
+    { "code": "BETA-09", "label": "Socio 9 — nombre + contacto" },
+    { "code": "BETA-10", "label": "Socio 10 — nombre + contacto" }
+  ]
+}

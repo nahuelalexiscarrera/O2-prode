@@ -12,7 +12,10 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:e2e": "playwright test",
-    "supabase:types": "supabase gen types typescript --local > types/database.ts"
+    "supabase:types": "supabase gen types typescript --local > types/database.ts",
+    "seed": "node scripts/seed.mjs",
+    "seed:invites": "node scripts/seed-invites.mjs",
+    "seed:storage": "node scripts/setup-db-extras.mjs"
   },
   "dependencies": {
     "@serwist/next": "^9.0.0",

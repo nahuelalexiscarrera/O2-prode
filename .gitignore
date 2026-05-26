@@ -64,6 +64,9 @@ desktop.ini
 # Local Claude/agent state
 .claude/settings.local.json
 
+# Seeds with real user data (use .example.json templates, copy locally)
+data/seed/beta-testers.json
+
 # Misc
 *.pem
 .cache/

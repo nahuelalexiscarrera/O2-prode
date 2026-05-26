@@ -30,14 +30,50 @@ Antes de mandar el primer invite code, todos estos items deben estar ✅.
 - [ ] `achievement_catalog` poblado con los 19 logros
 
 ### Invite codes para la beta
-- [ ] Lista definida de 5–10 socios beta (con email confirmado)
-- [ ] Códigos `BETA-01` a `BETA-10` insertados en `invite_code` con `email` pre-asignado
+- [ ] Lista definida de 5–10 socios beta (con contacto confirmado)
+- [ ] Códigos `BETA-01` a `BETA-10` insertados en `invite_code` (vía `pnpm seed:invites`, ver §0.5)
 - [ ] Mensaje preparado para enviar a cada beta tester (template abajo)
 
 ### Monitoreo mínimo
 - [ ] Acceso a logs de Vercel verificado
 - [ ] Acceso al dashboard de Supabase verificado
 - [ ] Canal de feedback definido (WhatsApp grupo cerrado / email / form interno)
+
+### 0.5 — Comandos de seed (orden de ejecución)
+
+Asumiendo Supabase de producción ya creado y `.env.local` con `NEXT_PUBLIC_SUPABASE_URL` +
+`SUPABASE_SERVICE_ROLE_KEY` apuntando a producción:
+
+```bash
+# 1) Schema (una sola vez, vía CLI o pegando en SQL Editor)
+supabase db push                # si usás Supabase CLI con migrations
+# alternativa: pegar supabase/schema.sql en el SQL Editor del dashboard
+
+# 2) Datos del torneo (tournament + groups + teams + 72 partidos + 19 logros)
+pnpm seed                       # corre scripts/seed.mjs
+# alternativa: pegar supabase/seed.sql en el SQL Editor
+
+# 3) Storage bucket para imágenes de posts
+pnpm seed:storage               # corre scripts/setup-db-extras.mjs
+
+# 4) Invite codes para los beta testers
+cp data/seed/beta-testers.example.json data/seed/beta-testers.json
+# editar beta-testers.json con los datos reales
+pnpm seed:invites               # corre scripts/seed-invites.mjs
+```
+
+**Verificación rápida en el SQL Editor de Supabase:**
+```sql
+SELECT COUNT(*) FROM match WHERE phase = 'groups';   -- 72
+SELECT COUNT(*) FROM team;                            -- 48
+SELECT COUNT(*) FROM groups;                          -- 12
+SELECT COUNT(*) FROM achievement_catalog;             -- 19
+SELECT COUNT(*) FROM invite_code WHERE used = FALSE;  -- = cantidad de beta testers
+```
+
+> **Importante:** `data/seed/beta-testers.json` está en `.gitignore` — no se commitea
+> porque puede contener nombres/contactos de socios. El `.example.json` sí está versionado
+> como template.
 
 ---
 
