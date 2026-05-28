@@ -12,6 +12,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getNextMatch } from "@/lib/matches/queries";
+import { getFeedRecientes } from "@/lib/social/queries";
+import { getMyProfile } from "@/lib/users/queries";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -159,6 +162,64 @@ async function runChecks(): Promise<Check[]> {
         detail: `${userRow.email} · ${userRow.name}`,
       });
     }
+  }
+
+  // ─── 4. Las queries que HomePage llama (con server client + RLS) ─────
+  // Cada una se ejecuta independiente para identificar cuál revienta.
+
+  try {
+    const profile = await getMyProfile();
+    checks.push({
+      name: "query: getMyProfile()",
+      ok: true,
+      detail: profile
+        ? `name=${profile.name} pts=${profile.total_points} pos=${profile.position}`
+        : "null (sin profile)",
+    });
+  } catch (err) {
+    checks.push({
+      name: "query: getMyProfile()",
+      ok: false,
+      error: {
+        message: err instanceof Error ? err.message : String(err),
+      },
+    });
+  }
+
+  try {
+    const next = await getNextMatch();
+    checks.push({
+      name: "query: getNextMatch()",
+      ok: true,
+      detail: next
+        ? `${next.home_code} vs ${next.away_code} @ ${next.kickoff_at}`
+        : "null (sin próximo partido)",
+    });
+  } catch (err) {
+    checks.push({
+      name: "query: getNextMatch()",
+      ok: false,
+      error: {
+        message: err instanceof Error ? err.message : String(err),
+      },
+    });
+  }
+
+  try {
+    const feed = await getFeedRecientes({ limit: 3 });
+    checks.push({
+      name: "query: getFeedRecientes(limit=3)",
+      ok: true,
+      detail: `${feed.length} posts`,
+    });
+  } catch (err) {
+    checks.push({
+      name: "query: getFeedRecientes(limit=3)",
+      ok: false,
+      error: {
+        message: err instanceof Error ? err.message : String(err),
+      },
+    });
   }
 
   return checks;
