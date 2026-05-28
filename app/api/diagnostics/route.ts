@@ -233,7 +233,14 @@ async function handle() {
       passing: checks.filter((c) => c.ok).length,
       failing: checks.filter((c) => !c.ok).length,
     };
-    return NextResponse.json({ summary, checks }, { status: 200 });
+    const deploy = {
+      commitSha: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? "local",
+      commitMessage: process.env.VERCEL_GIT_COMMIT_MESSAGE?.slice(0, 80) ?? null,
+      branch: process.env.VERCEL_GIT_COMMIT_REF ?? null,
+      env: process.env.VERCEL_ENV ?? "local",
+      url: process.env.VERCEL_URL ?? null,
+    };
+    return NextResponse.json({ deploy, summary, checks }, { status: 200 });
   } catch (err) {
     return NextResponse.json(
       {
