@@ -1,12 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useFormState, useFormStatus } from "react-dom";
 import { signInAction, type ActionResult } from "@/lib/auth/actions";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
+import { Icon } from "@/components/ui/Icon";
+
+function ConfirmBanner() {
+  const searchParams = useSearchParams();
+  if (searchParams.get("confirm") !== "1") return null;
+  return (
+    <div className="mb-6 rounded-md bg-surface border border-info/30 px-4 py-3 flex items-start gap-3">
+      <Icon name="info" size={18} className="text-info mt-0.5" />
+      <p className="text-body-sm text-text">
+        Cuenta creada. Revisá tu email para confirmarla y después entrá con tu contraseña.
+      </p>
+    </div>
+  );
+}
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -30,6 +45,10 @@ export default function LoginPage() {
           Entrá con tu cuenta de socio O2.
         </p>
       </header>
+
+      <Suspense fallback={null}>
+        <ConfirmBanner />
+      </Suspense>
 
       <form action={formAction} className="flex flex-col gap-4" noValidate>
         <Input

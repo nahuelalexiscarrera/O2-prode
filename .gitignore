@@ -70,3 +70,6 @@ data/seed/beta-testers.json
 # Misc
 *.pem
 .cache/
+
+.vercel
+.env*

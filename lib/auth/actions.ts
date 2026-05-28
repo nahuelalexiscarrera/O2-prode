@@ -173,14 +173,38 @@ export async function signUpAction(
     password,
   });
 
-  if (signUpErr || !signUpData.user) {
-    if (signUpErr?.message?.toLowerCase().includes("already")) {
+  if (signUpErr) {
+    console.error("[signUpAction] supabase.auth.signUp falló", {
+      code: signUpErr.code,
+      status: signUpErr.status,
+      message: signUpErr.message,
+    });
+    const msg = signUpErr.message.toLowerCase();
+    if (msg.includes("already") || msg.includes("registered")) {
       return { ok: false, error: "Ese email ya tiene una cuenta.", field: "email" };
     }
-    return { ok: false, error: signUpErr?.message ?? "No pudimos crear la cuenta." };
+    if (msg.includes("password")) {
+      return { ok: false, error: signUpErr.message, field: "password" };
+    }
+    if (msg.includes("rate") || msg.includes("limit")) {
+      return { ok: false, error: "Demasiados intentos. Esperá un momento y probá de nuevo." };
+    }
+    return { ok: false, error: `Auth error: ${signUpErr.message}` };
+  }
+
+  // Supabase obfusca emails duplicados devolviendo user con identities vacío.
+  if (signUpData.user && (signUpData.user.identities?.length ?? 0) === 0) {
+    console.warn("[signUpAction] email duplicado (identities vacío)", { email });
+    return { ok: false, error: "Ese email ya tiene una cuenta.", field: "email" };
+  }
+
+  if (!signUpData.user) {
+    console.error("[signUpAction] signUp ok pero sin user", { signUpData });
+    return { ok: false, error: "No pudimos crear la cuenta (sin user devuelto)." };
   }
 
   const newUserId = signUpData.user.id;
+  const needsEmailConfirm = !signUpData.session;
 
   // 3) Insertar fila en `user` (bypaseando RLS con admin)
   const { error: insertErr } = await admin.from("user").insert({
@@ -192,16 +216,35 @@ export async function signUpAction(
   });
 
   if (insertErr) {
+    console.error("[signUpAction] insert en table user falló", {
+      code: insertErr.code,
+      message: insertErr.message,
+      details: insertErr.details,
+      hint: insertErr.hint,
+    });
     // Rollback de la cuenta de auth si falla el insert
     await admin.auth.admin.deleteUser(newUserId);
-    return { ok: false, error: "No pudimos completar el registro. Probá de nuevo." };
+    // Surface el código de Postgres para diagnosticar
+    return {
+      ok: false,
+      error: `No pudimos completar el registro. (DB ${insertErr.code ?? "?"}: ${insertErr.message})`,
+    };
   }
 
   // 4) Marcar el invite como usado
-  await admin
+  const { error: updateInviteErr } = await admin
     .from("invite_code")
     .update({ used: true, used_by: newUserId })
     .eq("code", inviteCode);
+
+  if (updateInviteErr) {
+    console.error("[signUpAction] update invite_code falló (no fatal)", updateInviteErr);
+  }
+
+  // Si Supabase tiene email confirmation activado, no hay session todavía.
+  if (needsEmailConfirm) {
+    redirect("/login?confirm=1");
+  }
 
   redirect("/app");
 }
