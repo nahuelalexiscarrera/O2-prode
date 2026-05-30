@@ -6,10 +6,9 @@ import { cn } from "@/lib/utils/cn";
 
 export default async function NotificacionesPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data?.user) redirect("/login");
+  const user = data.user;
 
   const { data: notifs } = await supabase
     .from("notification")

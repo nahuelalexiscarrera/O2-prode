@@ -13,10 +13,9 @@ interface Props {
 
 export default async function MuroPage({ searchParams }: Props) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data?.user) redirect("/login");
+  const user = data.user;
 
   const { tab: tabParam } = await searchParams;
   const activeTab: "recientes" | "destacados" =

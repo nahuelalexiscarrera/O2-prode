@@ -27,10 +27,9 @@ function toIconName(ref: string): IconName {
 
 export default async function LogrosPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data?.user) redirect("/login");
+  const user = data.user;
 
   const { data: userAchievements } = await supabase
     .from("user_achievement")
