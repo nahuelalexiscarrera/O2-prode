@@ -27,7 +27,7 @@ export function StatCard({ label, value, delta, accent = "primary", className }:
       <span
         className={cn(
           "font-display text-[40px] leading-none tabular-nums",
-          accent === "primary" ? "text-primary" : "text-[#C6F135]"
+          accent === "primary" ? "text-primary" : "text-text"
         )}
       >
         {value}

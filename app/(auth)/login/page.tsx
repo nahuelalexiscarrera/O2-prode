@@ -38,11 +38,23 @@ export default function LoginPage() {
   const errorField = state && !state.ok ? state.field : undefined;
 
   return (
-    <div className="min-h-screen flex flex-col px-6 py-10">
-      <header className="mb-10">
-        <h1 className="font-display text-display-md leading-tight text-text">PRODE MUNDIAL O2</h1>
-        <p className="mt-3 text-body-md text-text-muted">
-          Entrá con tu cuenta de socio O2.
+    <div className="min-h-screen flex flex-col px-6 pt-[calc(2rem+env(safe-area-inset-top))] pb-10">
+      {/* Aire arriba: deja respirar la imagen de marca */}
+      <div className="flex-1 min-h-[24vh]" />
+
+      {/* Título editorial */}
+      <header className="mb-6">
+        <h1 className="font-display uppercase leading-[0.85] text-text">
+          <span className="block text-[1.75rem] tracking-[0.10em]">Prode</span>
+          <span className="block text-[3.5rem] tracking-[0.01em] text-primary">Mundial</span>
+        </h1>
+        <div className="mt-2 flex items-center gap-2">
+          <span className="font-display text-heading-md text-text">O2</span>
+          <span className="h-4 w-px bg-border-strong" />
+          <span className="text-body-sm text-text-muted">Wellness Club</span>
+        </div>
+        <p className="mt-4 text-body-md text-text-secondary text-balance">
+          Cada partido suma. Cada acierto te acerca al podio.
         </p>
       </header>
 
@@ -97,11 +109,16 @@ export default function LoginPage() {
         </div>
       </form>
 
-      <footer className="mt-auto pt-10 text-center text-body-sm text-text-muted">
-        ¿Sos socio nuevo?{" "}
-        <Link href="/register" className="text-primary font-semibold hover:underline">
-          Registrate
-        </Link>
+      <footer className="mt-8 text-center">
+        <p className="text-body-sm text-text-muted">
+          ¿Sos socio nuevo?{" "}
+          <Link href="/register" className="text-primary font-semibold hover:underline">
+            Registrate
+          </Link>
+        </p>
+        <p className="mt-4 text-[10px] uppercase tracking-[0.28em] text-text-disabled">
+          #WazeExperience
+        </p>
       </footer>
     </div>
   );
