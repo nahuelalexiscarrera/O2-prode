@@ -41,10 +41,9 @@ const PHASES = [
 
 export default async function KnockoutPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data?.user) redirect("/login");
+  const user = data.user;
 
   const allMatches = await getKnockoutMatches();
   const matchIds = allMatches.map((m) => m.id);

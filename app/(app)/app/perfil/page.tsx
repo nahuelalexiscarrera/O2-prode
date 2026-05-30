@@ -13,10 +13,9 @@ import type { UserLevel } from "@/types/domain";
 
 export default async function PerfilPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data?.user) redirect("/login");
+  const user = data.user;
 
   const [profile, predictionCount] = await Promise.all([
     getMyProfile(),

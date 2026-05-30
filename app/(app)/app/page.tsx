@@ -56,10 +56,11 @@ function NextMatchSection({ match }: { match: NextMatchRow }) {
 
 export default async function HomePage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  // Defensive: an errored or orphaned session (deleted auth user) can come back
+  // as an error and/or a null `data`. Never destructure blindly — treat anything
+  // that isn't a real user as logged-out and bounce to /login.
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data?.user) redirect("/login");
 
   const [profile, nextMatch, feed] = await Promise.all([
     getMyProfile(),

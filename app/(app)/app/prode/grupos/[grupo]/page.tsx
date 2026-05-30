@@ -27,10 +27,9 @@ export default async function GroupStagePage({ params }: Props) {
   const groupId = groupLetter.toUpperCase();
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data?.user) redirect("/login");
+  const user = data.user;
 
   const matches = await getMatchesByGroup(groupId);
   const matchIds = matches.map((m) => m.id);

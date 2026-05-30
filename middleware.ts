@@ -30,9 +30,15 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // `getUser()` validates the JWT against the auth server, so it can fail in
+  // ways that are NOT a clean "logged out": an expired refresh token, or — the
+  // case that bit us in beta — a JWT whose `sub` references a deleted auth user
+  // ("User from sub claim in JWT does not exist"). In those cases it returns an
+  // `error` and may return a null `data`, so we never blindly destructure
+  // `data.user`. Anything that isn't a valid, existing user is logged-out.
+  const { data, error } = await supabase.auth.getUser();
+  const user = data?.user ?? null;
+  const hasValidUser = !error && !!user;
 
   const { pathname } = request.nextUrl;
 
@@ -45,14 +51,24 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/register") ||
     pathname.startsWith("/forgot");
 
-  if (isAppRoute && !user && pathname !== "/splash") {
+  if (isAppRoute && !hasValidUser && pathname !== "/splash") {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(url);
+    const redirectResponse = NextResponse.redirect(url);
+    // Purge stale/orphaned Supabase auth cookies so a dead session doesn't
+    // bounce the user on every request — let them re-login from a clean slate.
+    if (error) {
+      for (const cookie of request.cookies.getAll()) {
+        if (cookie.name.startsWith("sb-") && cookie.name.includes("-auth-token")) {
+          redirectResponse.cookies.set({ name: cookie.name, value: "", maxAge: 0, path: "/" });
+        }
+      }
+    }
+    return redirectResponse;
   }
 
-  if (isAuthRoute && user) {
+  if (isAuthRoute && hasValidUser) {
     const url = request.nextUrl.clone();
     url.pathname = "/app";
     url.searchParams.delete("redirect");
