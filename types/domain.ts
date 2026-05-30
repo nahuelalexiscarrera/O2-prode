@@ -76,7 +76,8 @@ export interface User {
   totalPoints: number;
   position: number;
   joinedAt: string;
-  inviteCodeUsed: string;
+  phone: string | null;
+  inviteCodeUsed: string | null; // null desde el registro abierto (Sprint 8)
   notificationPrefs: NotificationPrefs;
   visibility: Visibility;
   deletedAt: string | null;

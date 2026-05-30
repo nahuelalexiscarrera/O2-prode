@@ -44,7 +44,7 @@ Estas son **hard rules**. No se ignoran.
 
 7. **Sin ilustraciones decorativas complejas** en mockups (trofeo, sol de mayo). Renderizan pobres. Tipografía editorial hace el trabajo cinematográfico.
 
-8. **Auth invite-only**. Padrón cerrado de socios O2 (~800 personas). Sin registro abierto.
+8. **Auth: registro abierto** (email + teléfono opcional). El flujo *invite-only* original se removió en **Sprint 8** (decisión de Nahuel, 2026-05-29) para construir una base de socios usable. La tabla `invite_code`, sus scripts y `validateInviteAction` se **conservan** por si se reactiva el padrón cerrado — solo se sacó del flujo de registro.
 
 9. **Sin dinero, sin apuestas**. Premios simbólicos definidos por marca aliada. Cero referencias a "apostar", "ganar plata", "casino". Glosario en `docs/13_ux_copy.md` §2.
 

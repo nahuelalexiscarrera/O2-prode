@@ -103,11 +103,14 @@ CREATE TABLE "user" (
   name                 TEXT NOT NULL,
   initials             TEXT NOT NULL,
   avatar_url           TEXT,
+  phone                TEXT,
   level                user_level_t NOT NULL DEFAULT '1',
   total_points         INTEGER NOT NULL DEFAULT 0,
   position             INTEGER NOT NULL DEFAULT 0,
   joined_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  invite_code_used     TEXT NOT NULL REFERENCES invite_code(code),
+  -- Registro abierto (Sprint 8): el invite dejó de ser obligatorio.
+  -- Se conserva el FK para el histórico de quienes sí usaron código.
+  invite_code_used     TEXT REFERENCES invite_code(code),
   notification_prefs   JSONB NOT NULL DEFAULT '{"matchReminders":true,"results":true,"socialReactions":false,"weeklyDigest":true}',
   visibility           visibility_t NOT NULL DEFAULT 'public',
   deleted_at           TIMESTAMPTZ

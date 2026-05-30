@@ -8,7 +8,7 @@
 
 ## 0. Pre-requisitos para arrancar la beta
 
-Antes de mandar el primer invite code, todos estos items deben estar ✅.
+Antes de invitar al primer socio, todos estos items deben estar ✅.
 
 ### Deploy productivo
 - [ ] Repo en GitHub con último build verde
@@ -29,10 +29,14 @@ Antes de mandar el primer invite code, todos estos items deben estar ✅.
 - [ ] Datos del Mundial 2026 seedeados (`tournament`, `team`, `group`, `match`)
 - [ ] `achievement_catalog` poblado con los 19 logros
 
-### Invite codes para la beta
+### Acceso a la beta
 - [ ] Lista definida de 5–10 socios beta (con contacto confirmado)
-- [ ] Códigos `BETA-01` a `BETA-10` insertados en `invite_code` (vía `pnpm seed:invites`, ver §0.5)
+- [ ] Registro abierto verificado: el socio crea su cuenta con email + teléfono (opcional), **sin código**
 - [ ] Mensaje preparado para enviar a cada beta tester (template abajo)
+
+> El flujo *invite-only* se removió en Sprint 8. Si quisieras volver a un acceso
+> cerrado, los códigos siguen disponibles vía `pnpm seed:invites` (la tabla
+> `invite_code` y el script se conservan), pero el registro ya no los pide.
 
 ### Monitoreo mínimo
 - [ ] Acceso a logs de Vercel verificado
@@ -56,10 +60,10 @@ pnpm seed                       # corre scripts/seed.mjs
 # 3) Storage bucket para imágenes de posts
 pnpm seed:storage               # corre scripts/setup-db-extras.mjs
 
-# 4) Invite codes para los beta testers
-cp data/seed/beta-testers.example.json data/seed/beta-testers.json
-# editar beta-testers.json con los datos reales
-pnpm seed:invites               # corre scripts/seed-invites.mjs
+# 4) (OPCIONAL) Invite codes — solo si querés acceso CERRADO.
+#    El registro abierto NO los necesita; se conservan por si se reactiva.
+# cp data/seed/beta-testers.example.json data/seed/beta-testers.json
+# pnpm seed:invites             # corre scripts/seed-invites.mjs
 ```
 
 **Verificación rápida en el SQL Editor de Supabase:**
@@ -68,7 +72,6 @@ SELECT COUNT(*) FROM match WHERE phase = 'groups';   -- 72
 SELECT COUNT(*) FROM team;                            -- 48
 SELECT COUNT(*) FROM groups;                          -- 12
 SELECT COUNT(*) FROM achievement_catalog;             -- 19
-SELECT COUNT(*) FROM invite_code WHERE used = FALSE;  -- = cantidad de beta testers
 ```
 
 > **Importante:** `data/seed/beta-testers.json` está en `.gitignore` — no se commitea
@@ -109,8 +112,7 @@ del Mundial 2026 que estamos armando para los socios del gym.
 Sos 1 de 10 personas que la prueban antes del lanzamiento general.
 
 → Link: https://[dominio-vercel]
-→ Tu código de invitación: BETA-0X
-→ Ingresá con tu email: [email-del-socio]
+→ Creá tu cuenta con tu email (y tu teléfono si querés que te avisemos novedades).
 
 Lo que te pedimos:
 - Probala 2-3 ratos durante la semana.
@@ -138,7 +140,7 @@ Cualquier feedback (lo bueno y lo malo) suma. Gracias por bancar.
 - [ ] ¿La carga de predicción de knockout fue clara?
 - [ ] ¿El muro se sintió "vivo" o vacío?
 - [ ] ¿Algún término / copy generó confusión?
-- [ ] ¿Hubo fricción con login / invite code?
+- [ ] ¿Hubo fricción con login / registro?
 - [ ] ¿Funcionaron las push notifications? ¿Llegaron a tiempo?
 
 ---
@@ -163,7 +165,7 @@ Registrar acá cada item con: `[severity] descripción · reportado por · estad
 
 Durante la beta (semana del **25/05/2026 → 01/06/2026**):
 
-1. **Lunes-martes** — Mandar invites, monitorear primer onboarding.
+1. **Lunes-martes** — Mandar invitaciones, monitorear primer onboarding.
 2. **Miércoles** — Check-in 1:1 rápido con 2–3 beta testers (chat o llamada de 10 min).
 3. **Jueves-viernes** — Parche de bugs P0/P1 → push a `main` → verificar en producción.
 4. **Sábado** — Round-up de feedback, decisión de qué entra al release y qué va a backlog.
