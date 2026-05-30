@@ -283,36 +283,31 @@
     margin-top: var(--space-8);
   }
 
-  /* ─── Auth (login / register) — fondo de marca ───────────── */
+  /* ─── Auth (login / register) ────────────────────────────── */
   .auth-shell {
-    position: relative;
     max-width: 480px;
     margin-inline: auto;
     min-height: 100dvh;
-    overflow: hidden;
     background: var(--color-bg);
-    isolation: isolate;
   }
 
-  /* Imagen 2 (poster O2 PRODE MUNDIAL): guardar en public/login-hero.jpg.
-     Si no está, queda el degradé sobre el fondo base (se ve prolijo igual). */
-  .auth-hero {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    background-color: var(--color-bg);
-    background-image:
-      linear-gradient(
-        to bottom,
-        rgba(11, 11, 13, 0.35) 0%,
-        rgba(11, 11, 13, 0.55) 35%,
-        rgba(11, 11, 13, 0.88) 68%,
-        rgba(11, 11, 13, 0.99) 100%
-      ),
-      url("/login-hero.jpg");
-    background-size: cover;
-    background-position: center top;
-    background-repeat: no-repeat;
+  /* ─── Desktop / tablet: encuadre del frame 480px ──────────────
+     Mobile-first se mantiene (contenido 480px), pero en pantallas
+     grandes el frame se centra con marco + sombra y un fondo sutil,
+     para que no quede una columna "suelta". No es un layout desktop
+     aparte (regla CLAUDE.md §4): es el mismo 480px, mejor encuadrado. */
+  @media (min-width: 481px) {
+    body {
+      background:
+        radial-gradient(125% 70% at 50% -10%, rgba(255, 106, 0, 0.06), transparent 55%),
+        #07070a;
+    }
+    .mobile-container,
+    .auth-shell {
+      background: var(--color-bg);
+      border-inline: 1px solid var(--color-border);
+      box-shadow: 0 0 90px rgba(0, 0, 0, 0.6);
+    }
   }
 }
 

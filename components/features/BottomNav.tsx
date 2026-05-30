@@ -39,7 +39,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Navegación principal"
-      className="fixed bottom-0 left-0 right-0 z-nav glass flex justify-around py-2 pb-[calc(0.875rem+env(safe-area-inset-bottom))]"
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] z-nav glass flex justify-around py-2 pb-[calc(0.875rem+env(safe-area-inset-bottom))]"
     >
       {NAV.map((item) => {
         const active = isActive(item);
