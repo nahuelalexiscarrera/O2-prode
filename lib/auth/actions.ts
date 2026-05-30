@@ -26,13 +26,15 @@ const registerSchema = z
   .object({
     name: z.string().trim().min(2, "Mínimo 2 caracteres").max(80),
     email: z.string().trim().toLowerCase().email("Email inválido"),
-    password: z.string().min(8, "Mínimo 8 caracteres"),
-    passwordConfirm: z.string(),
-    inviteCode: z
+    // Teléfono opcional: si viene, validación liviana (8–30 chars).
+    phone: z
       .string()
       .trim()
-      .toUpperCase()
-      .regex(/^[A-Z0-9-]{3,32}$/, "Código inválido"),
+      .max(30, "Teléfono demasiado largo")
+      .optional()
+      .or(z.literal("")),
+    password: z.string().min(8, "Mínimo 8 caracteres"),
+    passwordConfirm: z.string(),
     acceptTerms: z.literal("on", {
       errorMap: () => ({ message: "Tenés que aceptar los términos." }),
     }),
@@ -139,9 +141,9 @@ export async function signUpAction(
   const parsed = registerSchema.safeParse({
     name: formData.get("name"),
     email: formData.get("email"),
+    phone: formData.get("phone"),
     password: formData.get("password"),
     passwordConfirm: formData.get("passwordConfirm"),
-    inviteCode: formData.get("inviteCode"),
     acceptTerms: formData.get("acceptTerms"),
   });
 
@@ -150,27 +152,15 @@ export async function signUpAction(
     return { ok: false, error: issue?.message ?? "Datos inválidos", field: String(issue?.path?.[0] ?? "") };
   }
 
-  const { name, email, password, inviteCode } = parsed.data;
+  const { name, email, phone, password } = parsed.data;
   const admin = createAdminClient();
+  const normalizedPhone = phone && phone.trim() !== "" ? phone.trim() : null;
 
-  // 1) Re-validar el invite code server-side antes de tocar auth.users
-  const { data: invite, error: inviteErr } = await admin
-    .from("invite_code")
-    .select("code, used, expires_at")
-    .eq("code", inviteCode)
-    .maybeSingle();
-
-  if (inviteErr || !invite) return { ok: false, error: "Código de invitación inválido.", field: "inviteCode" };
-  if (invite.used) return { ok: false, error: "Ese código ya fue usado.", field: "inviteCode" };
-  if (new Date(invite.expires_at) < new Date()) {
-    return { ok: false, error: "Ese código está vencido.", field: "inviteCode" };
-  }
-
-  // 2) Crear la cuenta YA CONFIRMADA. El invite code es la verificación de
-  //    identidad (padrón cerrado de socios O2, CLAUDE.md §3.8), así que no
-  //    exigimos confirmación por email: evita la fricción del mail y la
-  //    dependencia de la Site URL / redirect config de Supabase, que es la
-  //    causa raíz por la que el registro "fallaba" en la beta.
+  // 1) Crear la cuenta YA CONFIRMADA. El registro es abierto (Sprint 8): con
+  //    email + password alcanza. No exigimos confirmación por email para
+  //    evitar la fricción del mail y la dependencia de la Site URL / redirect
+  //    config de Supabase, que era la causa raíz por la que el registro
+  //    "fallaba" en la beta.
   const { data: created, error: createErr } = await admin.auth.admin.createUser({
     email,
     password,
@@ -204,13 +194,13 @@ export async function signUpAction(
 
   const newUserId = created.user.id;
 
-  // 3) Insertar fila en `user` (bypaseando RLS con admin)
+  // 2) Insertar fila en `user` (bypaseando RLS con admin)
   const { error: insertErr } = await admin.from("user").insert({
     id: newUserId,
     email,
     name,
     initials: deriveInitials(name),
-    invite_code_used: inviteCode,
+    phone: normalizedPhone,
   });
 
   if (insertErr) {
@@ -229,17 +219,7 @@ export async function signUpAction(
     };
   }
 
-  // 4) Marcar el invite como usado
-  const { error: updateInviteErr } = await admin
-    .from("invite_code")
-    .update({ used: true, used_by: newUserId })
-    .eq("code", inviteCode);
-
-  if (updateInviteErr) {
-    console.error("[signUpAction] update invite_code falló (no fatal)", updateInviteErr);
-  }
-
-  // 5) Iniciar sesión para setear la cookie y entrar directo a /app.
+  // 3) Iniciar sesión para setear la cookie y entrar directo a /app.
   const supabase = await createClient();
   const { error: signInErr } = await supabase.auth.signInWithPassword({
     email,
