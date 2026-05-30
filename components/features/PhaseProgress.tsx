@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils/cn";
 import type { Phase } from "@/types/domain";
 
