@@ -39,24 +39,13 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col px-6 pt-[calc(2rem+env(safe-area-inset-top))] pb-10">
-      {/* Aire arriba: deja respirar la imagen de marca */}
-      <div className="flex-1 min-h-[24vh]" />
+      {/* La imagen (poster O2) ya trae el logo + "PRODE MUNDIAL". La dejamos
+          respirar arriba y montamos el contenido sobre la parte oscura de abajo. */}
+      <div className="flex-1 min-h-[44vh]" />
 
-      {/* Título editorial */}
-      <header className="mb-6">
-        <h1 className="font-display uppercase leading-[0.85] text-text">
-          <span className="block text-[1.75rem] tracking-[0.10em]">Prode</span>
-          <span className="block text-[3.5rem] tracking-[0.01em] text-primary">Mundial</span>
-        </h1>
-        <div className="mt-2 flex items-center gap-2">
-          <span className="font-display text-heading-md text-text">O2</span>
-          <span className="h-4 w-px bg-border-strong" />
-          <span className="text-body-sm text-text-muted">Wellness Club</span>
-        </div>
-        <p className="mt-4 text-body-md text-text-secondary text-balance">
-          Cada partido suma. Cada acierto te acerca al podio.
-        </p>
-      </header>
+      <p className="mb-6 text-body-md text-text-secondary text-balance [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
+        Cada partido suma. Cada acierto te acerca al podio.
+      </p>
 
       <Suspense fallback={null}>
         <ConfirmBanner />
