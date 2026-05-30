@@ -301,6 +301,28 @@ ALTER TABLE notification        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE push_subscription   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE share_intent        ENABLE ROW LEVEL SECURITY;
 
+-- Reference/tournament tables: datos PÚBLICOS del torneo. RLS activada con
+-- lectura abierta (USING true) — si se activa RLS sin policy, los socios reciben
+-- 0 filas (home sin "próximo partido", /prode sin partidos). Ver migración
+-- 20260530_reference_tables_rls.sql.
+ALTER TABLE tournament          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE groups              ENABLE ROW LEVEL SECURITY;
+ALTER TABLE team                ENABLE ROW LEVEL SECURITY;
+ALTER TABLE player              ENABLE ROW LEVEL SECURITY;
+ALTER TABLE match               ENABLE ROW LEVEL SECURITY;
+ALTER TABLE match_result        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE achievement_catalog ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ranking_snapshot    ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Lectura pública torneo"     ON tournament          FOR SELECT USING (true);
+CREATE POLICY "Lectura pública grupos"     ON groups              FOR SELECT USING (true);
+CREATE POLICY "Lectura pública equipos"    ON team                FOR SELECT USING (true);
+CREATE POLICY "Lectura pública jugadores"  ON player              FOR SELECT USING (true);
+CREATE POLICY "Lectura pública partidos"   ON match               FOR SELECT USING (true);
+CREATE POLICY "Lectura pública resultados" ON match_result        FOR SELECT USING (true);
+CREATE POLICY "Lectura pública logros"     ON achievement_catalog FOR SELECT USING (true);
+CREATE POLICY "Socios leen ranking"        ON ranking_snapshot    FOR SELECT USING (auth.role() = 'authenticated');
+
 -- Common pattern: authenticated socios SELECT all, INSERT/UPDATE/DELETE own only
 CREATE POLICY "Socios pueden leer todos los users públicos"
   ON "user" FOR SELECT
