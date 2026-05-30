@@ -24,7 +24,7 @@ export default function RegisterPage() {
   const errorField = state && !state.ok ? state.field : undefined;
 
   return (
-    <div className="min-h-screen flex flex-col px-6 py-10 bg-[rgba(11,11,13,0.62)]">
+    <div className="min-h-screen flex flex-col px-6 py-10">
       <header className="mb-8">
         <Link
           href="/login"
