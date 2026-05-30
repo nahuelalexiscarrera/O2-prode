@@ -166,45 +166,43 @@ export async function signUpAction(
     return { ok: false, error: "Ese código está vencido.", field: "inviteCode" };
   }
 
-  // 2) Crear la cuenta en auth.users (vía server client así setea cookie)
-  const supabase = await createClient();
-  const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({
+  // 2) Crear la cuenta YA CONFIRMADA. El invite code es la verificación de
+  //    identidad (padrón cerrado de socios O2, CLAUDE.md §3.8), así que no
+  //    exigimos confirmación por email: evita la fricción del mail y la
+  //    dependencia de la Site URL / redirect config de Supabase, que es la
+  //    causa raíz por la que el registro "fallaba" en la beta.
+  const { data: created, error: createErr } = await admin.auth.admin.createUser({
     email,
     password,
+    email_confirm: true,
+    user_metadata: { name },
   });
 
-  if (signUpErr) {
-    console.error("[signUpAction] supabase.auth.signUp falló", {
-      code: signUpErr.code,
-      status: signUpErr.status,
-      message: signUpErr.message,
+  if (createErr) {
+    console.error("[signUpAction] admin.createUser falló", {
+      code: createErr.code,
+      status: createErr.status,
+      message: createErr.message,
     });
-    const msg = signUpErr.message.toLowerCase();
-    if (msg.includes("already") || msg.includes("registered")) {
+    const msg = createErr.message.toLowerCase();
+    if (msg.includes("already") || msg.includes("registered") || msg.includes("exists")) {
       return { ok: false, error: "Ese email ya tiene una cuenta.", field: "email" };
     }
     if (msg.includes("password")) {
-      return { ok: false, error: signUpErr.message, field: "password" };
+      return { ok: false, error: createErr.message, field: "password" };
     }
     if (msg.includes("rate") || msg.includes("limit")) {
       return { ok: false, error: "Demasiados intentos. Esperá un momento y probá de nuevo." };
     }
-    return { ok: false, error: `Auth error: ${signUpErr.message}` };
+    return { ok: false, error: `Auth error: ${createErr.message}` };
   }
 
-  // Supabase obfusca emails duplicados devolviendo user con identities vacío.
-  if (signUpData.user && (signUpData.user.identities?.length ?? 0) === 0) {
-    console.warn("[signUpAction] email duplicado (identities vacío)", { email });
-    return { ok: false, error: "Ese email ya tiene una cuenta.", field: "email" };
-  }
-
-  if (!signUpData.user) {
-    console.error("[signUpAction] signUp ok pero sin user", { signUpData });
+  if (!created.user) {
+    console.error("[signUpAction] createUser ok pero sin user", { created });
     return { ok: false, error: "No pudimos crear la cuenta (sin user devuelto)." };
   }
 
-  const newUserId = signUpData.user.id;
-  const needsEmailConfirm = !signUpData.session;
+  const newUserId = created.user.id;
 
   // 3) Insertar fila en `user` (bypaseando RLS con admin)
   const { error: insertErr } = await admin.from("user").insert({
@@ -241,9 +239,19 @@ export async function signUpAction(
     console.error("[signUpAction] update invite_code falló (no fatal)", updateInviteErr);
   }
 
-  // Si Supabase tiene email confirmation activado, no hay session todavía.
-  if (needsEmailConfirm) {
-    redirect("/login?confirm=1");
+  // 5) Iniciar sesión para setear la cookie y entrar directo a /app.
+  const supabase = await createClient();
+  const { error: signInErr } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (signInErr) {
+    // La cuenta quedó creada y confirmada; que entre manualmente desde /login.
+    console.error("[signUpAction] auto sign-in falló tras crear cuenta", {
+      message: signInErr.message,
+    });
+    redirect("/login");
   }
 
   redirect("/app");
