@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ScoreInput, type ScoreStatus } from "@/components/ui/ScoreInput";
 import { Flag } from "@/components/ui/Flag";
+import { teamShortCode } from "@/lib/i18n/team-codes";
 import { Tag } from "@/components/ui/Tag";
 import { Icon } from "@/components/ui/Icon";
 import { Countdown } from "@/components/features/Countdown";
@@ -148,8 +149,8 @@ export function MatchCard({
         <ScoreInput
           homeValue={displayHome}
           awayValue={displayAway}
-          homeLabel={homeTeamName}
-          awayLabel={awayTeamName}
+          homeLabel={teamShortCode(homeCode)}
+          awayLabel={teamShortCode(awayCode)}
           status={scoreStatus}
           onHomeChange={setHomeValue}
           onAwayChange={setAwayValue}

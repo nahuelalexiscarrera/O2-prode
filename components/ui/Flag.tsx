@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils/cn";
+import { teamShortCode } from "@/lib/i18n/team-codes";
 
 export type FlagSize = "sm" | "md" | "lg";
 
@@ -15,8 +16,35 @@ const sizeMap: Record<FlagSize, { w: number; h: number }> = {
   lg: { w: 48, h: 32 },
 };
 
+// Banderas presentes en design/icons.svg. Cualquier otra cae a un chip con el
+// código FIFA (placeholder prolijo) en vez de un SVG roto/vacío.
+const AVAILABLE_FLAGS = new Set([
+  "ar", "br", "de", "ec", "fr", "gb", "hr", "ir", "jp", "ma", "mx", "nl", "qa", "sn",
+]);
+
 export function Flag({ code, size = "md", alt, className }: FlagProps) {
   const { w, h } = sizeMap[size];
+  const lc = code.toLowerCase();
+
+  // Fallback prolijo cuando la bandera no está en el sprite.
+  if (!AVAILABLE_FLAGS.has(lc)) {
+    return (
+      <span
+        role={alt ? "img" : undefined}
+        aria-label={alt ?? undefined}
+        aria-hidden={alt ? undefined : true}
+        style={{ width: w, height: h }}
+        className={cn(
+          "inline-flex items-center justify-center flex-shrink-0 rounded-[3px]",
+          "bg-elevated border border-border text-text-secondary font-bold leading-none",
+          size === "lg" ? "text-[11px]" : size === "md" ? "text-[9px]" : "text-[7px]",
+          className
+        )}
+      >
+        {teamShortCode(lc)}
+      </span>
+    );
+  }
 
   return (
     <svg
@@ -28,7 +56,7 @@ export function Flag({ code, size = "md", alt, className }: FlagProps) {
       role={alt ? "img" : undefined}
       focusable="false"
     >
-      <use href={`/design/icons.svg#flag-${code}`} />
+      <use href={`/design/icons.svg#flag-${lc}`} />
     </svg>
   );
 }
