@@ -3,11 +3,15 @@
 import { useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, useAnimation } from "framer-motion";
 import { Avatar } from "@/components/ui/Avatar";
 import { Icon } from "@/components/ui/Icon";
+import { IconButton } from "@/components/ui/IconButton";
+import { Button } from "@/components/ui/Button";
+import { BottomSheet } from "@/components/ui/Modal";
 import { useToast } from "@/components/ui/Toast";
-import { toggleReaction } from "@/lib/social/actions";
+import { toggleReaction, deletePost } from "@/lib/social/actions";
 import { heartPop } from "@/lib/motion/variants";
 import { cn } from "@/lib/utils/cn";
 import type { UserLevel } from "@/types/domain";
@@ -29,6 +33,9 @@ interface PostCardFullProps {
   myUserId: string;
   timeAgo: string;
   isDetailView?: boolean;
+  isAdmin?: boolean;
+  /** Feed: quitar la card de la lista tras borrarla. */
+  onDeleted?: () => void;
 }
 
 export function PostCardFull({
@@ -48,15 +55,36 @@ export function PostCardFull({
   myUserId,
   timeAgo,
   isDetailView,
+  isAdmin = false,
+  onDeleted,
 }: PostCardFullProps) {
   const [reacted, setReacted] = useState(initialReacted);
   const [count, setCount] = useState(initialReactionCount);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const pendingRef = useRef(false);
   const heartControls = useAnimation();
+  const router = useRouter();
   const { toast } = useToast();
 
   const isOwn = authorId === myUserId;
+  const canModerate = isOwn || isAdmin;
   const profileHref = isOwn ? "/app/perfil" : `/app/perfil/${authorId}`;
+
+  async function handleDelete() {
+    if (deleting) return;
+    setDeleting(true);
+    try {
+      await deletePost(postId);
+      setMenuOpen(false);
+      toast({ variant: "success", message: "Publicación eliminada" });
+      if (isDetailView) router.push("/app/muro");
+      else onDeleted?.();
+    } catch {
+      toast({ variant: "error", message: "No se pudo eliminar la publicación" });
+      setDeleting(false);
+    }
+  }
 
   async function handleToggleReaction() {
     if (pendingRef.current) return;
@@ -84,6 +112,7 @@ export function PostCardFull({
       : null;
 
   return (
+    <>
     <article className="bg-card rounded-xl border border-border overflow-hidden">
       {/* Author row */}
       <div className="flex items-center gap-3 px-4 pt-4 pb-3">
@@ -106,6 +135,16 @@ export function PostCardFull({
           </Link>
           <p className="text-[10px] text-text-secondary">{timeAgo}</p>
         </div>
+
+        {canModerate && (
+          <IconButton
+            icon="more"
+            label="Opciones de la publicación"
+            size="sm"
+            variant="ghost"
+            onClick={() => setMenuOpen(true)}
+          />
+        )}
       </div>
 
       {/* Body */}
@@ -174,5 +213,28 @@ export function PostCardFull({
         )}
       </div>
     </article>
+
+    <BottomSheet open={menuOpen} onClose={() => setMenuOpen(false)} title="Publicación">
+      <div className="flex flex-col gap-3 px-4 pt-2 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
+        <p className="text-body-sm text-text-muted">
+          {isOwn
+            ? "¿Querés eliminar tu publicación? No se puede deshacer."
+            : "Moderación: esta publicación se eliminará para todos."}
+        </p>
+        <Button
+          variant="danger"
+          fullWidth
+          loading={deleting}
+          onClick={handleDelete}
+          leftIcon="x-mark"
+        >
+          Eliminar publicación
+        </Button>
+        <Button variant="ghost" fullWidth onClick={() => setMenuOpen(false)}>
+          Cancelar
+        </Button>
+      </div>
+    </BottomSheet>
+    </>
   );
 }

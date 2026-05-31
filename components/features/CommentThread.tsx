@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Icon } from "@/components/ui/Icon";
+import { IconButton } from "@/components/ui/IconButton";
 import { Button } from "@/components/ui/Button";
+import { BottomSheet } from "@/components/ui/Modal";
 import { useToast } from "@/components/ui/Toast";
-import { createComment, toggleReaction } from "@/lib/social/actions";
+import { createComment, toggleReaction, deleteComment } from "@/lib/social/actions";
 import { AchievementModal, type UnlockedAchievement } from "@/components/features/AchievementModal";
 import { timeAgo as formatTimeAgo } from "@/lib/social/feed";
 import { usePostCommentsStream } from "@/lib/social/realtime";
@@ -18,6 +20,7 @@ interface CommentThreadProps {
   initialComments: DbComment[];
   commentReactedIds: string[];
   myUserId: string;
+  isAdmin?: boolean;
 }
 
 export function CommentThread({
@@ -25,14 +28,32 @@ export function CommentThread({
   initialComments,
   commentReactedIds,
   myUserId,
+  isAdmin = false,
 }: CommentThreadProps) {
   const { comments, setComments } = usePostCommentsStream(postId, initialComments);
   const [reactedIds, setReactedIds] = useState(new Set(commentReactedIds));
   const [body, setBody] = useState("");
   const [posting, setPosting] = useState(false);
+  const [menuFor, setMenuFor] = useState<string | null>(null);
   const [achievements, setAchievements] = useState<UnlockedAchievement[]>([]);
   const { toast } = useToast();
   const now = new Date();
+
+  async function handleDelete(commentId: string) {
+    const removed = comments.find((c) => c.id === commentId);
+    setMenuFor(null);
+    setComments((prev) => prev.filter((c) => c.id !== commentId));
+    try {
+      await deleteComment(commentId);
+    } catch {
+      if (removed) {
+        setComments((prev) =>
+          [...prev, removed].sort((a, b) => a.created_at.localeCompare(b.created_at))
+        );
+      }
+      toast({ variant: "error", message: "No se pudo eliminar el comentario" });
+    }
+  }
 
   async function handleToggleReaction(commentId: string) {
     const wasReacted = reactedIds.has(commentId);
@@ -156,6 +177,15 @@ export function CommentThread({
                     <span>{comment.reaction_count}</span>
                   </button>
                 </div>
+                {(comment.user_id === myUserId || isAdmin) && (
+                  <IconButton
+                    icon="more"
+                    label="Opciones del comentario"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setMenuFor(comment.id)}
+                  />
+                )}
               </div>
             );
           })}
@@ -197,6 +227,22 @@ export function CommentThread({
         </div>
       </div>
     </div>
+
+    <BottomSheet open={menuFor !== null} onClose={() => setMenuFor(null)} title="Comentario">
+      <div className="flex flex-col gap-3 px-4 pt-2 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
+        <Button
+          variant="danger"
+          fullWidth
+          leftIcon="x-mark"
+          onClick={() => menuFor && handleDelete(menuFor)}
+        >
+          Eliminar comentario
+        </Button>
+        <Button variant="ghost" fullWidth onClick={() => setMenuFor(null)}>
+          Cancelar
+        </Button>
+      </div>
+    </BottomSheet>
     </>
   );
 }

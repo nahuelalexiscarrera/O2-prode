@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getFeedRecientes, getFeedDestacados, getMyReactionsForPosts } from "@/lib/social/queries";
-import { getMyProfile } from "@/lib/users/queries";
+import { getMyProfile, getIsAdmin } from "@/lib/users/queries";
 import { ScreenHeader } from "@/components/features/ScreenHeader";
 import { WallFeed } from "@/components/features/WallFeed";
 import type { AuthorRow, FeedPost } from "@/lib/social/types";
@@ -21,11 +21,12 @@ export default async function MuroPage({ searchParams }: Props) {
   const activeTab: "recientes" | "destacados" =
     tabParam === "destacados" ? "destacados" : "recientes";
 
-  const [rawPosts, profile] = await Promise.all([
+  const [rawPosts, profile, isAdmin] = await Promise.all([
     activeTab === "destacados"
       ? getFeedDestacados(30)
       : getFeedRecientes({ limit: 30 }),
     getMyProfile(),
+    getIsAdmin(),
   ]);
 
   const postIds = rawPosts.map((p) => p.id);
@@ -58,6 +59,7 @@ export default async function MuroPage({ searchParams }: Props) {
         myAvatarUrl={profile?.avatar_url ?? null}
         myLevel={Number(profile?.level ?? 1) as UserLevel}
         activeTab={activeTab}
+        isAdmin={isAdmin}
       />
     </div>
   );

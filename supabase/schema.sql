@@ -113,6 +113,7 @@ CREATE TABLE "user" (
   invite_code_used     TEXT REFERENCES invite_code(code),
   notification_prefs   JSONB NOT NULL DEFAULT '{"matchReminders":true,"results":true,"socialReactions":false,"weeklyDigest":true}',
   visibility           visibility_t NOT NULL DEFAULT 'public',
+  is_admin             BOOLEAN NOT NULL DEFAULT false,  -- superusuario: modera muro, sube fotos de premios
   deleted_at           TIMESTAMPTZ
 );
 
@@ -314,6 +315,14 @@ ALTER TABLE match_result        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE achievement_catalog ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ranking_snapshot    ENABLE ROW LEVEL SECURITY;
 
+-- Helper de moderación: ¿el usuario actual es admin? SECURITY DEFINER para poder
+-- leer "user" sin chocar con sus propias RLS. Definido antes de las policies que
+-- lo usan (post / comment / storage).
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN LANGUAGE sql SECURITY DEFINER STABLE SET search_path = public AS $$
+  SELECT COALESCE((SELECT u.is_admin FROM "user" u WHERE u.id = auth.uid()), false);
+$$;
+
 CREATE POLICY "Lectura pública torneo"     ON tournament          FOR SELECT USING (true);
 CREATE POLICY "Lectura pública grupos"     ON groups              FOR SELECT USING (true);
 CREATE POLICY "Lectura pública equipos"    ON team                FOR SELECT USING (true);
@@ -361,9 +370,9 @@ CREATE POLICY "User crea sus posts"
   ON post FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "User borra sus posts (soft)"
+CREATE POLICY "Borra post: dueño o admin"
   ON post FOR UPDATE
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = user_id OR public.is_admin());
 
 CREATE POLICY "Socios leen comentarios"
   ON comment FOR SELECT
@@ -372,6 +381,10 @@ CREATE POLICY "Socios leen comentarios"
 CREATE POLICY "User crea comentarios"
   ON comment FOR INSERT
   WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Borra comentario: dueño o admin"
+  ON comment FOR UPDATE
+  USING (auth.uid() = user_id OR public.is_admin());
 
 CREATE POLICY "Socios ven todas las reacciones"
   ON reaction FOR SELECT

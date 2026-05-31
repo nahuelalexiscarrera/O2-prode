@@ -64,6 +64,27 @@ export async function getMyProfile(): Promise<UserProfile | null> {
   return data as UserProfile;
 }
 
+/** ¿El usuario actual es admin/superusuario? Falla a `false` (ej. si la columna
+ *  is_admin todavía no existe en la DB), así nunca rompe el render. */
+export async function getIsAdmin(): Promise<boolean> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return false;
+    const { data, error } = await supabase
+      .from("user")
+      .select("is_admin")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (error) return false;
+    return Boolean((data as { is_admin?: boolean } | null)?.is_admin);
+  } catch {
+    return false;
+  }
+}
+
 /** Perfil público de otro socio (para ver desde el muro / ranking). */
 export async function getUserProfileById(userId: string): Promise<UserProfile | null> {
   const supabase = await createClient();
