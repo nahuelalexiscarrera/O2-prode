@@ -135,10 +135,10 @@ export function MatchCard({
         )}
       </div>
 
-      {/* Teams + score */}
-      <div className="flex items-center justify-between gap-4">
+      {/* Teams + score — grid de 3 columnas: equipo · marcador · equipo */}
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
         {/* Home team */}
-        <div className="flex flex-col items-center gap-1.5 w-[72px]">
+        <div className="flex flex-col items-center gap-1.5 min-w-0">
           <Flag code={homeCode} size="md" />
           <span className="text-body-xs text-text text-center font-semibold leading-tight line-clamp-2">
             {homeTeamName}
@@ -161,7 +161,7 @@ export function MatchCard({
         />
 
         {/* Away team */}
-        <div className="flex flex-col items-center gap-1.5 w-[72px]">
+        <div className="flex flex-col items-center gap-1.5 min-w-0">
           <Flag code={awayCode} size="md" />
           <span className="text-body-xs text-text text-center font-semibold leading-tight line-clamp-2">
             {awayTeamName}
