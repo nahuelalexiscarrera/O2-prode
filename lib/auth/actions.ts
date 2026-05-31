@@ -14,6 +14,12 @@ import { z } from "zod";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { deriveInitials } from "@/lib/auth/initials";
+
+/** URL pública del sitio (para el redirect del mail de confirmación). */
+function siteUrl(): string {
+  return process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
+}
 
 // ─── Schemas ──────────────────────────────────────────────────────────
 
@@ -54,19 +60,6 @@ const validateInviteSchema = z.object({
 
 // ─── Helpers ──────────────────────────────────────────────────────────
 
-/** "Juan Pérez" → "JP", "Maria" → "MA", "Ana Maria Lopez" → "AL" */
-function deriveInitials(fullName: string): string {
-  const parts = fullName
-    .trim()
-    .split(/\s+/)
-    .filter((p) => p.length > 0);
-  if (parts.length === 0) return "??";
-  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
-  const first = parts[0]!.charAt(0);
-  const last = parts[parts.length - 1]!.charAt(0);
-  return (first + last).toUpperCase();
-}
-
 export type ActionResult<T = undefined> =
   | { ok: true; data?: T }
   | { ok: false; error: string; field?: string };
@@ -94,6 +87,14 @@ export async function signInAction(
   });
 
   if (error) {
+    const msg = error.message.toLowerCase();
+    if (error.code === "email_not_confirmed" || msg.includes("not confirmed") || msg.includes("confirm")) {
+      return {
+        ok: false,
+        error: "Confirmá tu email antes de entrar. Revisá tu bandeja (y la carpeta de spam).",
+        field: "email",
+      };
+    }
     // Mensaje neutro para no filtrar si el email existe o no.
     return { ok: false, error: "Email o contraseña incorrectos." };
   }
@@ -137,7 +138,7 @@ export async function validateInviteAction(
 export async function signUpAction(
   _prev: unknown,
   formData: FormData
-): Promise<ActionResult> {
+): Promise<ActionResult<{ email: string }>> {
   const parsed = registerSchema.safeParse({
     name: formData.get("name"),
     email: formData.get("email"),
@@ -153,88 +154,91 @@ export async function signUpAction(
   }
 
   const { name, email, phone, password } = parsed.data;
-  const admin = createAdminClient();
   const normalizedPhone = phone && phone.trim() !== "" ? phone.trim() : null;
 
-  // 1) Crear la cuenta YA CONFIRMADA. El registro es abierto (Sprint 8): con
-  //    email + password alcanza. No exigimos confirmación por email para
-  //    evitar la fricción del mail y la dependencia de la Site URL / redirect
-  //    config de Supabase, que era la causa raíz por la que el registro
-  //    "fallaba" en la beta.
-  const { data: created, error: createErr } = await admin.auth.admin.createUser({
+  // Registro con CONFIRMACIÓN por email (anti-spam). signUp crea la cuenta SIN
+  // confirmar y dispara el mail de verificación; la fila en `user` se crea recién
+  // al confirmar (en /auth/confirm). Guardamos name/phone en user_metadata para
+  // ese momento. NO auto-logueamos: el socio entra después de confirmar.
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    email_confirm: true,
-    user_metadata: { name },
+    options: {
+      emailRedirectTo: `${siteUrl()}/auth/confirm`,
+      data: { name, phone: normalizedPhone },
+    },
   });
 
-  if (createErr) {
-    console.error("[signUpAction] admin.createUser falló", {
-      code: createErr.code,
-      status: createErr.status,
-      message: createErr.message,
-    });
-    const msg = createErr.message.toLowerCase();
-    if (msg.includes("already") || msg.includes("registered") || msg.includes("exists")) {
+  if (error) {
+    const msg = error.message.toLowerCase();
+    if (msg.includes("already") || msg.includes("registered")) {
       return { ok: false, error: "Ese email ya tiene una cuenta.", field: "email" };
     }
+    if (error.status === 429 || msg.includes("rate") || msg.includes("limit")) {
+      return { ok: false, error: "Demasiados intentos. Esperá unos minutos y probá de nuevo." };
+    }
     if (msg.includes("password")) {
-      return { ok: false, error: createErr.message, field: "password" };
+      return { ok: false, error: error.message, field: "password" };
     }
-    if (msg.includes("rate") || msg.includes("limit")) {
-      return { ok: false, error: "Demasiados intentos. Esperá un momento y probá de nuevo." };
+    return { ok: false, error: "No pudimos crear la cuenta. Probá de nuevo." };
+  }
+
+  // Supabase ofusca el "email ya registrado": devuelve un user con identities []
+  // (para no filtrar qué emails existen). Lo tratamos como cuenta existente.
+  if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+    return { ok: false, error: "Ese email ya tiene una cuenta.", field: "email" };
+  }
+
+  // Si la confirmación de email NO está activada en Supabase, signUp ya devuelve
+  // sesión (cuenta auto-confirmada): creamos la fila y entramos directo. Si SÍ
+  // está activada, no hay sesión → mostramos la pantalla "revisá tu email".
+  if (data.session && data.user) {
+    const admin = createAdminClient();
+    const { data: existing } = await admin
+      .from("user")
+      .select("id")
+      .eq("id", data.user.id)
+      .maybeSingle();
+    if (!existing) {
+      await admin.from("user").insert({
+        id: data.user.id,
+        email,
+        name,
+        initials: deriveInitials(name),
+        phone: normalizedPhone,
+      });
     }
-    return { ok: false, error: `Auth error: ${createErr.message}` };
+    redirect("/app");
   }
 
-  if (!created.user) {
-    console.error("[signUpAction] createUser ok pero sin user", { created });
-    return { ok: false, error: "No pudimos crear la cuenta (sin user devuelto)." };
-  }
+  return { ok: true, data: { email } };
+}
 
-  const newUserId = created.user.id;
+// ─── Reenviar email de confirmación ───────────────────────────────────
 
-  // 2) Insertar fila en `user` (bypaseando RLS con admin)
-  const { error: insertErr } = await admin.from("user").insert({
-    id: newUserId,
-    email,
-    name,
-    initials: deriveInitials(name),
-    phone: normalizedPhone,
-  });
+const resendSchema = z.object({
+  email: z.string().trim().toLowerCase().email("Email inválido"),
+});
 
-  if (insertErr) {
-    console.error("[signUpAction] insert en table user falló", {
-      code: insertErr.code,
-      message: insertErr.message,
-      details: insertErr.details,
-      hint: insertErr.hint,
-    });
-    // Rollback de la cuenta de auth si falla el insert
-    await admin.auth.admin.deleteUser(newUserId);
-    // Surface el código de Postgres para diagnosticar
-    return {
-      ok: false,
-      error: `No pudimos completar el registro. (DB ${insertErr.code ?? "?"}: ${insertErr.message})`,
-    };
-  }
+export async function resendConfirmationAction(
+  _prev: unknown,
+  formData: FormData
+): Promise<ActionResult> {
+  const parsed = resendSchema.safeParse({ email: formData.get("email") });
+  if (!parsed.success) return { ok: false, error: "Email inválido" };
 
-  // 3) Iniciar sesión para setear la cookie y entrar directo a /app.
   const supabase = await createClient();
-  const { error: signInErr } = await supabase.auth.signInWithPassword({
-    email,
-    password,
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email: parsed.data.email,
+    options: { emailRedirectTo: `${siteUrl()}/auth/confirm` },
   });
 
-  if (signInErr) {
-    // La cuenta quedó creada y confirmada; que entre manualmente desde /login.
-    console.error("[signUpAction] auto sign-in falló tras crear cuenta", {
-      message: signInErr.message,
-    });
-    redirect("/login");
+  if (error) {
+    return { ok: false, error: "No pudimos reenviar el mail. Esperá unos minutos." };
   }
-
-  redirect("/app");
+  return { ok: true };
 }
 
 // ─── Sign out ─────────────────────────────────────────────────────────

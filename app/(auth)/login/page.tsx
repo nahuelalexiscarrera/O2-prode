@@ -13,7 +13,22 @@ import { Icon } from "@/components/ui/Icon";
 
 function ConfirmBanner() {
   const searchParams = useSearchParams();
-  if (searchParams.get("confirm") !== "1") return null;
+  const confirmed = searchParams.get("confirm") === "1";
+  const errorConfirm = searchParams.get("error") === "confirm";
+  if (!confirmed && !errorConfirm) return null;
+
+  if (errorConfirm) {
+    return (
+      <div className="mb-6 rounded-md bg-surface border border-error/30 px-4 py-3 flex items-start gap-3">
+        <Icon name="info" size={18} className="text-error mt-0.5" />
+        <p className="text-body-sm text-text">
+          El link de confirmación venció o ya se usó. Si ya confirmaste, entrá con tu contraseña; si
+          no, registrate de nuevo para recibir uno nuevo.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="mb-6 rounded-md bg-surface border border-info/30 px-4 py-3 flex items-start gap-3">
       <Icon name="info" size={18} className="text-info mt-0.5" />

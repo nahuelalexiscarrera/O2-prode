@@ -3,7 +3,11 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
-import { signUpAction, type ActionResult } from "@/lib/auth/actions";
+import {
+  signUpAction,
+  resendConfirmationAction,
+  type ActionResult,
+} from "@/lib/auth/actions";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
@@ -18,10 +22,78 @@ function SubmitButton() {
   );
 }
 
+function ResendButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" variant="secondary" size="md" fullWidth loading={pending}>
+      Reenviar email
+    </Button>
+  );
+}
+
+/** Pantalla post-registro: la cuenta se creó pero falta confirmar el email. */
+function ConfirmSentScreen({ email }: { email: string }) {
+  const [resendState, resendAction] = useFormState<ActionResult | null, FormData>(
+    resendConfirmationAction,
+    null
+  );
+
+  return (
+    <div className="min-h-screen flex flex-col px-6 py-10">
+      <div className="flex-1 flex flex-col items-center justify-center text-center max-w-sm mx-auto">
+        <div
+          className="flex items-center justify-center w-20 h-20 rounded-full mb-6"
+          style={{ background: "rgba(217,255,63,0.12)", border: "1px solid rgba(217,255,63,0.4)" }}
+        >
+          <Icon name="check" size={36} className="text-primary" />
+        </div>
+
+        <h1 className="font-display text-display-md leading-tight text-text">Revisá tu email</h1>
+        <p className="mt-4 text-body-md text-text-muted">
+          Te enviamos un link de confirmación a{" "}
+          <span className="text-text font-semibold break-all">{email}</span>. Abrilo para activar
+          tu cuenta y entrar a jugar.
+        </p>
+        <p className="mt-3 text-body-sm text-text-disabled">
+          ¿No te llegó? Fijate en la carpeta de spam, o reenvialo.
+        </p>
+
+        <form action={resendAction} className="w-full mt-8">
+          <input type="hidden" name="email" value={email} />
+          <ResendButton />
+        </form>
+
+        {resendState?.ok && (
+          <p role="status" className="mt-3 text-body-sm text-primary">
+            Listo, te reenviamos el email.
+          </p>
+        )}
+        {resendState && !resendState.ok && (
+          <p role="alert" className="mt-3 text-body-sm text-error">
+            {resendState.error}
+          </p>
+        )}
+
+        <Link href="/login" className="mt-8 text-body-sm text-primary font-semibold hover:underline">
+          Volver al inicio de sesión
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [state, formAction] = useFormState<ActionResult | null, FormData>(signUpAction, null);
+  const [state, formAction] = useFormState<ActionResult<{ email: string }> | null, FormData>(
+    signUpAction,
+    null
+  );
   const errorField = state && !state.ok ? state.field : undefined;
+
+  // Registro OK → falta confirmar el email.
+  if (state?.ok && state.data?.email) {
+    return <ConfirmSentScreen email={state.data.email} />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col px-6 py-10">
@@ -58,6 +130,7 @@ export default function RegisterPage() {
           autoComplete="email"
           required
           state={errorField === "email" ? "error" : "default"}
+          helper="Te vamos a mandar un link para confirmarlo."
         />
 
         <Input
