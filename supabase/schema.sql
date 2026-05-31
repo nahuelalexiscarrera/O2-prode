@@ -529,8 +529,10 @@ CREATE TRIGGER trg_match_status_change
   FOR EACH ROW EXECUTE FUNCTION trg_match_finished();
 
 -- Trigger: mantener post.reaction_count y comment_count consistentes
+-- SECURITY DEFINER: el conteo updatea post/comment aunque quien reacciona no sea
+-- el dueño (si no, la RLS de post/comment bloquea el UPDATE y el contador no sube).
 CREATE OR REPLACE FUNCTION trg_reaction_count()
-RETURNS TRIGGER LANGUAGE plpgsql AS $$
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 BEGIN
   IF TG_OP = 'INSERT' THEN
     IF NEW.target_type = 'post' THEN
