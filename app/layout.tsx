@@ -7,7 +7,7 @@
  */
 
 import type { Metadata, Viewport } from "next";
-import { Anton, Inter } from "next/font/google";
+import { Anton, Hanken_Grotesk } from "next/font/google";
 import "./styles/globals.css";
 import { ToastProvider } from "@/components/ui/Toast";
 
@@ -18,10 +18,10 @@ const anton = Anton({
   display: "swap",
 });
 
-const inter = Inter({
+const hanken = Hanken_Grotesk({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-inter",
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-hanken",
   display: "swap",
 });
 
@@ -75,7 +75,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es-AR" className={`${anton.variable} ${inter.variable}`}>
+    <html lang="es-AR" className={`${anton.variable} ${hanken.variable}`}>
       <body>
         {/* Icon sprite (inlined for offline / instant access) */}
         <svg aria-hidden="true" style={{ position: "absolute", width: 0, height: 0 }}>

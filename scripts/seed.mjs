@@ -88,67 +88,69 @@ async function seedGroups() {
 
 // ─── Teams ────────────────────────────────────────────────────────────
 
+// Mundial 2026 — sorteo final (5 dic 2025) con repechajes resueltos (mar 2026).
+// code = ISO del archivo de bandera en /public/flags. Orden = posición de sorteo.
 const TEAMS = [
   // Grupo A
-  { code: "mx", name: "México",          group_id: "A" },
-  { code: "ar", name: "Argentina",       group_id: "A" },
-  { code: "jp", name: "Japón",           group_id: "A" },
-  { code: "qa", name: "Qatar",           group_id: "A" },
+  { code: "mx",     name: "México",          group_id: "A" },
+  { code: "za",     name: "Sudáfrica",       group_id: "A" },
+  { code: "kr",     name: "Corea del Sur",   group_id: "A" },
+  { code: "cz",     name: "Rep. Checa",      group_id: "A" },
   // Grupo B
-  { code: "us", name: "Estados Unidos",  group_id: "B" },
-  { code: "br", name: "Brasil",          group_id: "B" },
-  { code: "kr", name: "Corea del Sur",   group_id: "B" },
-  { code: "ec", name: "Ecuador",         group_id: "B" },
+  { code: "ca",     name: "Canadá",          group_id: "B" },
+  { code: "ba",     name: "Bosnia",          group_id: "B" },
+  { code: "qa",     name: "Qatar",           group_id: "B" },
+  { code: "ch",     name: "Suiza",           group_id: "B" },
   // Grupo C
-  { code: "ca", name: "Canadá",          group_id: "C" },
-  { code: "fr", name: "Francia",         group_id: "C" },
-  { code: "ng", name: "Nigeria",         group_id: "C" },
-  { code: "uy", name: "Uruguay",         group_id: "C" },
+  { code: "br",     name: "Brasil",          group_id: "C" },
+  { code: "ma",     name: "Marruecos",       group_id: "C" },
+  { code: "ht",     name: "Haití",           group_id: "C" },
+  { code: "gb-sct", name: "Escocia",         group_id: "C" },
   // Grupo D
-  { code: "de", name: "Alemania",        group_id: "D" },
-  { code: "co", name: "Colombia",        group_id: "D" },
-  { code: "sa", name: "Arabia Saudita",  group_id: "D" },
-  { code: "se", name: "Suecia",          group_id: "D" },
+  { code: "us",     name: "Estados Unidos",  group_id: "D" },
+  { code: "py",     name: "Paraguay",        group_id: "D" },
+  { code: "au",     name: "Australia",       group_id: "D" },
+  { code: "tr",     name: "Turquía",         group_id: "D" },
   // Grupo E
-  { code: "es", name: "España",          group_id: "E" },
-  { code: "ma", name: "Marruecos",       group_id: "E" },
-  { code: "au", name: "Australia",       group_id: "E" },
-  { code: "cr", name: "Costa Rica",      group_id: "E" },
+  { code: "de",     name: "Alemania",        group_id: "E" },
+  { code: "cw",     name: "Curazao",         group_id: "E" },
+  { code: "ci",     name: "Costa de Marfil", group_id: "E" },
+  { code: "ec",     name: "Ecuador",         group_id: "E" },
   // Grupo F
-  { code: "pt", name: "Portugal",        group_id: "F" },
-  { code: "ir", name: "Irán",            group_id: "F" },
-  { code: "pa", name: "Panamá",          group_id: "F" },
-  { code: "be", name: "Bélgica",         group_id: "F" },
+  { code: "nl",     name: "Países Bajos",    group_id: "F" },
+  { code: "jp",     name: "Japón",           group_id: "F" },
+  { code: "se",     name: "Suecia",          group_id: "F" },
+  { code: "tn",     name: "Túnez",           group_id: "F" },
   // Grupo G
-  { code: "nl", name: "Países Bajos",    group_id: "G" },
-  { code: "sn", name: "Senegal",         group_id: "G" },
-  { code: "no", name: "Noruega",         group_id: "G" },
-  { code: "ws", name: "Gales",           group_id: "G" },
+  { code: "be",     name: "Bélgica",         group_id: "G" },
+  { code: "eg",     name: "Egipto",          group_id: "G" },
+  { code: "ir",     name: "Irán",            group_id: "G" },
+  { code: "nz",     name: "Nueva Zelanda",   group_id: "G" },
   // Grupo H
-  { code: "it", name: "Italia",          group_id: "H" },
-  { code: "tn", name: "Túnez",           group_id: "H" },
-  { code: "cl", name: "Chile",           group_id: "H" },
-  { code: "jm", name: "Jamaica",         group_id: "H" },
+  { code: "es",     name: "España",          group_id: "H" },
+  { code: "cv",     name: "Cabo Verde",      group_id: "H" },
+  { code: "sa",     name: "Arabia Saudita",  group_id: "H" },
+  { code: "uy",     name: "Uruguay",         group_id: "H" },
   // Grupo I
-  { code: "gb", name: "Inglaterra",      group_id: "I" },
-  { code: "ck", name: "Rep. Checa",      group_id: "I" },
-  { code: "py", name: "Paraguay",        group_id: "I" },
-  { code: "tr", name: "Turquía",         group_id: "I" },
+  { code: "fr",     name: "Francia",         group_id: "I" },
+  { code: "sn",     name: "Senegal",         group_id: "I" },
+  { code: "iq",     name: "Irak",            group_id: "I" },
+  { code: "no",     name: "Noruega",         group_id: "I" },
   // Grupo J
-  { code: "dk", name: "Dinamarca",       group_id: "J" },
-  { code: "om", name: "Omán",            group_id: "J" },
-  { code: "ci", name: "Costa de Marfil", group_id: "J" },
-  { code: "hr", name: "Croacia",         group_id: "J" },
+  { code: "ar",     name: "Argentina",       group_id: "J" },
+  { code: "dz",     name: "Argelia",         group_id: "J" },
+  { code: "at",     name: "Austria",         group_id: "J" },
+  { code: "jo",     name: "Jordania",        group_id: "J" },
   // Grupo K
-  { code: "pl", name: "Polonia",         group_id: "K" },
-  { code: "ke", name: "Kenia",           group_id: "K" },
-  { code: "ve", name: "Venezuela",       group_id: "K" },
-  { code: "nz", name: "Nueva Zelanda",   group_id: "K" },
+  { code: "pt",     name: "Portugal",        group_id: "K" },
+  { code: "cd",     name: "RD Congo",        group_id: "K" },
+  { code: "uz",     name: "Uzbekistán",      group_id: "K" },
+  { code: "co",     name: "Colombia",        group_id: "K" },
   // Grupo L
-  { code: "ch", name: "Suiza",           group_id: "L" },
-  { code: "eg", name: "Egipto",          group_id: "L" },
-  { code: "pe", name: "Perú",            group_id: "L" },
-  { code: "uz", name: "Uzbekistán",      group_id: "L" },
+  { code: "gb-eng", name: "Inglaterra",      group_id: "L" },
+  { code: "hr",     name: "Croacia",         group_id: "L" },
+  { code: "gh",     name: "Ghana",           group_id: "L" },
+  { code: "pa",     name: "Panamá",          group_id: "L" },
 ];
 
 async function seedTeams() {
@@ -175,18 +177,18 @@ async function seedTeams() {
 //             Grupos G-L → 20/23:00 (MD1), 20/23:00 (MD2), 22:00 (MD3)
 
 const GROUP_SCHEDULE = {
-  A: { teams: ["mx","ar","jp","qa"], md1:"2026-06-11", md2:"2026-06-17", md3:"2026-06-23", slot:"morning", venues: ["Ciudad de México","Guadalajara","Monterrey","Ciudad de México","Guadalajara","Monterrey"] },
-  B: { teams: ["us","br","kr","ec"], md1:"2026-06-12", md2:"2026-06-18", md3:"2026-06-24", slot:"morning", venues: ["Los Angeles","Dallas","Los Angeles","Houston","Dallas","Los Angeles"] },
-  C: { teams: ["ca","fr","ng","uy"], md1:"2026-06-13", md2:"2026-06-19", md3:"2026-06-25", slot:"morning", venues: ["Toronto","Vancouver","Toronto","Vancouver","Toronto","Vancouver"] },
-  D: { teams: ["de","co","sa","se"], md1:"2026-06-14", md2:"2026-06-20", md3:"2026-06-26", slot:"morning", venues: ["Dallas","Atlanta","Houston","Dallas","Dallas","Atlanta"] },
-  E: { teams: ["es","ma","au","cr"], md1:"2026-06-15", md2:"2026-06-21", md3:"2026-06-27", slot:"morning", venues: ["Miami","Kansas City","Seattle","Miami","Miami","Kansas City"] },
-  F: { teams: ["pt","ir","pa","be"], md1:"2026-06-16", md2:"2026-06-22", md3:"2026-06-28", slot:"morning", venues: ["Boston","Philadelphia","New York","Boston","Philadelphia","New York"] },
-  G: { teams: ["nl","sn","no","ws"], md1:"2026-06-11", md2:"2026-06-17", md3:"2026-06-23", slot:"evening", venues: ["Seattle","San Francisco","San Francisco","Los Angeles","Seattle","San Francisco"] },
-  H: { teams: ["it","tn","cl","jm"], md1:"2026-06-12", md2:"2026-06-18", md3:"2026-06-24", slot:"evening", venues: ["New York","Philadelphia","Boston","New York","Philadelphia","Boston"] },
-  I: { teams: ["gb","ck","py","tr"], md1:"2026-06-13", md2:"2026-06-19", md3:"2026-06-25", slot:"evening", venues: ["Dallas","Kansas City","Houston","Dallas","Kansas City","Houston"] },
-  J: { teams: ["dk","om","ci","hr"], md1:"2026-06-14", md2:"2026-06-20", md3:"2026-06-26", slot:"evening", venues: ["Miami","Atlanta","Miami","Atlanta","Miami","Atlanta"] },
-  K: { teams: ["pl","ke","ve","nz"], md1:"2026-06-15", md2:"2026-06-21", md3:"2026-06-27", slot:"evening", venues: ["Houston","Kansas City","Kansas City","Houston","Houston","Kansas City"] },
-  L: { teams: ["ch","eg","pe","uz"], md1:"2026-06-16", md2:"2026-06-22", md3:"2026-06-28", slot:"evening", venues: ["Guadalajara","Monterrey","Ciudad de México","Guadalajara","Monterrey","Ciudad de México"] },
+  A: { teams: ["mx","za","kr","cz"],     md1:"2026-06-11", md2:"2026-06-17", md3:"2026-06-23", slot:"morning", venues: ["Ciudad de México","Guadalajara","Monterrey","Ciudad de México","Guadalajara","Monterrey"] },
+  B: { teams: ["ca","ba","qa","ch"],     md1:"2026-06-12", md2:"2026-06-18", md3:"2026-06-24", slot:"morning", venues: ["Toronto","Vancouver","Toronto","Vancouver","Toronto","Vancouver"] },
+  C: { teams: ["br","ma","ht","gb-sct"], md1:"2026-06-13", md2:"2026-06-19", md3:"2026-06-25", slot:"morning", venues: ["Los Angeles","Dallas","Los Angeles","Houston","Dallas","Los Angeles"] },
+  D: { teams: ["us","py","au","tr"],     md1:"2026-06-14", md2:"2026-06-20", md3:"2026-06-26", slot:"morning", venues: ["Dallas","Atlanta","Houston","Dallas","Dallas","Atlanta"] },
+  E: { teams: ["de","cw","ci","ec"],     md1:"2026-06-15", md2:"2026-06-21", md3:"2026-06-27", slot:"morning", venues: ["Miami","Kansas City","Seattle","Miami","Miami","Kansas City"] },
+  F: { teams: ["nl","jp","se","tn"],     md1:"2026-06-16", md2:"2026-06-22", md3:"2026-06-28", slot:"morning", venues: ["Boston","Philadelphia","New York","Boston","Philadelphia","New York"] },
+  G: { teams: ["be","eg","ir","nz"],     md1:"2026-06-11", md2:"2026-06-17", md3:"2026-06-23", slot:"evening", venues: ["Seattle","San Francisco","San Francisco","Los Angeles","Seattle","San Francisco"] },
+  H: { teams: ["es","cv","sa","uy"],     md1:"2026-06-12", md2:"2026-06-18", md3:"2026-06-24", slot:"evening", venues: ["New York","Philadelphia","Boston","New York","Philadelphia","Boston"] },
+  I: { teams: ["fr","sn","iq","no"],     md1:"2026-06-13", md2:"2026-06-19", md3:"2026-06-25", slot:"evening", venues: ["Dallas","Kansas City","Houston","Dallas","Kansas City","Houston"] },
+  J: { teams: ["ar","dz","at","jo"],     md1:"2026-06-14", md2:"2026-06-20", md3:"2026-06-26", slot:"evening", venues: ["Miami","Atlanta","Miami","Atlanta","Miami","Atlanta"] },
+  K: { teams: ["pt","cd","uz","co"],     md1:"2026-06-15", md2:"2026-06-21", md3:"2026-06-27", slot:"evening", venues: ["Houston","Kansas City","Kansas City","Houston","Houston","Kansas City"] },
+  L: { teams: ["gb-eng","hr","gh","pa"], md1:"2026-06-16", md2:"2026-06-22", md3:"2026-06-28", slot:"evening", venues: ["Guadalajara","Monterrey","Ciudad de México","Guadalajara","Monterrey","Ciudad de México"] },
 };
 
 const GROUP_INDEX = { A:1, B:2, C:3, D:4, E:5, F:6, G:7, H:8, I:9, J:10, K:11, L:12 };

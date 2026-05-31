@@ -51,6 +51,8 @@ export type IconName =
   // System
   | "settings"
   | "logout"
+  // Brand
+  | "o2-mark"
   // Decorative
   | "sol-de-mayo"
   | "world-trophy"

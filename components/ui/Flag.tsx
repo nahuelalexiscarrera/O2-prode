@@ -4,7 +4,8 @@ import { teamShortCode } from "@/lib/i18n/team-codes";
 export type FlagSize = "sm" | "md" | "lg";
 
 interface FlagProps {
-  code: string; // ISO alpha-2 lowercase: "ar", "br", "de", …
+  /** Código ISO del equipo: "ar", "mx", "gb-sct"… (= nombre del archivo en /flags) */
+  code: string;
   size?: FlagSize;
   alt?: string;
   className?: string;
@@ -16,17 +17,21 @@ const sizeMap: Record<FlagSize, { w: number; h: number }> = {
   lg: { w: 48, h: 32 },
 };
 
-// Banderas presentes en design/icons.svg. Cualquier otra cae a un chip con el
-// código FIFA (placeholder prolijo) en vez de un SVG roto/vacío.
+// Las 48 banderas del Mundial 2026 viven en /public/flags/{code}.svg (SVG, no emoji).
+// Cualquier código fuera de este set (p. ej. un cruce de eliminatorias aún sin
+// definir) cae a un chip con la abreviatura FIFA, sin SVG roto.
 const AVAILABLE_FLAGS = new Set([
-  "ar", "br", "de", "ec", "fr", "gb", "hr", "ir", "jp", "ma", "mx", "nl", "qa", "sn",
+  "mx", "za", "kr", "cz", "ca", "ba", "qa", "ch", "br", "ma", "ht", "gb-sct",
+  "us", "py", "au", "tr", "de", "cw", "ci", "ec", "nl", "jp", "se", "tn",
+  "be", "eg", "ir", "nz", "es", "cv", "sa", "uy", "fr", "sn", "iq", "no",
+  "ar", "dz", "at", "jo", "pt", "cd", "uz", "co", "gb-eng", "hr", "gh", "pa",
 ]);
 
 export function Flag({ code, size = "md", alt, className }: FlagProps) {
   const { w, h } = sizeMap[size];
   const lc = code.toLowerCase();
 
-  // Fallback prolijo cuando la bandera no está en el sprite.
+  // Fallback prolijo cuando no hay bandera disponible.
   if (!AVAILABLE_FLAGS.has(lc)) {
     return (
       <span
@@ -35,8 +40,8 @@ export function Flag({ code, size = "md", alt, className }: FlagProps) {
         aria-hidden={alt ? undefined : true}
         style={{ width: w, height: h }}
         className={cn(
-          "inline-flex items-center justify-center flex-shrink-0 rounded-[3px]",
-          "bg-elevated border border-border text-text-secondary font-bold leading-none",
+          "inline-flex flex-shrink-0 items-center justify-center rounded-[3px]",
+          "border border-border bg-elevated font-bold leading-none text-text-secondary",
           size === "lg" ? "text-[11px]" : size === "md" ? "text-[9px]" : "text-[7px]",
           className
         )}
@@ -47,16 +52,19 @@ export function Flag({ code, size = "md", alt, className }: FlagProps) {
   }
 
   return (
-    <svg
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={`/flags/${lc}.svg`}
       width={w}
       height={h}
-      className={cn("inline-block flex-shrink-0 rounded-[3px] overflow-hidden", className)}
-      aria-label={alt}
+      alt={alt ?? ""}
       aria-hidden={alt ? undefined : true}
-      role={alt ? "img" : undefined}
-      focusable="false"
-    >
-      <use href={`/design/icons.svg#flag-${lc}`} />
-    </svg>
+      loading="lazy"
+      style={{ width: w, height: h }}
+      className={cn(
+        "inline-block flex-shrink-0 rounded-[3px] object-cover ring-1 ring-black/20",
+        className
+      )}
+    />
   );
 }
