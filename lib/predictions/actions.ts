@@ -28,8 +28,13 @@ export async function upsertPrediction(input: unknown) {
     .single();
   if (matchErr || !match) return { error: "Partido no encontrado" as const };
 
+  // Solo se predice un partido programado y antes del cierre (1h antes del
+  // kickoff). Si ya está en juego (live), terminado o postergado, está cerrado.
+  // (Antes el `&& status !== "live"` dejaba editar partidos EN JUEGO — bug de
+  // integridad: se podía "predecir" viendo el partido.)
   const lockoutAt = new Date(match.kickoff_at).getTime() - 60 * 60 * 1000;
-  if (Date.now() >= lockoutAt && match.status !== "live") {
+  const isOpen = match.status === "scheduled" && Date.now() < lockoutAt;
+  if (!isOpen) {
     return { error: "El partido ya está cerrado" as const };
   }
 
