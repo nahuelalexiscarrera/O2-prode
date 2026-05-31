@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getPostDetail, getMyReactionsForPosts, getMyReactionsForComments } from "@/lib/social/queries";
+import { getIsAdmin } from "@/lib/users/queries";
 import { timeAgo } from "@/lib/social/feed";
 import { ScreenHeader } from "@/components/features/ScreenHeader";
 import { PostCardFull } from "@/components/features/PostCardFull";
@@ -27,9 +28,10 @@ export default async function PostDetailPage({ params }: Props) {
   if (!postRow || postRow.deleted_at) notFound();
 
   const commentIds = rawComments.map((c) => c.id);
-  const [postReacted, commentReacted] = await Promise.all([
+  const [postReacted, commentReacted, isAdmin] = await Promise.all([
     getMyReactionsForPosts([postId]),
     getMyReactionsForComments(commentIds),
+    getIsAdmin(),
   ]);
 
   const now = new Date();
@@ -72,6 +74,7 @@ export default async function PostDetailPage({ params }: Props) {
           myUserId={user.id}
           timeAgo={timeAgo(postRow.created_at, now)}
           isDetailView
+          isAdmin={isAdmin}
         />
 
         <CommentThread
@@ -79,6 +82,7 @@ export default async function PostDetailPage({ params }: Props) {
           initialComments={comments}
           commentReactedIds={[...commentReacted]}
           myUserId={user.id}
+          isAdmin={isAdmin}
         />
       </div>
     </div>

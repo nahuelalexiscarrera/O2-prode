@@ -228,20 +228,28 @@ export async function createComment(
 }
 
 export async function deletePost(postId: string) {
-  const { supabase, user } = await requireUser();
-  const { error } = await supabase
+  const { supabase } = await requireUser();
+  // No filtramos por user_id: la RLS ("Borra post: dueño o admin") decide quién
+  // puede. Si no puede, el UPDATE no afecta filas → lo tratamos como prohibido.
+  const { data, error } = await supabase
     .from("post")
     .update({ deleted_at: new Date().toISOString() })
-    .match({ id: postId, user_id: user.id });
+    .eq("id", postId)
+    .select("id");
   if (error) throw error;
+  if (!data || data.length === 0) throw new Error("FORBIDDEN");
   revalidateTag("feed-recientes");
 }
 
 export async function deleteComment(commentId: string) {
-  const { supabase, user } = await requireUser();
-  const { error } = await supabase
+  const { supabase } = await requireUser();
+  // RLS ("Borra comentario: dueño o admin") decide; soft-delete vía deleted_at.
+  const { data, error } = await supabase
     .from("comment")
     .update({ deleted_at: new Date().toISOString() })
-    .match({ id: commentId, user_id: user.id });
+    .eq("id", commentId)
+    .select("id");
   if (error) throw error;
+  if (!data || data.length === 0) throw new Error("FORBIDDEN");
+  revalidateTag("feed-recientes");
 }

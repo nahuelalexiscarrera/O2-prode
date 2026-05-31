@@ -20,6 +20,7 @@ interface WallFeedProps {
   myAvatarUrl: string | null;
   myLevel: UserLevel;
   activeTab: "recientes" | "destacados";
+  isAdmin?: boolean;
 }
 
 export function WallFeed({
@@ -31,6 +32,7 @@ export function WallFeed({
   myAvatarUrl,
   myLevel,
   activeTab,
+  isAdmin = false,
 }: WallFeedProps) {
   const [posts, setPosts] = useState<FeedPost[]>(initialPosts);
   const [reactedIds, setReactedIds] = useState(new Set(myReactedIds));
@@ -88,6 +90,10 @@ export function WallFeed({
   function handleNewPost(post: FeedPost) {
     setPosts((prev) => [post, ...prev]);
     setReactedIds((prev) => prev); // no change
+  }
+
+  function handleDeletePost(postId: string) {
+    setPosts((prev) => prev.filter((p) => p.id !== postId));
   }
 
   function handleLoadNew() {
@@ -149,6 +155,7 @@ export function WallFeed({
             myInitials={myInitials}
             myAvatarUrl={myAvatarUrl}
             myLevel={myLevel}
+            isAdmin={isAdmin}
             onPost={handleNewPost}
           />
         )}
@@ -196,6 +203,8 @@ export function WallFeed({
               myReacted={reactedIds.has(post.id)}
               myUserId={myUserId}
               timeAgo={formatTimeAgo(post.created_at, now)}
+              isAdmin={isAdmin}
+              onDeleted={() => handleDeletePost(post.id)}
             />
           ))
         )}

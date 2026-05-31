@@ -78,7 +78,7 @@ export function AchievementModal({ achievements, userId, onClose }: AchievementM
         initial="hidden"
         animate="visible"
         exit="exit"
-        className="fixed inset-0 z-[9999] flex items-center justify-center"
+        className="fixed inset-0 z-overlay flex items-center justify-center"
         style={{ background: "rgba(10,6,8,0.92)" }}
         role="dialog"
         aria-modal="true"

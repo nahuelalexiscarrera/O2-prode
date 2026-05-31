@@ -142,6 +142,7 @@ const config: Config = {
         sticky: "20",
         nav: "30",
         popover: "40",
+        overlay: "45",
         modal: "50",
         toast: "60",
       },
