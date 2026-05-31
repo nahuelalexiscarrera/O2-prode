@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getMyProfile } from "@/lib/users/queries";
+import { getMyProfile, getIsAdmin } from "@/lib/users/queries";
 import { getMyPredictionCount } from "@/lib/predictions/queries";
 import { getLevelMeta } from "@/lib/achievements/levels";
 import { ScreenHeader } from "@/components/features/ScreenHeader";
@@ -17,9 +17,10 @@ export default async function PerfilPage() {
   if (error || !data?.user) redirect("/login");
   const user = data.user;
 
-  const [profile, predictionCount] = await Promise.all([
+  const [profile, predictionCount, isAdmin] = await Promise.all([
     getMyProfile(),
     getMyPredictionCount(user.id),
+    getIsAdmin(),
   ]);
 
   if (!profile) redirect("/login");
@@ -64,6 +65,7 @@ export default async function PerfilPage() {
 
       {/* Navigation */}
       <div className="mx-4 bg-card rounded-xl border border-border overflow-hidden">
+        {isAdmin && <NavRow href="/app/admin" label="Panel de admin" />}
         <NavRow href="/app/perfil/logros" label="Logros" />
         <NavRow href="/app/perfil/notificaciones" label="Notificaciones" />
         <NavRow href="/app/perfil/configuracion" label="Configuración" />
