@@ -82,7 +82,7 @@ export default async function HomePage() {
         title={`Hola, ${firstName}`}
         actions={
           <Link
-            href="/app/notificaciones"
+            href="/app/perfil/notificaciones"
             aria-label="Notificaciones"
             className="flex items-center justify-center w-9 h-9 rounded-full text-text-muted hover:text-text transition-colors"
           >

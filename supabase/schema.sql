@@ -390,6 +390,17 @@ CREATE POLICY "User marca leídas"
   ON notification FOR UPDATE
   USING (auth.uid() = user_id);
 
+-- Logros desbloqueados: lectura para socios (visibles en perfiles), inserción
+-- del propio. SIN estas policies, processAchievements() falla por RLS y los
+-- logros nunca se desbloquean ni suman puntos.
+CREATE POLICY "Socios leen logros"
+  ON user_achievement FOR SELECT
+  USING (auth.role() = 'authenticated');
+
+CREATE POLICY "User desbloquea sus logros"
+  ON user_achievement FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
 -- ┌─────────────────────────────────────────────────────────────────┐
 -- │  Functions                                                      │
 -- └─────────────────────────────────────────────────────────────────┘

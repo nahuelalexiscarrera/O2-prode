@@ -190,6 +190,7 @@ export async function toggleReaction(input: ToggleReactionInput) {
       user_id: user.id,
     });
     if (error) throw error;
+    revalidateTag("feed-recientes");
     return { reacted: false };
   }
 
@@ -199,6 +200,7 @@ export async function toggleReaction(input: ToggleReactionInput) {
     user_id: user.id,
   });
   if (error) throw error;
+  revalidateTag("feed-recientes");
   return { reacted: true };
 }
 
@@ -217,6 +219,9 @@ export async function createComment(
     .single();
 
   if (error) throw error;
+  // El trigger de DB ya incrementó post.comment_count; refrescamos el feed
+  // para que el contador no quede stale al volver al muro.
+  revalidateTag("feed-recientes");
 
   const unlockedAchievements = await evalSocialAchievements(user.id);
   return { comment: data as CommentRow, unlockedAchievements };
