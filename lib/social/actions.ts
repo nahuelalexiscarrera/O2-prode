@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { processAchievements } from "@/lib/achievements/actions";
 import {
   checkPostRateLimit,
@@ -227,29 +228,56 @@ export async function createComment(
   return { comment: data as CommentRow, unlockedAchievements };
 }
 
+/** ¿El usuario es admin? (lee su propia fila; la policy de SELECT lo permite) */
+async function isAdminUser(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string
+): Promise<boolean> {
+  const { data } = await supabase.from("user").select("is_admin").eq("id", userId).maybeSingle();
+  return Boolean((data as { is_admin?: boolean } | null)?.is_admin);
+}
+
+// NOTA — por qué el soft-delete usa el cliente admin (service role):
+// las policies de SELECT de post/comment son `deleted_at IS NULL`. Al setear
+// deleted_at, la fila resultante deja de pasar SELECT y Postgres rechaza el
+// UPDATE con 42501 ("new row violates row-level security policy"). Entonces
+// autorizamos en el server action (dueño o admin) y hacemos el UPDATE con el
+// service role, que no está sujeto a RLS. La autorización queda explícita acá.
+
 export async function deletePost(postId: string) {
-  const { supabase } = await requireUser();
-  // No filtramos por user_id: la RLS ("Borra post: dueño o admin") decide quién
-  // puede. Si no puede, el UPDATE no afecta filas → lo tratamos como prohibido.
-  const { data, error } = await supabase
+  const { supabase, user } = await requireUser();
+  const { data: row } = await supabase
+    .from("post")
+    .select("user_id")
+    .eq("id", postId)
+    .maybeSingle();
+  if (!row) throw new Error("NOT_FOUND");
+  const allowed = row.user_id === user.id || (await isAdminUser(supabase, user.id));
+  if (!allowed) throw new Error("FORBIDDEN");
+
+  const { error } = await createAdminClient()
     .from("post")
     .update({ deleted_at: new Date().toISOString() })
-    .eq("id", postId)
-    .select("id");
+    .eq("id", postId);
   if (error) throw error;
-  if (!data || data.length === 0) throw new Error("FORBIDDEN");
   revalidateTag("feed-recientes");
 }
 
 export async function deleteComment(commentId: string) {
-  const { supabase } = await requireUser();
-  // RLS ("Borra comentario: dueño o admin") decide; soft-delete vía deleted_at.
-  const { data, error } = await supabase
+  const { supabase, user } = await requireUser();
+  const { data: row } = await supabase
+    .from("comment")
+    .select("user_id")
+    .eq("id", commentId)
+    .maybeSingle();
+  if (!row) throw new Error("NOT_FOUND");
+  const allowed = row.user_id === user.id || (await isAdminUser(supabase, user.id));
+  if (!allowed) throw new Error("FORBIDDEN");
+
+  const { error } = await createAdminClient()
     .from("comment")
     .update({ deleted_at: new Date().toISOString() })
-    .eq("id", commentId)
-    .select("id");
+    .eq("id", commentId);
   if (error) throw error;
-  if (!data || data.length === 0) throw new Error("FORBIDDEN");
   revalidateTag("feed-recientes");
 }

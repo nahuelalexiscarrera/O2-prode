@@ -402,6 +402,9 @@ CREATE POLICY "User ve sus notifs"
 CREATE POLICY "User marca leídas"
   ON notification FOR UPDATE
   USING (auth.uid() = user_id);
+-- NOTA: notification no tiene policy de INSERT a propósito. Las notifs propias
+-- (logros) se insertan con service_role desde processAchievements(); las
+-- sociales vía trigger SECURITY DEFINER; las del cron con service_role.
 
 -- Logros desbloqueados: lectura para socios (visibles en perfiles), inserción
 -- del propio. SIN estas policies, processAchievements() falla por RLS y los

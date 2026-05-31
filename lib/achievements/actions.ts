@@ -10,6 +10,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidateTag } from "next/cache";
 import { evaluateForEvent, type EventScope, type TriggerContext } from "./triggers";
 import { ACHIEVEMENT_BY_ID } from "./catalog";
@@ -79,15 +80,19 @@ export async function processAchievements(
     }
   }
 
-  // Create in-app notifications for each unlock
+  // Create in-app notifications for each unlock.
+  // service role: la tabla notification no tiene policy de INSERT, así que
+  // insertarlas con el cliente de usuario fallaría por RLS (en silencio) y la
+  // campana nunca mostraría los logros. El cron y los triggers ya usan rutas
+  // privilegiadas; acá hacemos lo mismo para la notif propia.
   const notifs = newlyUnlocked.map((r) => ({
     user_id: ctx.userId,
     type: "achievement-unlocked" as const,
     title: "Logro desbloqueado",
     body: `${r.achievement.name} · ${r.achievement.description}`,
-    deep_link: `/perfil/logros#${r.achievement.id}`,
+    deep_link: `/app/perfil/logros#${r.achievement.id}`,
   }));
-  await supabase.from("notification").insert(notifs);
+  await createAdminClient().from("notification").insert(notifs);
 
   revalidateTag(`user-${ctx.userId}-achievements`);
 

@@ -54,7 +54,8 @@ export function ScoreInput({
   const [activeSlot, setActiveSlot] = useState<ActiveSlot>("home");
   const [draft, setDraft] = useState<ScoreDraft>({ home: null, away: null });
 
-  const canEdit = status === "default" || status === "live";
+  // Solo editable antes del cierre (default). En vivo / cerrado / resuelto NO.
+  const canEdit = status === "default";
 
   const openNumpad = (slot: ActiveSlot) => {
     if (!canEdit) return;
@@ -162,7 +163,8 @@ function ScoreSlot({ value, label, status, correct, onClick }: ScoreSlotProps) {
   const [focused, setFocused] = useState(false);
   const isLocked = status === "locked";
   const isSettled = status === "settled";
-  const canEdit = status === "default" || status === "live";
+  // Solo editable antes del cierre (default). En vivo / cerrado / resuelto NO.
+  const canEdit = status === "default";
 
   return (
     <div className="flex flex-col items-center gap-1.5">
