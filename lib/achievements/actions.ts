@@ -59,20 +59,23 @@ export async function processAchievements(
   const totalBonus = newlyUnlocked.reduce((sum, r) => sum + r.achievement.pointsBonus, 0);
 
   if (totalBonus > 0) {
-    // Use RPC for atomic increment (defined in schema migrations)
-    const { error: rpcErr } = await supabase.rpc("fn_add_points", {
+    // service role: fn_add_points queda REVOCADA para usuarios (un socio no debe
+    // poder auto-sumarse puntos llamando la RPC directo). Se ejecuta con
+    // privilegios de servicio desde el server. Los crons también usan service role.
+    const adminDb = createAdminClient();
+    const { error: rpcErr } = await adminDb.rpc("fn_add_points", {
       p_user_id: ctx.userId,
       p_delta: totalBonus,
     });
     if (rpcErr) {
-      // Fallback non-atomic update
-      const { data: user } = await supabase
+      // Fallback no atómico (también con service role)
+      const { data: user } = await adminDb
         .from("user")
         .select("total_points")
         .eq("id", ctx.userId)
         .single();
       if (user) {
-        await supabase
+        await adminDb
           .from("user")
           .update({ total_points: (user.total_points ?? 0) + totalBonus })
           .eq("id", ctx.userId);
