@@ -63,3 +63,15 @@ export async function getMyProfile(): Promise<UserProfile | null> {
   if (error) return null;
   return data as UserProfile;
 }
+
+/** Perfil público de otro socio (para ver desde el muro / ranking). */
+export async function getUserProfileById(userId: string): Promise<UserProfile | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("user")
+    .select("id, name, initials, avatar_url, level, total_points, position")
+    .eq("id", userId)
+    .maybeSingle();
+  if (error || !data) return null;
+  return data as UserProfile;
+}
