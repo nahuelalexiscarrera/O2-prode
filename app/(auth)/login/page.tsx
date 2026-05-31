@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useFormState, useFormStatus } from "react-dom";
@@ -39,8 +40,20 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col px-6 pt-[calc(2rem+env(safe-area-inset-top))] pb-10">
-      {/* Aire arriba */}
-      <div className="flex-1 min-h-[24vh]" />
+      {/* Logo real O2 Wellness Club */}
+      <div className="flex justify-center pt-2">
+        <Image
+          src="/logo.png"
+          alt="O2 Wellness Club"
+          width={150}
+          height={150}
+          priority
+          className="h-36 w-36 object-contain select-none"
+        />
+      </div>
+
+      {/* Aire */}
+      <div className="flex-1 min-h-[6vh]" />
 
       {/* Título editorial */}
       <header className="mb-6">
@@ -48,11 +61,6 @@ export default function LoginPage() {
           <span className="block text-[1.75rem] tracking-[0.10em]">Prode</span>
           <span className="block text-[3.5rem] tracking-[0.01em] text-primary">Mundial</span>
         </h1>
-        <div className="mt-2 flex items-center gap-2">
-          <span className="font-display text-heading-md text-text">O2</span>
-          <span className="h-4 w-px bg-border-strong" />
-          <span className="text-body-sm text-text-muted">Wellness Club</span>
-        </div>
         <p className="mt-4 text-body-md text-text-secondary text-balance text-center">
           Cada partido suma. Cada acierto te acerca al podio.
         </p>

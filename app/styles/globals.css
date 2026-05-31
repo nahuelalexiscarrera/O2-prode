@@ -11,12 +11,12 @@
 @layer base {
   :root {
     /* ─── Surfaces ─────────────────────────────────────────── */
-    --color-bg: #0b0b0d;
-    --color-surface: #131417;
-    --color-card: #1b1d22;
-    --color-elevated: #23262c;
-    --color-border: #2a2e36;
-    --color-border-strong: #3a3f49;
+    --color-bg: #0e0e0e;
+    --color-surface: #161616;
+    --color-card: #1a1a1a;
+    --color-elevated: #242424;
+    --color-border: #333333;
+    --color-border-strong: #454545;
 
     /* ─── Text ─────────────────────────────────────────────── */
     --text-primary: #f5f7fa;
@@ -49,8 +49,8 @@
     --state-live: #ff2d55;
 
     /* ─── Typography ───────────────────────────────────────── */
-    --font-display: "Anton", "Bebas Neue", "Oswald", Impact, sans-serif;
-    --font-body: "Inter", "Satoshi", system-ui, -apple-system, sans-serif;
+    --font-display: var(--font-anton), "Anton", "Bebas Neue", "Oswald", Impact, sans-serif;
+    --font-body: var(--font-hanken), "Hanken Grotesk", "Inter", system-ui, -apple-system, sans-serif;
     --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
     /* ─── Spacing (base 4) ─────────────────────────────────── */
@@ -139,9 +139,9 @@
     font-feature-settings: "tnum" 1, "lnum" 1;
   }
 
-  /* Inter alternates limpios */
+  /* Hanken Grotesk — kerning + ligaduras estándar */
   body {
-    font-feature-settings: "cv11" 1, "ss01" 1;
+    font-feature-settings: "kern" 1, "liga" 1;
   }
 
   /* Eliminamos italics globalmente */
