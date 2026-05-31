@@ -98,8 +98,8 @@ export function ScoreInput({
         {/* Live badge */}
         {status === "live" && <Tag variant="live" />}
 
-        {/* Score slots */}
-        <div className="flex items-center gap-6">
+        {/* Score slots — sin recuadro, el guión se alinea con los números */}
+        <div className="flex items-start justify-center gap-2">
           <ScoreSlot
             value={homeValue}
             label={homeLabel}
@@ -108,7 +108,9 @@ export function ScoreInput({
             onClick={() => openNumpad("home")}
           />
 
-          <span className="text-heading-lg text-text-muted font-display select-none">—</span>
+          <span className="flex h-12 items-center justify-center font-display text-numeric-lg leading-none text-text-muted select-none">
+            –
+          </span>
 
           <ScoreSlot
             value={awayValue}
@@ -174,13 +176,14 @@ function ScoreSlot({ value, label, status, correct, onClick }: ScoreSlotProps) {
         disabled={!canEdit}
         aria-label={`${label}: ${value ?? "sin ingresar"}`}
         className={cn(
-          "relative flex items-center justify-center w-16 h-20 rounded-lg bg-card border",
-          "transition-colors",
+          // Sin recuadro: solo el número. Una línea inferior sutil indica que es
+          // editable (afordancia tipo input) sin el "cuadro" que metía aire muerto.
+          "relative flex items-center justify-center min-w-[2.75rem] min-h-[3rem] px-1.5",
+          "rounded-md outline-none transition-colors border-b-2 border-transparent",
+          canEdit && "border-border/70",
+          canEdit && focused && "border-primary",
           !canEdit && "cursor-default",
-          isLocked && "opacity-60 border-border",
-          isSettled && correct === true && "border-success/40 bg-success-bg/30",
-          isSettled && correct === false && "border-error/40 bg-error-bg/30",
-          !isLocked && !isSettled && "border-border"
+          isLocked && "opacity-50"
         )}
       >
         <AnimatePresence mode="wait">
@@ -190,33 +193,26 @@ function ScoreSlot({ value, label, status, correct, onClick }: ScoreSlotProps) {
             initial="initial"
             animate="animate"
             className={cn(
-              "font-display text-numeric-lg tabular",
+              "font-display text-numeric-xl leading-none tabular",
               value === null && "text-text-disabled",
               value !== null && !isSettled && "text-text",
               isSettled && correct === true && "text-success",
               isSettled && correct === false && "text-error"
             )}
           >
-            {value === null ? "—" : value}
+            {value === null ? "–" : value}
           </motion.span>
         </AnimatePresence>
-
-        {/* Lock overlay */}
-        {isLocked && (
-          <div className="absolute inset-0 flex items-center justify-center rounded-lg">
-            <Icon name="lock" size={14} className="text-text-disabled" />
-          </div>
-        )}
 
         {/* Settled result indicator */}
         {isSettled && correct !== undefined && (
           <div
             className={cn(
-              "absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full",
+              "absolute -top-1.5 -right-2.5 flex items-center justify-center w-4 h-4 rounded-full",
               correct ? "bg-success" : "bg-error"
             )}
           >
-            <Icon name={correct ? "check" : "x-mark"} size={10} className="text-text-inverse" />
+            <Icon name={correct ? "check" : "x-mark"} size={9} className="text-text-inverse" />
           </div>
         )}
       </motion.button>
