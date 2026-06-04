@@ -8,6 +8,53 @@
 
 import { createAdminClient } from "@/lib/supabase/admin";
 
+export type AdminMatch = {
+  id: string;
+  homeCode: string;
+  awayCode: string;
+  homeName: string;
+  awayName: string;
+  kickoffAt: string;
+  status: "scheduled" | "live" | "finished" | "postponed";
+  phase: string;
+  homeScore: number | null;
+  awayScore: number | null;
+};
+
+/** Lista todos los partidos con su resultado (si lo tienen) y nombres de equipo. */
+export async function getMatchesForAdmin(): Promise<AdminMatch[]> {
+  const admin = createAdminClient();
+  const [matchesRes, teamsRes, resultsRes] = await Promise.all([
+    admin
+      .from("match")
+      .select("id, home_code, away_code, kickoff_at, status, phase")
+      .order("kickoff_at", { ascending: true }),
+    admin.from("team").select("code, name"),
+    admin.from("match_result").select("match_id, home_score, away_score"),
+  ]);
+
+  const nameByCode = new Map((teamsRes.data ?? []).map((t) => [t.code as string, t.name as string]));
+  const resByMatch = new Map(
+    (resultsRes.data ?? []).map((r) => [r.match_id as string, r])
+  );
+
+  return (matchesRes.data ?? []).map((m) => {
+    const r = resByMatch.get(m.id as string);
+    return {
+      id: m.id as string,
+      homeCode: m.home_code as string,
+      awayCode: m.away_code as string,
+      homeName: nameByCode.get(m.home_code as string) ?? (m.home_code as string),
+      awayName: nameByCode.get(m.away_code as string) ?? (m.away_code as string),
+      kickoffAt: m.kickoff_at as string,
+      status: m.status as AdminMatch["status"],
+      phase: m.phase as string,
+      homeScore: (r?.home_score as number | undefined) ?? null,
+      awayScore: (r?.away_score as number | undefined) ?? null,
+    };
+  });
+}
+
 export type AdminMetrics = {
   socios: number;
   sociosNuevos7d: number;
