@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getIsAdmin } from "@/lib/users/queries";
 import { getAdminMetrics } from "@/lib/admin/queries";
 import { ScreenHeader } from "@/components/features/ScreenHeader";
+import { NavRow } from "@/components/features/NavRow";
 
 export const dynamic = "force-dynamic";
 
@@ -45,6 +46,10 @@ export default async function AdminPage() {
       <p className="px-4 pt-2 pb-5 text-body-sm text-text-muted">
         Resumen en vivo de la actividad del prode.
       </p>
+
+      <div className="mx-4 mb-6 bg-card rounded-xl border border-border overflow-hidden">
+        <NavRow href="/app/admin/partidos" label="Cargar resultados de partidos" />
+      </div>
 
       <Section title="Comunidad">
         <Metric label="Socios" value={m.socios} sub="cuentas confirmadas" />
