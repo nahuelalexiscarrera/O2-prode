@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ScoreInput, type ScoreStatus } from "@/components/ui/ScoreInput";
 import { Flag } from "@/components/ui/Flag";
 import { teamShortCode } from "@/lib/i18n/team-codes";
 import { Tag } from "@/components/ui/Tag";
 import { Icon } from "@/components/ui/Icon";
 import { Countdown } from "@/components/features/Countdown";
+import { ShareButton } from "@/components/features/ShareButton";
 import { useToast } from "@/components/ui/Toast";
+import { createClient } from "@/lib/supabase/client";
 import { upsertPrediction } from "@/lib/predictions/actions";
 import { cn } from "@/lib/utils/cn";
 
@@ -73,11 +75,40 @@ export function MatchCard({
   const [homeValue, setHomeValue] = useState<number | null>(predictionHome);
   const [awayValue, setAwayValue] = useState<number | null>(predictionAway);
   const [saving, setSaving] = useState(false);
+  const [myUserId, setMyUserId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Id del usuario (lectura local de sesión) para el share de la predicción.
+  useEffect(() => {
+    let active = true;
+    createClient()
+      .auth.getSession()
+      .then(({ data }) => {
+        if (active) setMyUserId(data.session?.user?.id ?? null);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const hasPrediction = homeValue !== null && awayValue !== null;
 
   const scoreStatus = resolveScoreStatus(matchStatus, kickoffAt);
   const isSettled = scoreStatus === "settled";
-  const isCorrect = isSettled && (pointsEarned ?? 0) > 0;
+
+  // Correctness per slot: verde solo si ese score exacto coincide con el real
+  const homeScoreCorrect =
+    isSettled &&
+    resultHome !== null &&
+    resultHome !== undefined &&
+    homeValue !== null &&
+    homeValue === resultHome;
+  const awayScoreCorrect =
+    isSettled &&
+    resultAway !== null &&
+    resultAway !== undefined &&
+    awayValue !== null &&
+    awayValue === resultAway;
 
   const displayHome = isSettled ? (resultHome ?? null) : homeValue;
   const displayAway = isSettled ? (resultAway ?? null) : awayValue;
@@ -127,7 +158,7 @@ export function MatchCard({
           <span
             className={cn(
               "text-[11px] font-bold px-2 py-0.5 rounded-full",
-              isCorrect ? "bg-success/20 text-success" : "bg-error/20 text-error"
+              (pointsEarned ?? 0) > 0 ? "bg-success/20 text-success" : "bg-error/20 text-error"
             )}
           >
             {pointsEarned > 0 ? `+${pointsEarned} pts` : "0 pts"}
@@ -155,8 +186,8 @@ export function MatchCard({
           onHomeChange={setHomeValue}
           onAwayChange={setAwayValue}
           onSave={handleSave}
-          homeCorrect={isSettled ? isCorrect : undefined}
-          awayCorrect={isSettled ? isCorrect : undefined}
+          homeCorrect={isSettled ? homeScoreCorrect : undefined}
+          awayCorrect={isSettled ? awayScoreCorrect : undefined}
           lockoutLabel={scoreStatus === "locked" ? `Cerró ${formatKickoff(kickoffAt)}` : undefined}
         />
 
@@ -177,6 +208,19 @@ export function MatchCard({
             kickoffAt={new Date(lockoutMs).toISOString()}
             prefix="Cierra en"
             className="text-[11px]"
+          />
+        </div>
+      )}
+
+      {/* Compartir mi predicción (viral share T03) */}
+      {hasPrediction && myUserId && (
+        <div className="flex justify-center mt-3">
+          <ShareButton
+            template="match"
+            userId={myUserId}
+            contextId={matchId}
+            label="Compartir predicción"
+            className="h-8 px-3 text-[11px]"
           />
         </div>
       )}
