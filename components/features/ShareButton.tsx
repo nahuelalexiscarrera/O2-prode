@@ -6,7 +6,7 @@ import { BottomSheet } from "@/components/ui/Modal";
 import { Icon } from "@/components/ui/Icon";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
-import { shareToWall } from "@/lib/share/actions";
+import { shareToWall, recordShareAction } from "@/lib/share/actions";
 import { cn } from "@/lib/utils/cn";
 import type { ShareTemplateId, ShareFormat } from "@/lib/share/templates";
 
@@ -67,6 +67,7 @@ export function ShareButton({
       a.click();
       URL.revokeObjectURL(url);
       toast({ variant: "success", message: "¡Imagen guardada!" });
+      void recordShareAction({ template, channel: "download", contextId });
     } catch {
       toast({ variant: "error", message: "No se pudo descargar la imagen" });
     } finally {
@@ -84,10 +85,11 @@ export function ShareButton({
         await navigator.share({
           files: [file],
           title: "Mi prode del Mundial 2026",
-          text: "#PRODEMUNDIALO2",
+          text: "#WAZEXPERIENCE",
         });
+        void recordShareAction({ template, channel: "more", contextId });
       } else {
-        // Fallback: download
+        // Fallback: download (handleDownload ya registra el share)
         await handleDownload();
       }
     } catch (e) {

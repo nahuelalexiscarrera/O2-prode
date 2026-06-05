@@ -33,7 +33,11 @@ async function ensureUserRow(): Promise<void> {
     .maybeSingle();
   if (existing) return;
 
-  const meta = (user.user_metadata ?? {}) as { name?: string; phone?: string | null };
+  const meta = (user.user_metadata ?? {}) as {
+    name?: string;
+    phone?: string | null;
+    referralCode?: string;
+  };
   const name = (meta.name && meta.name.trim()) || user.email?.split("@")[0] || "Socio";
   await admin.from("user").insert({
     id: user.id,
@@ -42,6 +46,22 @@ async function ensureUserRow(): Promise<void> {
     initials: deriveInitials(name),
     phone: meta.phone ?? null,
   });
+
+  // Referidos: genera el código propio + linkea al referidor si vino uno.
+  // Graceful: si las columnas referral_code/referred_by no existen todavía
+  // (antes de la migración), el update falla en silencio y no rompe el registro.
+  const updates: Record<string, unknown> = {
+    referral_code: crypto.randomUUID().replace(/-/g, "").slice(0, 6).toUpperCase(),
+  };
+  if (meta.referralCode) {
+    const { data: referrer } = await admin
+      .from("user")
+      .select("id")
+      .eq("referral_code", meta.referralCode.toUpperCase())
+      .maybeSingle();
+    if (referrer && referrer.id !== user.id) updates.referred_by = referrer.id;
+  }
+  await admin.from("user").update(updates).eq("id", user.id);
 }
 
 export async function GET(request: NextRequest) {

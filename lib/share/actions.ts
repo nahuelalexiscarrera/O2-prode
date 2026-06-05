@@ -3,6 +3,8 @@
 import { z } from "zod";
 import { revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { evalSocialAchievements } from "@/lib/social/actions";
 
 const schema = z.object({
   template: z.enum(["summary", "position", "match", "achievement"]),
@@ -45,5 +47,45 @@ export async function shareToWall(input: {
   if (error) return { ok: false, error: "No se pudo publicar en el muro." };
 
   revalidateTag("feed-recientes");
+  return { ok: true };
+}
+
+// ─── Registrar un share (para el logro "Embajador") ───────────────────
+
+const recordSchema = z.object({
+  template: z.enum(["summary", "position", "match", "achievement"]),
+  channel: z.enum(["instagram", "whatsapp", "download", "more"]),
+  contextId: z.string().uuid().optional(),
+});
+
+/**
+ * Registra que el usuario compartió un viral share. Inserta en share_intent
+ * (service role: la tabla tiene RLS sin policy) y re-evalúa los logros sociales
+ * → desbloquea S03 "Embajador" al 5to share. Fire-and-forget desde el cliente.
+ */
+export async function recordShareAction(input: {
+  template: "summary" | "position" | "match" | "achievement";
+  channel: "instagram" | "whatsapp" | "download" | "more";
+  contextId?: string;
+}): Promise<{ ok: boolean }> {
+  const parsed = recordSchema.safeParse(input);
+  if (!parsed.success) return { ok: false };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false };
+
+  const admin = createAdminClient();
+  const { error } = await admin.from("share_intent").insert({
+    user_id: user.id,
+    template: parsed.data.template,
+    channel: parsed.data.channel,
+    context_id: parsed.data.contextId ?? null,
+  });
+  if (error) return { ok: false };
+
+  await evalSocialAchievements(user.id);
   return { ok: true };
 }
