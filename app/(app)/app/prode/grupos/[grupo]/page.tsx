@@ -9,6 +9,9 @@ import { MatchCard } from "@/components/features/MatchCard";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { cn } from "@/lib/utils/cn";
 
+// Esta ruta requiere sesión: force-dynamic evita que Next.js intente pre-renderizarla.
+export const dynamic = "force-dynamic";
+
 // ─── Valid groups ─────────────────────────────────────────────────────
 
 const VALID = new Set(["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l"]);
@@ -112,10 +115,4 @@ export default async function GroupStagePage({ params }: Props) {
       )}
     </div>
   );
-}
-
-// ─── Route segment config ─────────────────────────────────────────────
-
-export async function generateStaticParams() {
-  return ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l"].map((grupo) => ({ grupo }));
 }

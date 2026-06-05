@@ -2,9 +2,12 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getMyProfile } from "@/lib/users/queries";
+import { getUnreadNotificationCount } from "@/lib/users/queries";
 import { getNextMatch, type NextMatchRow } from "@/lib/matches/queries";
+import { getCurrentPhase } from "@/lib/matches/queries";
 import { getFeedRecientes } from "@/lib/social/queries";
 import { ScreenHeader } from "@/components/features/ScreenHeader";
+import { NotificationBell } from "@/components/features/NotificationBell";
 import { StatCard } from "@/components/features/StatCard";
 import { NextMatchHero } from "@/components/features/NextMatchHero";
 import { PhaseProgress } from "@/components/features/PhaseProgress";
@@ -62,10 +65,12 @@ export default async function HomePage() {
   const { data, error } = await supabase.auth.getUser();
   if (error || !data?.user) redirect("/login");
 
-  const [profile, nextMatch, feed] = await Promise.all([
+  const [profile, nextMatch, feed, currentPhase, unreadCount] = await Promise.all([
     getMyProfile(),
     getNextMatch(),
     getFeedRecientes({ limit: 3 }),
+    getCurrentPhase(),
+    getUnreadNotificationCount(),
   ]);
 
   const firstName = profile?.name?.split(" ")?.[0] ?? "Socio";
@@ -80,15 +85,7 @@ export default async function HomePage() {
       {/* Header */}
       <ScreenHeader
         title={`Hola, ${firstName}`}
-        actions={
-          <Link
-            href="/app/perfil/notificaciones"
-            aria-label="Notificaciones"
-            className="flex items-center justify-center w-9 h-9 rounded-full text-text-muted hover:text-text transition-colors"
-          >
-            <Icon name="bell" size={22} />
-          </Link>
-        }
+        actions={<NotificationBell unreadCount={unreadCount} />}
       />
 
       {/* Stat cards */}
@@ -116,7 +113,7 @@ export default async function HomePage() {
         <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
           Progreso del torneo
         </span>
-        <PhaseProgress currentPhase="groups" />
+        <PhaseProgress currentPhase={currentPhase} />
       </div>
 
       {/* Recent activity */}

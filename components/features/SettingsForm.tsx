@@ -9,6 +9,8 @@ import { Icon } from "@/components/ui/Icon";
 import { useToast } from "@/components/ui/Toast";
 import { updateNotificationPrefs, updateVisibility } from "@/lib/users/actions";
 import { PushToggle } from "@/components/features/PushToggle";
+import { AvatarPicker } from "@/components/features/AvatarPicker";
+import { Avatar } from "@/components/ui/Avatar";
 import { cn } from "@/lib/utils/cn";
 
 interface NotifPrefs {
@@ -22,6 +24,9 @@ interface SettingsFormProps {
   email: string;
   initialPrefs: NotifPrefs;
   initialVisibility: "public" | "private";
+  avatarUrl?: string | null;
+  name: string;
+  initials: string;
 }
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
@@ -67,9 +72,10 @@ function StaticRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function SettingsForm({ email, initialPrefs, initialVisibility }: SettingsFormProps) {
+export function SettingsForm({ email, initialPrefs, initialVisibility, avatarUrl, name, initials }: SettingsFormProps) {
   const [prefs, setPrefs] = useState<NotifPrefs>(initialPrefs);
   const [visibility, setVisibility] = useState(initialVisibility);
+  const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const router = useRouter();
@@ -114,11 +120,24 @@ export function SettingsForm({ email, initialPrefs, initialVisibility }: Setting
           <span className="text-body-sm text-text">Cambiar contraseña</span>
           <span className="text-body-sm text-text-muted text-[11px]">Próximamente</span>
         </div>
-        <div className="flex items-center justify-between px-4 py-3.5">
+        <button
+          type="button"
+          onClick={() => setAvatarPickerOpen(true)}
+          className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-elevated/50 transition-colors"
+        >
           <span className="text-body-sm text-text">Foto de perfil</span>
-          <span className="text-body-sm text-text-muted text-[11px]">Próximamente</span>
-        </div>
+          <div className="flex items-center gap-3">
+            <Avatar name={name} initials={initials} avatarUrl={avatarUrl} size="sm" />
+            <Icon name="arrow-right" size={16} className="text-text-muted" />
+          </div>
+        </button>
       </div>
+
+      <AvatarPicker
+        open={avatarPickerOpen}
+        onClose={() => setAvatarPickerOpen(false)}
+        currentAvatarUrl={avatarUrl}
+      />
 
       {/* Notifications */}
       <SectionLabel>Notificaciones</SectionLabel>

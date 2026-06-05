@@ -1,6 +1,11 @@
 {
   "crons": [
     {
+      "path": "/api/cron/sync-results",
+      "schedule": "*/30 * * * *",
+      "comment": "Sincroniza resultados del Mundial desde API-Football. Requiere plan Pro para frecuencia <1día. En Hobby: usar cron-job.org con Bearer CRON_SECRET."
+    },
+    {
       "path": "/api/cron/refresh-views",
       "schedule": "0 0 * * *"
     },

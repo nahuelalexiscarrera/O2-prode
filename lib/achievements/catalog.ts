@@ -175,7 +175,7 @@ export const ACHIEVEMENTS: readonly AchievementDef[] = [
     name: "Top 10",
     description: "Llegaste al top 10 del ranking.",
     iconRef: "nav-chart",
-    pointsBonus: 10,
+    pointsBonus: 0, // insignia: la posición no da puntos (sale de los puntos)
     triggerKey: "position_top_10",
     impact: "medium",
   },
@@ -185,7 +185,7 @@ export const ACHIEVEMENTS: readonly AchievementDef[] = [
     name: "Podio",
     description: "Llegaste al top 3 del ranking.",
     iconRef: "medal",
-    pointsBonus: 25,
+    pointsBonus: 0, // insignia
     triggerKey: "position_top_3",
     impact: "high",
   },
@@ -195,7 +195,7 @@ export const ACHIEVEMENTS: readonly AchievementDef[] = [
     name: "Líder",
     description: "Liderás el ranking general.",
     iconRef: "crown",
-    pointsBonus: 50,
+    pointsBonus: 0, // insignia
     triggerKey: "position_1",
     impact: "high",
   },
@@ -215,7 +215,7 @@ export const ACHIEVEMENTS: readonly AchievementDef[] = [
     name: "Campeón",
     description: "Sos el ganador final del torneo.",
     iconRef: "world-trophy",
-    pointsBonus: 100,
+    pointsBonus: 0, // insignia: el campeón ya ganó; sumarle puntos no tiene sentido
     triggerKey: "tournament_winner",
     impact: "high",
   },

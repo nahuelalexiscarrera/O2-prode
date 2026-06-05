@@ -162,7 +162,7 @@ export function PostComposer({
           value={body}
           onChange={(e) => setBody(e.target.value)}
           placeholder="¿Qué pensás del partido?"
-          maxLength={300}
+          maxLength={280}
           rows={3}
           disabled={loading}
           className="flex-1 bg-transparent text-body-sm text-text placeholder:text-text-muted resize-none outline-none"
