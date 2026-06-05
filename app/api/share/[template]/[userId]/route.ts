@@ -60,7 +60,7 @@ export async function GET(
   if (antonData) fonts.push({ name: "Anton", data: antonData, style: "normal", weight: 400 });
   if (interData) fonts.push({ name: "Inter", data: interData, style: "normal", weight: 700 });
 
-  const jsx = renderTemplate(shareData, format);
+  const jsx = renderTemplate(shareData, format, origin);
 
   return new ImageResponse(jsx, {
     ...dims,

@@ -6,8 +6,16 @@ import { BottomSheet } from "@/components/ui/Modal";
 import { Icon } from "@/components/ui/Icon";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
+import { shareToWall } from "@/lib/share/actions";
 import { cn } from "@/lib/utils/cn";
 import type { ShareTemplateId, ShareFormat } from "@/lib/share/templates";
+
+const WALL_BODY: Record<ShareTemplateId, string> = {
+  position: "Mi posición en el PRODE MUNDIAL O2",
+  match: "Mi predicción para el Mundial",
+  achievement: "Desbloqueé un logro en el prode",
+  summary: "Mi resumen del Mundial",
+};
 
 interface ShareButtonProps {
   template: ShareTemplateId;
@@ -27,7 +35,20 @@ export function ShareButton({
   const [open, setOpen] = useState(false);
   const [format, setFormat] = useState<ShareFormat>("story");
   const [downloading, setDownloading] = useState(false);
+  const [posting, setPosting] = useState(false);
   const { toast } = useToast();
+
+  async function handlePostToWall() {
+    setPosting(true);
+    const res = await shareToWall({ template, contextId, body: WALL_BODY[template] });
+    setPosting(false);
+    if (res.ok) {
+      toast({ variant: "success", message: "¡Publicado en el muro!" });
+      setOpen(false);
+    } else {
+      toast({ variant: "error", message: res.error });
+    }
+  }
 
   const params = new URLSearchParams({ format });
   if (contextId) params.set("contextId", contextId);
@@ -142,6 +163,15 @@ export function ShareButton({
               leftIcon="download"
             >
               Descargar imagen
+            </Button>
+            <Button
+              fullWidth
+              variant="ghost"
+              onClick={handlePostToWall}
+              loading={posting}
+              leftIcon="comment"
+            >
+              Publicar en el muro
             </Button>
           </div>
         </div>
