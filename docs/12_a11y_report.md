@@ -179,11 +179,16 @@ El producto está pensado portrait-first pero no bloquea landscape. ✅
 
 ## 5. Resumen consolidado de findings
 
-| ID | Severidad | Área | Hallazgo | Parche |
+> **Estado de los 3 críticos: ✅ RESUELTOS (2026-06-05).**
+> - **C1** ✅ El `viewport` (app/layout.tsx) ya no bloquea zoom (sin `maximumScale`/`userScalable`) + regla global `font-size:16px` en inputs (globals.css) para evitar el auto-zoom de iOS.
+> - **C2** ✅ El componente `Flag` es decorativo (`aria-hidden`) por defecto y aceptado `alt` para el caso con label. En MatchCard y NextMatchHero la bandera va siempre acompañada del **nombre del país como texto**, que es lo que anuncia el lector de pantalla.
+> - **C3** ✅ `ScoreInput` es un `<button>` con `aria-label` (operable por teclado: Enter/Space abre el numpad, cuyos dígitos también son `<button>`).
+
+| ID | Severidad | Área | Hallazgo | Estado |
 |---|---|---|---|---|
-| **C1** | 🔴 Crítico | Viewport | `user-scalable=no` viola 1.4.4 | Quitar bloqueo de zoom; `font-size:16px` en inputs |
-| **C2** | 🔴 Crítico | Iconografía | Banderas standalone sin `aria-label` | Variant `<Flag standalone>` con label; mantener decorativas como `aria-hidden` |
-| **C3** | 🔴 Crítico | Keyboard | ScoreInput no es operable por teclado | Convertir a `<button>` con keyboard handler |
+| **C1** | 🔴 Crítico | Viewport | `user-scalable=no` viola 1.4.4 | ✅ Resuelto (zoom permitido + inputs 16px) |
+| **C2** | 🔴 Crítico | Iconografía | Banderas standalone sin `aria-label` | ✅ Resuelto (decorativas + nombre en texto) |
+| **C3** | 🔴 Crítico | Keyboard | ScoreInput no es operable por teclado | ✅ Resuelto (`<button>` + aria-label) |
 | **M1** | 🟠 Mayor | Contraste | `text-muted` sobre `card` da 4.1:1 | Usar `text-secondary` sobre card; `text-muted` solo sobre `bg` |
 | **M2** | 🟠 Mayor | Keyboard | Modales no responden a Escape | Hook `useModalEscape()` |
 | **M3** | 🟠 Mayor | Tap target | Heart icon button < 44×44 | Envolver con padding 16px |
