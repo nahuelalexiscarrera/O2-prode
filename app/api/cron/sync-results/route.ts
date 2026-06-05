@@ -1,35 +1,26 @@
 /**
- * O2 PRODE — Cron: sync-results
+ * O2 PRODE — Cron: sync-results (football-data.org)
  *
- * GET/POST /api/cron/sync-results
+ * GET/POST /api/cron/sync-results · Bearer CRON_SECRET
  *
- * Sincroniza resultados del Mundial 2026 desde API-Football hacia la DB local.
- * La cadena de automatización ya existe en Postgres:
- *   match.status → 'finished'
- *   → trigger trg_match_status_change
- *   → fn_settle_match (calcula puntos de predicciones)
- *   → fn_recalculate_positions (actualiza ranking)
+ * Trae los 104 partidos del Mundial 2026 desde football-data.org y:
+ *  - actualiza status/horario de cada partido,
+ *  - CREA los cruces de eliminatorias a medida que se definen (fases se
+ *    desbloquean solas),
+ *  - al finalizar un partido inserta match_result + lo marca 'finished', lo que
+ *    dispara fn_settle_match (puntúa predicciones → recalcula ranking).
  *
- * Este cron es el único eslabón que faltaba: detectar el resultado y
- * actualizar match.status + insertar match_result.
- *
- * Protegido por Authorization: Bearer <CRON_SECRET>.
- *
- * Consumo de cuota API-Football (plan free: 100 req/día):
- *   - Días sin partidos: 0 llamadas (se corta temprano al no haber matches hoy)
- *   - Días con partidos: 1-2 llamadas (live + finished)
- *   - Worst case: ~15 req/día en semana pico de grupos
+ * Clave de cruce: match.fd_id (id de football-data.org). Para los partidos de
+ * grupos ya seeded, el backfill (scripts) setea fd_id la primera vez.
  */
 
 import { type NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getFixturesByStatus, type ApiFixture } from "@/lib/football-api/client";
-import { TEAM_CODE_TO_API_ID, WC_LEAGUE_ID, WC_SEASON } from "@/lib/football-api/team-map";
+import { getWcMatches, type FdMatch } from "@/lib/football-api/client";
+import { TLA_TO_CODE, stageToPhase, fdStatusToMatch } from "@/lib/football-api/team-map";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-// ─── Auth ────────────────────────────────────────────────────────────
 
 function authOk(req: NextRequest): boolean {
   const secret = process.env.CRON_SECRET;
@@ -37,227 +28,150 @@ function authOk(req: NextRequest): boolean {
   return req.headers.get("authorization") === `Bearer ${secret}`;
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────
+type DbMatch = {
+  id: string;
+  fd_id: number | null;
+  home_code: string;
+  away_code: string;
+  status: string;
+  phase: string;
+};
 
-/** Invierte el team-map: API numeric ID → our ISO code */
-function buildApiIdToCode(): Record<number, string> {
-  const map: Record<number, string> = {};
-  for (const [code, id] of Object.entries(TEAM_CODE_TO_API_ID)) {
-    map[id] = code;
-  }
-  return map;
-}
-
-const API_ID_TO_CODE = buildApiIdToCode();
-
-/**
- * Convierte los status de API-Football a nuestros match_status_t.
- * FT, AET, PEN → "finished"
- * 1H, HT, 2H, ET → "live"
- * NS, TBD       → "scheduled"
- * PST, CANC     → "postponed"
- */
-function mapStatus(apiStatus: string): "scheduled" | "live" | "finished" | "postponed" | null {
-  switch (apiStatus) {
-    case "FT":
-    case "AET":
-    case "PEN":
-      return "finished";
-    case "1H":
-    case "HT":
-    case "2H":
-    case "ET":
-    case "P":
-      return "live";
-    case "NS":
-    case "TBD":
-      return "scheduled";
-    case "PST":
-    case "CANC":
-    case "SUSP":
-    case "ABD":
-    case "AWD":
-    case "WO":
-      return "postponed";
-    default:
-      return null;
-  }
-}
-
-// ─── Main handler ─────────────────────────────────────────────────────
-
-interface SyncResult {
-  matchId: string;
-  homeCode: string;
-  awayCode: string;
-  action: "set_live" | "set_finished" | "set_postponed";
-  score?: string;
+interface SyncChange {
+  fdId: number;
+  action: "created" | "set_live" | "set_finished" | "set_postponed" | "linked";
+  detail?: string;
 }
 
 async function handle(req: NextRequest) {
-  if (!authOk(req)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!authOk(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const supabase = createAdminClient();
 
-  // ── 1. Verificar si hay partidos hoy (evitar llamadas innecesarias a la API) ──
-  const todayStart = new Date();
-  todayStart.setUTCHours(0, 0, 0, 0);
-  const tomorrowStart = new Date(todayStart);
-  tomorrowStart.setUTCDate(tomorrowStart.getUTCDate() + 1);
+  let fixtures: FdMatch[];
+  try {
+    fixtures = await getWcMatches();
+  } catch (e) {
+    return NextResponse.json({ error: (e as Error).message }, { status: 502 });
+  }
 
-  const { data: todayMatches, error: tmErr } = await supabase
+  const { data: tournament } = await supabase.from("tournament").select("id").limit(1).maybeSingle();
+  const tournamentId = tournament?.id as string | undefined;
+
+  const { data: dbMatchesRaw } = await supabase
     .from("match")
-    .select("id")
-    .gte("kickoff_at", todayStart.toISOString())
-    .lt("kickoff_at", tomorrowStart.toISOString())
-    .limit(1);
+    .select("id, fd_id, home_code, away_code, status, phase");
+  const dbMatches = (dbMatchesRaw ?? []) as DbMatch[];
 
-  if (tmErr) {
-    return NextResponse.json({ error: tmErr.message }, { status: 500 });
-  }
+  const byFdId = new Map<number, DbMatch>();
+  for (const m of dbMatches) if (m.fd_id != null) byFdId.set(m.fd_id, m);
 
-  // También verificar si hay partidos en vivo o recientes (últimas 4 horas)
-  const fourHoursAgo = new Date(Date.now() - 4 * 60 * 60 * 1000);
-  const { data: recentMatches } = await supabase
-    .from("match")
-    .select("id")
-    .in("status", ["live", "scheduled"])
-    .gte("kickoff_at", fourHoursAgo.toISOString())
-    .limit(1);
+  // Índice por par de equipos (ordenado) para enganchar partidos de grupos que
+  // todavía no tienen fd_id (primera corrida sin backfill).
+  const pairKey = (a: string, b: string) => [a, b].sort().join("|");
+  const byPair = new Map<string, DbMatch>();
+  for (const m of dbMatches) byPair.set(pairKey(m.home_code, m.away_code), m);
 
-  const hasActivityToday = (todayMatches?.length ?? 0) > 0 || (recentMatches?.length ?? 0) > 0;
+  const changes: SyncChange[] = [];
+  const finishedNotifs: Array<{ homeCode: string; awayCode: string; h: number; a: number }> = [];
 
-  if (!hasActivityToday) {
-    return NextResponse.json({
-      ok: true,
-      skipped: "No hay partidos hoy ni partidos recientes pendientes. Cuota de API conservada.",
-    });
-  }
+  for (const fx of fixtures) {
+    const homeTla = fx.homeTeam?.tla;
+    const awayTla = fx.awayTeam?.tla;
+    if (!homeTla || !awayTla) continue; // equipos aún sin definir (cruce futuro)
 
-  // ── 2. Obtener fixtures en vivo y finalizados desde API-Football ──
-  const [liveFixtures, finishedFixtures] = await Promise.all([
-    getFixturesByStatus(WC_LEAGUE_ID, WC_SEASON, "1H,HT,2H,ET,P").catch(() => [] as ApiFixture[]),
-    getFixturesByStatus(WC_LEAGUE_ID, WC_SEASON, "FT,AET,PEN").catch(() => [] as ApiFixture[]),
-  ]);
-
-  const allFixtures = [...liveFixtures, ...finishedFixtures];
-
-  if (allFixtures.length === 0) {
-    return NextResponse.json({ ok: true, message: "Sin partidos activos en la API en este momento." });
-  }
-
-  // ── 3. Obtener partidos locales no finalizados ──
-  const { data: localMatches, error: lmErr } = await supabase
-    .from("match")
-    .select("id, home_code, away_code, kickoff_at, status")
-    .in("status", ["scheduled", "live"])
-    .order("kickoff_at", { ascending: true });
-
-  if (lmErr) {
-    return NextResponse.json({ error: lmErr.message }, { status: 500 });
-  }
-
-  const results: SyncResult[] = [];
-
-  // ── 4. Cruzar partidos de API con partidos locales ──
-  for (const fixture of allFixtures) {
-    const apiHomeId = fixture.teams.home.id;
-    const apiAwayId = fixture.teams.away.id;
-    const homeCode = API_ID_TO_CODE[apiHomeId];
-    const awayCode = API_ID_TO_CODE[apiAwayId];
-
-    // Si no podemos mapear los equipos, salteamos
+    const homeCode = TLA_TO_CODE[homeTla];
+    const awayCode = TLA_TO_CODE[awayTla];
     if (!homeCode || !awayCode) continue;
 
-    // Buscar partido local por equipos (fecha es referencial, el par es único en fase grupos)
-    const localMatch = localMatches?.find(
-      (m) => m.home_code === homeCode && m.away_code === awayCode
-    );
+    const phase = stageToPhase(fx.stage);
+    const status = fdStatusToMatch(fx.status);
+    if (!phase || !status) continue;
 
-    if (!localMatch) continue;
+    // Enganchar el partido local
+    let db = byFdId.get(fx.id) ?? byPair.get(pairKey(homeCode, awayCode));
 
-    const apiStatus = fixture.fixture.status.short;
-    const mappedStatus = mapStatus(apiStatus);
-    if (!mappedStatus) continue;
-
-    // ── 4a. Partido en vivo → marcar como live ──
-    if (mappedStatus === "live" && localMatch.status === "scheduled") {
-      const { error } = await supabase
+    if (!db) {
+      // Cruce nuevo (eliminatorias recién definidas) → crear
+      if (!tournamentId) continue;
+      const { data: inserted } = await supabase
         .from("match")
-        .update({ status: "live" })
-        .eq("id", localMatch.id);
-
-      if (!error) {
-        results.push({ matchId: localMatch.id, homeCode, awayCode, action: "set_live" });
-      }
+        .insert({
+          tournament_id: tournamentId,
+          phase,
+          home_code: homeCode,
+          away_code: awayCode,
+          kickoff_at: fx.utcDate,
+          status: status === "finished" ? "scheduled" : status, // si llega ya finished, settle abajo
+          fd_id: fx.id,
+        })
+        .select("id, fd_id, home_code, away_code, status, phase")
+        .single();
+      if (!inserted) continue;
+      db = inserted as DbMatch;
+      changes.push({ fdId: fx.id, action: "created", detail: `${homeCode} vs ${awayCode} (${phase})` });
+    } else if (db.fd_id == null) {
+      // Vincular fd_id + refrescar horario
+      await supabase.from("match").update({ fd_id: fx.id, kickoff_at: fx.utcDate }).eq("id", db.id);
+      db.fd_id = fx.id;
+      changes.push({ fdId: fx.id, action: "linked" });
     }
 
-    // ── 4b. Partido finalizado → guardar resultado + marcar finished ──
-    if (mappedStatus === "finished" && localMatch.status !== "finished") {
-      const homeScore = fixture.goals.home;
-      const awayScore = fixture.goals.away;
+    // ── En vivo ──
+    if (status === "live" && db.status === "scheduled") {
+      await supabase.from("match").update({ status: "live" }).eq("id", db.id);
+      changes.push({ fdId: fx.id, action: "set_live" });
+    }
 
-      if (homeScore === null || awayScore === null) continue;
+    // ── Postergado ──
+    if (status === "postponed" && db.status === "scheduled") {
+      await supabase.from("match").update({ status: "postponed" }).eq("id", db.id);
+      changes.push({ fdId: fx.id, action: "set_postponed" });
+    }
 
-      // Insertar resultado (el trigger SQL hace el settle automáticamente)
-      const { error: rErr } = await supabase
-        .from("match_result")
-        .upsert(
-          {
-            match_id: localMatch.id,
-            home_score: homeScore,
-            away_score: awayScore,
-            finished_at: new Date().toISOString(),
-          },
-          { onConflict: "match_id" }
-        );
+    // ── Finalizado ──
+    if (status === "finished" && db.status !== "finished") {
+      const gh = fx.score?.fullTime?.home;
+      const ga = fx.score?.fullTime?.away;
+      if (gh == null || ga == null) continue;
 
+      // Mapear goles al orden home/away de NUESTRA fila (puede estar invertido)
+      let dbHome: number, dbAway: number;
+      if (homeCode === db.home_code) {
+        dbHome = gh;
+        dbAway = ga;
+      } else {
+        dbHome = ga;
+        dbAway = gh;
+      }
+
+      const { error: rErr } = await supabase.from("match_result").upsert(
+        { match_id: db.id, home_score: dbHome, away_score: dbAway, finished_at: new Date().toISOString() },
+        { onConflict: "match_id" }
+      );
       if (rErr) continue;
 
-      // Actualizar status (dispara el trigger trg_match_status_change → fn_settle_match)
-      const { error: mErr } = await supabase
-        .from("match")
-        .update({ status: "finished" })
-        .eq("id", localMatch.id);
-
+      // Marcar finished dispara fn_settle_match (puntúa + recalcula ranking)
+      const { error: mErr } = await supabase.from("match").update({ status: "finished" }).eq("id", db.id);
       if (!mErr) {
-        const score = `${homeScore}-${awayScore}`;
-        results.push({ matchId: localMatch.id, homeCode, awayCode, action: "set_finished", score });
-
-        // ── 4c. Notificación de resultado a todos los usuarios ──
-        await sendMatchResultNotifications(supabase, homeCode, awayCode, homeScore, awayScore);
+        changes.push({ fdId: fx.id, action: "set_finished", detail: `${db.home_code} ${dbHome}-${dbAway} ${db.away_code}` });
+        finishedNotifs.push({ homeCode: db.home_code, awayCode: db.away_code, h: dbHome, a: dbAway });
       }
-    }
-
-    // ── 4d. Partido postergado ──
-    if (mappedStatus === "postponed" && localMatch.status === "scheduled") {
-      await supabase
-        .from("match")
-        .update({ status: "postponed" })
-        .eq("id", localMatch.id);
-      results.push({ matchId: localMatch.id, homeCode, awayCode, action: "set_postponed" });
     }
   }
 
-  // ── 5. Notificaciones de partido próximo (en los próximos 60 min) ──
+  for (const n of finishedNotifs) {
+    await sendMatchResultNotifications(supabase, n.homeCode, n.awayCode, n.h, n.a);
+  }
   await sendUpcomingMatchNotifications(supabase);
-
-  // ── 6. Refresh de vistas materializadas si hubo resultados ──
-  if (results.some((r) => r.action === "set_finished")) {
+  if (changes.some((c) => c.action === "set_finished")) {
     await supabase.rpc("fn_refresh_views");
   }
 
-  return NextResponse.json({
-    ok: true,
-    processed: allFixtures.length,
-    changes: results.length,
-    results,
-  });
+  return NextResponse.json({ ok: true, processed: fixtures.length, changes: changes.length, detail: changes });
 }
 
-// ─── Notificaciones de resultado ─────────────────────────────────────
+// ─── Notificaciones ───────────────────────────────────────────────────
 
 async function sendMatchResultNotifications(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -267,29 +181,19 @@ async function sendMatchResultNotifications(
   homeScore: number,
   awayScore: number
 ) {
-  // Obtener todos los usuarios activos
-  const { data: users } = await supabase
-    .from("user")
-    .select("id")
-    .is("deleted_at", null);
-
+  const { data: users } = await supabase.from("user").select("id").is("deleted_at", null);
   if (!users?.length) return;
-
   const notifs = users.map((u: { id: string }) => ({
     user_id: u.id,
     type: "match-result",
     title: "Resultado del partido",
-    body: `${homeCode.toUpperCase()} ${homeScore} - ${awayScore} ${awayCode.toUpperCase()} · Chequeá tus puntos`,
+    body: `${homeCode.toUpperCase()} ${homeScore} - ${awayScore} ${awayCode.toUpperCase()} · Mirá tus puntos`,
     deep_link: "/app",
   }));
-
-  // Insertar en batches de 100 para evitar límites de payload
   for (let i = 0; i < notifs.length; i += 100) {
     await supabase.from("notification").insert(notifs.slice(i, i + 100));
   }
 }
-
-// ─── Notificaciones de partido próximo ───────────────────────────────
 
 async function sendUpcomingMatchNotifications(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -299,51 +203,35 @@ async function sendUpcomingMatchNotifications(
   const in60min = new Date(now.getTime() + 60 * 60 * 1000);
   const in30min = new Date(now.getTime() + 30 * 60 * 1000);
 
-  // Partidos que empiezan entre 30 y 60 minutos
   const { data: upcomingMatches } = await supabase
     .from("match")
     .select("id, home_code, away_code, kickoff_at")
     .eq("status", "scheduled")
     .gte("kickoff_at", in30min.toISOString())
     .lte("kickoff_at", in60min.toISOString());
-
   if (!upcomingMatches?.length) return;
 
   for (const match of upcomingMatches) {
-    // Usuarios que NO tienen predicción para este partido
     const { data: usersWithPred } = await supabase
       .from("prediction")
       .select("user_id")
       .eq("match_id", match.id);
-
-    const predictedUserIds = new Set((usersWithPred ?? []).map((p: { user_id: string }) => p.user_id));
-
-    const { data: allUsers } = await supabase
-      .from("user")
-      .select("id")
-      .is("deleted_at", null);
-
-    const usersWithoutPred = (allUsers ?? []).filter(
-      (u: { id: string }) => !predictedUserIds.has(u.id)
-    );
-
-    if (!usersWithoutPred.length) continue;
-
-    const notifs = usersWithoutPred.map((u: { id: string }) => ({
+    const predicted = new Set((usersWithPred ?? []).map((p: { user_id: string }) => p.user_id));
+    const { data: allUsers } = await supabase.from("user").select("id").is("deleted_at", null);
+    const without = (allUsers ?? []).filter((u: { id: string }) => !predicted.has(u.id));
+    if (!without.length) continue;
+    const notifs = without.map((u: { id: string }) => ({
       user_id: u.id,
       type: "match-upcoming",
       title: "¡Partido en 1 hora!",
-      body: `${match.home_code.toUpperCase()} vs ${match.away_code.toUpperCase()} · Cargá tu predicción antes del cierre`,
+      body: `${match.home_code.toUpperCase()} vs ${match.away_code.toUpperCase()} · Cargá tu predicción`,
       deep_link: "/app/prode",
     }));
-
     for (let i = 0; i < notifs.length; i += 100) {
       await supabase.from("notification").insert(notifs.slice(i, i + 100));
     }
   }
 }
-
-// ─── Exports (Vercel Cron dispara GET; POST para invocación manual) ──
 
 export const GET = handle;
 export const POST = handle;

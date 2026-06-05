@@ -25,6 +25,9 @@ export const POINTS = {
 // ─── Phase multipliers ──────────────────────────────────────────────
 export const PHASE_MULTIPLIER: Record<Phase, number> = {
   groups: 1,
+  // R32 (formato 48 equipos) comparte multiplicador con R16 para no alterar los
+  // valores existentes (paridad con fn_calculate_points en Postgres).
+  "round-of-32": 2,
   "round-of-16": 2,
   quarter: 3,
   semi: 4,
