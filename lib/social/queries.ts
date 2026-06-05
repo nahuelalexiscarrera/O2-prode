@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const POST_WITH_AUTHOR = `
   id, user_id, body, embed_type, embed_ref_id,
+  image_url, image_width, image_height,
   reaction_count, comment_count, created_at,
   author:user!user_id ( id, name, initials, avatar_url, level )
 ` as const;
