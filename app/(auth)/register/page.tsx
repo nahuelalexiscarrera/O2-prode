@@ -144,6 +144,14 @@ export default function RegisterPage() {
         />
 
         <Input
+          label="Código de referido (opcional)"
+          name="referralCode"
+          type="text"
+          autoComplete="off"
+          helper="¿Te invitó un socio? Poné su código y sumás a su tribu."
+        />
+
+        <Input
           label="Contraseña"
           name="password"
           type={showPassword ? "text" : "password"}

@@ -76,12 +76,29 @@ async function requireUser() {
 
 // ─── Social stats for achievement evaluation ──────────────────────────
 
-async function fetchSocialStats(userId: string) {
-  const supabase = await createClient();
+type SocialStats = {
+  postsCount: number;
+  bestPostReactions: number;
+  distinctPostsCommented: number;
+  externalSharesCount: number;
+  activatedFriendsCount: number;
+};
 
-  const [postsRes, commentsRes] = await Promise.all([
+async function fetchSocialStats(userId: string): Promise<SocialStats> {
+  const supabase = await createClient();
+  // share_intent tiene RLS sin policy y referred_by puede no existir todavía →
+  // se leen con service role para no chocar con RLS / columnas faltantes.
+  const admin = createAdminClient();
+
+  const [postsRes, commentsRes, sharesRes, referralsRes] = await Promise.all([
     supabase.from("post").select("reaction_count").eq("user_id", userId).is("deleted_at", null),
     supabase.from("comment").select("post_id").eq("user_id", userId).is("deleted_at", null),
+    admin.from("share_intent").select("id", { count: "exact", head: true }).eq("user_id", userId),
+    admin
+      .from("user")
+      .select("id", { count: "exact", head: true })
+      .eq("referred_by", userId)
+      .is("deleted_at", null),
   ]);
 
   const posts = postsRes.data ?? [];
@@ -91,15 +108,13 @@ async function fetchSocialStats(userId: string) {
     postsCount: posts.length,
     bestPostReactions: posts.reduce((max, p) => Math.max(max, p.reaction_count ?? 0), 0),
     distinctPostsCommented: new Set(comments.map((c) => c.post_id)).size,
+    externalSharesCount: sharesRes.count ?? 0,
+    // referralsRes falla si la columna referred_by no existe (antes de la migración) → 0
+    activatedFriendsCount: referralsRes.error ? 0 : (referralsRes.count ?? 0),
   };
 }
 
-function buildSocialCtx(
-  userId: string,
-  postsCount: number,
-  bestPostReactions: number,
-  distinctCommentedCount: number
-): TriggerContext {
+function buildSocialCtx(userId: string, stats: SocialStats): TriggerContext {
   return {
     userId,
     exactStreak: 0,
@@ -111,11 +126,11 @@ function buildSocialCtx(
     upsets: { upsetsCorrect: 0 },
     position: 0,
     weeklyPositionDelta: 0,
-    postsCount,
-    bestPostReactions,
-    commentsMadeOnDistinctPostsCount: distinctCommentedCount,
-    externalSharesCount: 0,
-    activatedFriendsCount: 0,
+    postsCount: stats.postsCount,
+    bestPostReactions: stats.bestPostReactions,
+    commentsMadeOnDistinctPostsCount: stats.distinctPostsCommented,
+    externalSharesCount: stats.externalSharesCount,
+    activatedFriendsCount: stats.activatedFriendsCount,
     predictedChampionCode: null,
     actualChampionCode: null,
     tournamentEnded: false,
@@ -123,15 +138,11 @@ function buildSocialCtx(
   };
 }
 
-async function evalSocialAchievements(userId: string): Promise<UnlockedAchievement[]> {
+/** Evalúa los logros sociales (post/comentario/share/referido) del usuario. */
+export async function evalSocialAchievements(userId: string): Promise<UnlockedAchievement[]> {
   try {
     const stats = await fetchSocialStats(userId);
-    const ctx = buildSocialCtx(
-      userId,
-      stats.postsCount,
-      stats.bestPostReactions,
-      stats.distinctPostsCommented
-    );
+    const ctx = buildSocialCtx(userId, stats);
     return await processAchievements("social", ctx);
   } catch {
     // Achievement errors must never break the main action

@@ -41,6 +41,7 @@ const registerSchema = z
       .or(z.literal("")),
     password: z.string().min(8, "Mínimo 8 caracteres"),
     passwordConfirm: z.string(),
+    referralCode: z.string().trim().toUpperCase().max(16).optional().or(z.literal("")),
     acceptTerms: z.literal("on", {
       errorMap: () => ({ message: "Tenés que aceptar los términos." }),
     }),
@@ -153,7 +154,7 @@ export async function signUpAction(
     return { ok: false, error: issue?.message ?? "Datos inválidos", field: String(issue?.path?.[0] ?? "") };
   }
 
-  const { name, email, phone, password } = parsed.data;
+  const { name, email, phone, password, referralCode } = parsed.data;
   const normalizedPhone = phone && phone.trim() !== "" ? phone.trim() : null;
 
   // Registro con CONFIRMACIÓN por email (anti-spam). signUp crea la cuenta SIN
@@ -166,7 +167,7 @@ export async function signUpAction(
     password,
     options: {
       emailRedirectTo: `${siteUrl()}/auth/confirm`,
-      data: { name, phone: normalizedPhone },
+      data: { name, phone: normalizedPhone, referralCode: referralCode || undefined },
     },
   });
 

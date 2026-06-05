@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getMyProfile, getIsAdmin } from "@/lib/users/queries";
+import { getMyProfile, getIsAdmin, getMyReferral } from "@/lib/users/queries";
+import { ReferralCard } from "@/components/features/ReferralCard";
 import { getMyPredictionCount } from "@/lib/predictions/queries";
 import { getLevelMeta } from "@/lib/achievements/levels";
 import { ScreenHeader } from "@/components/features/ScreenHeader";
@@ -17,10 +18,11 @@ export default async function PerfilPage() {
   if (error || !data?.user) redirect("/login");
   const user = data.user;
 
-  const [profile, predictionCount, isAdmin] = await Promise.all([
+  const [profile, predictionCount, isAdmin, referral] = await Promise.all([
     getMyProfile(),
     getMyPredictionCount(user.id),
     getIsAdmin(),
+    getMyReferral(),
   ]);
 
   if (!profile) redirect("/login");
@@ -62,6 +64,9 @@ export default async function PerfilPage() {
         <StatCard label="Puntos" value={profile.total_points} accent="lime" />
         <StatCard label="Predicciones" value={predictionCount} />
       </div>
+
+      {/* Código de referido */}
+      {referral && <ReferralCard code={referral.code} friends={referral.friends} />}
 
       {/* Navigation */}
       <div className="mx-4 bg-card rounded-xl border border-border overflow-hidden">
