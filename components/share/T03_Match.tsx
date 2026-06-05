@@ -1,119 +1,147 @@
 import type { MatchShareData, ShareFormat } from "@/lib/share/templates";
 
+/**
+ * T03 — "Mi predicción" (viral share). Marcador predicho gigante + glow,
+ * equipos, fase, logo O2 y hashtag #WAZEXPERIENCE.
+ */
+
 const C = {
-  bg: "#0a0a0c",
-  primary: "#FF6A00",
-  gold: "#FFB300",
-  muted: "#888888",
-  text: "#FFFFFF",
+  bg: "#080808",
+  accent: "#FF6A00",
+  accentRGB: "255,106,0",
+  white: "#FFFFFF",
+  dim: "rgba(255,255,255,0.42)",
+  ghost: "rgba(255,255,255,0.18)",
+  border: "rgba(255,106,0,0.35)",
 };
 
-export function T03_Match({ data, format }: { data: MatchShareData; format: ShareFormat }) {
-  const h = format === "story" ? 1920 : 1080;
-  const scoreFontSize = format === "story" ? 300 : 220;
+export function T03_Match({
+  data,
+  format,
+  origin = "",
+}: {
+  data: MatchShareData;
+  format: ShareFormat;
+  origin?: string;
+}) {
+  const story = format === "story";
+  const H = story ? 1920 : 1080;
+  const scoreSize = story ? 460 : 320;
 
   const kickoff = new Date(data.kickoffISO);
-  const dateLabel = kickoff.toLocaleDateString("es-AR", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  });
-  const timeLabel = kickoff.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
+  const dateLabel = kickoff
+    .toLocaleDateString("es-AR", { day: "numeric", month: "short" })
+    .toUpperCase();
 
   return (
     <div
       style={{
+        position: "relative",
         display: "flex",
         flexDirection: "column",
         width: 1080,
-        height: h,
-        background: `linear-gradient(135deg, ${C.bg} 0%, #1a1410 50%, ${C.bg} 100%)`,
+        height: H,
+        background: C.bg,
         fontFamily: "Inter",
-        padding: 0,
+        padding: `${story ? 110 : 70}px 96px ${story ? 90 : 64}px`,
       }}
     >
-      <div style={{ display: "flex", flexDirection: "column", flex: 1, padding: "80px 80px 72px" }}>
-        {/* Top bar */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 56 }}>
-          <span style={{ fontSize: 28, letterSpacing: "0.2em", color: C.muted, fontWeight: 700 }}>
-            MI PREDICCIÓN
-          </span>
-          <span style={{ fontSize: 64, fontFamily: "Anton", color: C.primary, textShadow: `0 0 32px rgba(255,106,0,0.6)` }}>
-            O2
-          </span>
-        </div>
+      {/* Glow */}
+      <div
+        style={{
+          position: "absolute",
+          top: story ? 560 : 320,
+          left: 0,
+          width: 1080,
+          height: 700,
+          display: "flex",
+          background: `radial-gradient(ellipse 60% 50% at 50% 50%, rgba(${C.accentRGB},0.16) 0%, transparent 70%)`,
+        }}
+      />
 
-        {/* Match header */}
-        <div style={{ display: "flex", flexDirection: "column", marginBottom: 48 }}>
-          <span style={{ fontFamily: "Anton", fontSize: format === "story" ? 88 : 64, color: C.text, lineHeight: 1 }}>
-            PRÓXIMO PARTIDO
-          </span>
-          <span style={{ fontSize: 32, color: C.gold, fontWeight: 700, marginTop: 12 }}>
-            {data.phase.toUpperCase()} · {dateLabel.toUpperCase()} {timeLabel}
-          </span>
-        </div>
+      {/* Top bar */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <span style={{ fontSize: 30, letterSpacing: "0.22em", color: C.ghost, fontWeight: 700 }}>
+          MI PREDICCIÓN
+        </span>
+        <span style={{ fontSize: 30, letterSpacing: "0.16em", color: C.ghost, fontWeight: 700 }}>
+          {data.phase.toUpperCase()} · {dateLabel}
+        </span>
+      </div>
 
-        {/* Teams */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 40 }}>
-          <span style={{ fontFamily: "Anton", fontSize: format === "story" ? 56 : 44, color: C.text }}>
+      {/* Hero */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          flex: 1,
+          justifyContent: "center",
+        }}
+      >
+        {/* Equipos */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <span style={{ fontFamily: "Anton", fontSize: story ? 72 : 54, color: C.white, letterSpacing: "0.02em" }}>
             {data.home.country.toUpperCase()}
           </span>
-          <span style={{ fontSize: 28, color: C.muted, fontWeight: 700 }}>VS</span>
-          <span style={{ fontFamily: "Anton", fontSize: format === "story" ? 56 : 44, color: C.text }}>
+          <span style={{ fontSize: story ? 40 : 30, color: C.accent, fontWeight: 800, margin: "0 28px" }}>
+            VS
+          </span>
+          <span style={{ fontFamily: "Anton", fontSize: story ? 72 : 54, color: C.white, letterSpacing: "0.02em" }}>
             {data.away.country.toUpperCase()}
           </span>
         </div>
 
-        {/* Score prediction */}
-        <div style={{ display: "flex", flexDirection: "column", flex: 1, justifyContent: "center", alignItems: "center" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-            <span
-              style={{
-                fontFamily: "Anton",
-                fontSize: scoreFontSize,
-                color: C.text,
-                lineHeight: 1,
-                letterSpacing: "-0.02em",
-              }}
-            >
-              {data.predictedScore[0]}
-            </span>
-            <span
-              style={{
-                fontFamily: "Anton",
-                fontSize: scoreFontSize * 0.5,
-                color: C.primary,
-                lineHeight: 1,
-              }}
-            >
-              —
-            </span>
-            <span
-              style={{
-                fontFamily: "Anton",
-                fontSize: scoreFontSize,
-                color: C.text,
-                lineHeight: 1,
-                letterSpacing: "-0.02em",
-              }}
-            >
-              {data.predictedScore[1]}
-            </span>
-          </div>
-          <span style={{ fontSize: 28, letterSpacing: "0.2em", color: C.muted, fontWeight: 700, marginTop: 16 }}>
-            MI PREDICCIÓN
+        {/* Marcador gigante */}
+        <div style={{ display: "flex", alignItems: "center", marginTop: story ? 60 : 36 }}>
+          <span
+            style={{
+              fontFamily: "Anton",
+              fontSize: scoreSize,
+              color: C.accent,
+              lineHeight: 0.9,
+              textShadow: `0 0 70px rgba(${C.accentRGB},0.45), 0 0 140px rgba(${C.accentRGB},0.2)`,
+            }}
+          >
+            {data.predictedScore[0]}
+          </span>
+          <span
+            style={{
+              fontFamily: "Anton",
+              fontSize: scoreSize * 0.42,
+              color: C.dim,
+              margin: `0 ${story ? 40 : 28}px`,
+            }}
+          >
+            –
+          </span>
+          <span
+            style={{
+              fontFamily: "Anton",
+              fontSize: scoreSize,
+              color: C.accent,
+              lineHeight: 0.9,
+              textShadow: `0 0 70px rgba(${C.accentRGB},0.45), 0 0 140px rgba(${C.accentRGB},0.2)`,
+            }}
+          >
+            {data.predictedScore[1]}
           </span>
         </div>
 
-        {/* Footer */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
-          <span style={{ fontSize: 28, letterSpacing: "0.14em", color: C.gold, fontWeight: 700 }}>
-            #PRODEMUNDIALO2
-          </span>
-          <span style={{ fontSize: 24, color: C.muted }}>
-            {data.userName.split(" ")[0]} · #{data.userPosition}
-          </span>
-        </div>
+        <span style={{ fontSize: 30, letterSpacing: "0.2em", color: C.ghost, marginTop: story ? 40 : 24, fontWeight: 700 }}>
+          MI MARCADOR
+        </span>
+      </div>
+
+      {/* Footer */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <span style={{ fontSize: 30, letterSpacing: "0.12em", color: C.dim, fontWeight: 700 }}>
+          #WAZEXPERIENCE
+        </span>
+        {origin ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={`${origin}/logo.png`} width={132} height={120} alt="O2" />
+        ) : null}
       </div>
     </div>
   );
