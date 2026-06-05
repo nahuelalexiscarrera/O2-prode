@@ -7,6 +7,60 @@ import { cn } from "@/lib/utils/cn";
 import { modalBackdrop, modalSlide, modalFade } from "@/lib/motion/variants";
 import { IconButton } from "./IconButton";
 
+// ─── Focus trap ────────────────────────────────────────────────────
+// Mantiene el foco dentro del contenedor mientras el modal está abierto.
+// Cicla Tab / Shift+Tab solo entre elementos focusables del dialog.
+
+const FOCUSABLE = [
+  'button:not([disabled])',
+  '[href]',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(", ");
+
+function useFocusTrap(
+  containerRef: React.RefObject<HTMLElement | null>,
+  enabled: boolean
+) {
+  useEffect(() => {
+    if (!enabled || !containerRef.current) return;
+    const el = containerRef.current;
+
+    const getFocusable = () =>
+      Array.from(el.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
+        (n) => !n.closest('[aria-hidden="true"]')
+      );
+
+    // Mover foco al primer elemento al abrir
+    const first = getFocusable()[0];
+    first?.focus();
+
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key !== "Tab") return;
+      const focusable = getFocusable();
+      if (focusable.length === 0) { e.preventDefault(); return; }
+      const firstEl = focusable[0];
+      const lastEl = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === firstEl) {
+          e.preventDefault();
+          lastEl?.focus();
+        }
+      } else {
+        if (document.activeElement === lastEl) {
+          e.preventDefault();
+          firstEl?.focus();
+        }
+      }
+    }
+
+    el.addEventListener("keydown", onKeyDown);
+    return () => el.removeEventListener("keydown", onKeyDown);
+  }, [enabled, containerRef]);
+}
+
 // ─── BottomSheet ──────────────────────────────────────────────────────
 // Slides up from bottom. Used for numpad, filters, action sheets.
 
@@ -21,6 +75,9 @@ interface BottomSheetProps {
 export function BottomSheet({ open, onClose, title, children, className }: BottomSheetProps) {
   const [mounted, setMounted] = useState(false);
   const prevFocusRef = useRef<HTMLElement | null>(null);
+  const sheetRef = useRef<HTMLDivElement | null>(null);
+
+  useFocusTrap(sheetRef, open);
 
   useEffect(() => setMounted(true), []);
 
@@ -64,6 +121,7 @@ export function BottomSheet({ open, onClose, title, children, className }: Botto
 
           {/* Sheet */}
           <motion.div
+            ref={sheetRef}
             variants={modalSlide}
             initial="hidden"
             animate="visible"
@@ -113,6 +171,9 @@ interface DialogProps {
 export function Dialog({ open, onClose, title, children, className }: DialogProps) {
   const [mounted, setMounted] = useState(false);
   const prevFocusRef = useRef<HTMLElement | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+
+  useFocusTrap(dialogRef, open);
 
   useEffect(() => setMounted(true), []);
 
@@ -154,6 +215,7 @@ export function Dialog({ open, onClose, title, children, className }: DialogProp
           />
           <div className="fixed inset-0 z-modal flex items-center justify-center p-6 pointer-events-none">
             <motion.div
+              ref={dialogRef}
               variants={modalFade}
               initial="hidden"
               animate="visible"

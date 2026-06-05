@@ -85,6 +85,25 @@ export async function getIsAdmin(): Promise<boolean> {
   }
 }
 
+/** Cantidad de notificaciones no leídas del usuario actual. */
+export async function getUnreadNotificationCount(): Promise<number> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return 0;
+    const { count } = await supabase
+      .from("notification")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .is("read_at", null);
+    return count ?? 0;
+  } catch {
+    return 0;
+  }
+}
+
 /** Perfil público de otro socio (para ver desde el muro / ranking). */
 export async function getUserProfileById(userId: string): Promise<UserProfile | null> {
   const supabase = await createClient();

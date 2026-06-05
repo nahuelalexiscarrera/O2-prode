@@ -53,7 +53,11 @@ BEGIN
 END $$;
 
 -- ─── 2. fn_add_points: solo service role ──────────────────────────────
-REVOKE EXECUTE ON FUNCTION fn_add_points(uuid, integer) FROM anon, authenticated;
+-- OJO: en Postgres las funciones tienen EXECUTE para PUBLIC por defecto, así que
+-- revocar solo a `authenticated` NO alcanza (el rol sigue teniendo permiso vía
+-- PUBLIC). Hay que revocar a PUBLIC y dar el grant explícito al service role.
+REVOKE EXECUTE ON FUNCTION fn_add_points(uuid, integer) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION fn_add_points(uuid, integer) TO service_role;
 
 -- ─── Backfill: recomputar contadores reales (por si quedaron desfasados) ─
 UPDATE post p SET

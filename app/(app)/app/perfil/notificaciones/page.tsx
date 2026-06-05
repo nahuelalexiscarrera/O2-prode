@@ -48,7 +48,7 @@ export default async function NotificacionesPage() {
 
   return (
     <div className="min-h-screen pb-[calc(5rem+env(safe-area-inset-bottom))] flex flex-col">
-      <ScreenHeader title="Notificaciones" backHref="/app/perfil" />
+      <ScreenHeader title="Notificaciones" backHref="/app" />
 
       {items.length === 0 ? (
         <div className="flex-1 flex items-center justify-center">

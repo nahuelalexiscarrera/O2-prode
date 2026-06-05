@@ -48,6 +48,13 @@ function nameColor(name: string): string {
   return PALETTE[h % PALETTE.length] ?? PALETTE[0]!;
 }
 
+// Fallback para usuarios con formatos viejos ("art:" o "/avatars/")
+function resolveAvatarUrl(url?: string | null): string | null {
+  if (!url) return null;
+  if (url.startsWith("art:") || url.startsWith("/avatars/")) return "/avatares_O2/screen.webp";
+  return url;
+}
+
 export function Avatar({
   name,
   initials,
@@ -58,6 +65,7 @@ export function Avatar({
   className,
 }: AvatarProps) {
   const { px, text, badge } = sizeMap[size];
+  const finalUrl = resolveAvatarUrl(avatarUrl);
 
   return (
     <div
@@ -65,13 +73,13 @@ export function Avatar({
       style={{ width: px, height: px }}
     >
       {/* Image or initials fallback */}
-      {avatarUrl ? (
+      {finalUrl ? (
         <Image
-          src={avatarUrl}
+          src={finalUrl}
           alt={name}
           width={px}
           height={px}
-          className="rounded-full object-cover w-full h-full"
+          className="rounded-full object-cover w-full h-full bg-elevated"
         />
       ) : (
         <div
