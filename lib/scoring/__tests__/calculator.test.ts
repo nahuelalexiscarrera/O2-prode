@@ -95,6 +95,16 @@ describe("calculateMatchPoints — base scoring rules (Agente 2 §7)", () => {
 });
 
 describe("calculateMatchPoints — phase multipliers", () => {
+  it("32avos (Mundial 48) x2: exacto = 16 pts", () => {
+    const r = calculateMatchPoints({
+      prediction: { homeScore: 2, awayScore: 1 },
+      result: { homeScore: 2, awayScore: 1 },
+      phase: "round-of-32",
+    });
+    expect(r.phaseMultiplier).toBe(2);
+    expect(r.total).toBe(16);
+  });
+
   it("octavos x2: exacto = 16 pts", () => {
     const r = calculateMatchPoints({
       prediction: { homeScore: 2, awayScore: 1 },

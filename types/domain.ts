@@ -8,7 +8,13 @@
 
 // ─── Enums and unions ───────────────────────────────────────────────
 
-export type Phase = "groups" | "round-of-16" | "quarter" | "semi" | "final";
+export type Phase =
+  | "groups"
+  | "round-of-32"
+  | "round-of-16"
+  | "quarter"
+  | "semi"
+  | "final";
 
 export type MatchStatus = "scheduled" | "live" | "finished" | "postponed";
 
