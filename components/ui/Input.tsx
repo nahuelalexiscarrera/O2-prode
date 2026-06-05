@@ -87,7 +87,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
             onChange?.(e);
           }}
           className={cn(
-            "w-full h-14 rounded-md bg-surface border text-text text-body-md px-4",
+            // text-body-lg = 16px: evita el auto-zoom de iOS al enfocar (a11y C1)
+            "w-full h-14 rounded-md bg-surface border text-text text-body-lg px-4",
             "transition-colors duration-base outline-none",
             "disabled:opacity-40 disabled:cursor-not-allowed",
             label && "pt-4",

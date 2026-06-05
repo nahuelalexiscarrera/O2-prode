@@ -347,3 +347,13 @@
     height: 100dvh;
   }
 }
+
+/* ─── a11y C1: evitar auto-zoom de iOS al enfocar inputs ──── */
+/* El viewport ya permite pinch-zoom (WCAG 1.4.4). iOS Safari auto-zoomea cuando
+   el campo enfocado tiene fuente < 16px; forzamos 16px en los controles de
+   formulario para que no salte el zoom involuntario. */
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  font-size: 16px;
+}
