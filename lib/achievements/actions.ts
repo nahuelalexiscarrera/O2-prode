@@ -14,6 +14,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidateTag } from "next/cache";
 import { evaluateForEvent, type EventScope, type TriggerContext } from "./triggers";
 import { ACHIEVEMENT_BY_ID } from "./catalog";
+import { pushToUser } from "@/lib/push/notify";
 
 // ─── Helper: get user's already-unlocked achievement IDs ─────────────
 
@@ -99,6 +100,17 @@ export async function processAchievements(
     deep_link: `/app/perfil/logros#${r.achievement.id}`,
   }));
   await createAdminClient().from("notification").insert(notifs);
+
+  // Push al dispositivo (los logros son hitos infrecuentes → siempre se envían).
+  const pushBody =
+    newlyUnlocked.length === 1
+      ? (newlyUnlocked[0]?.achievement.name ?? "Nuevo logro")
+      : `Desbloqueaste ${newlyUnlocked.length} logros nuevos`;
+  await pushToUser(ctx.userId, {
+    title: "Logro desbloqueado",
+    body: pushBody,
+    deep_link: "/app/perfil/logros",
+  });
 
   revalidateTag(`user-${ctx.userId}-achievements`);
 

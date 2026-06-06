@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getGlobalRanking } from "@/lib/ranking/queries";
+import { getGlobalRanking, getMyRankEntry } from "@/lib/ranking/queries";
 import { ScreenHeader } from "@/components/features/ScreenHeader";
 import { PodiumCard, type PodiumEntry } from "@/components/features/PodiumCard";
 import { RankingRow } from "@/components/features/RankingRow";
@@ -29,7 +29,10 @@ export default async function RankingPage() {
     }));
 
   const listEntries = ranking.filter((u) => u.computedPosition > 3);
-  const myEntry = ranking.find((u) => u.id === user.id);
+  // Si el socio está en el top-100, ya lo tenemos. Si no (rankeado 101-800),
+  // computamos su posición aparte para que igual vea dónde está.
+  const myEntry =
+    ranking.find((u) => u.id === user.id) ?? (await getMyRankEntry(user.id));
 
   return (
     <div

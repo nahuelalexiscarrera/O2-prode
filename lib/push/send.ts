@@ -1,10 +1,25 @@
 import webpush from "web-push";
 
-webpush.setVapidDetails(
-  process.env.VAPID_SUBJECT ?? "mailto:contacto@o2-prode.app",
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!,
-);
+// VAPID lazy: si las claves no están configuradas, importar este módulo NO
+// debe romper (varios crons críticos lo importan, p.ej. sync-results). En ese
+// caso el push simplemente no se envía y se degrada en silencio.
+let vapidState: boolean | null = null;
+function ensureVapid(): boolean {
+  if (vapidState !== null) return vapidState;
+  const pub = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  const priv = process.env.VAPID_PRIVATE_KEY;
+  if (!pub || !priv) {
+    vapidState = false;
+    return false;
+  }
+  webpush.setVapidDetails(
+    process.env.VAPID_SUBJECT ?? "mailto:contacto@o2-prode.app",
+    pub,
+    priv,
+  );
+  vapidState = true;
+  return true;
+}
 
 export interface PushPayload {
   title: string;
@@ -22,6 +37,7 @@ export async function sendPush(
   sub: Subscription,
   payload: PushPayload,
 ): Promise<{ ok: boolean; gone?: boolean }> {
+  if (!ensureVapid()) return { ok: false };
   try {
     await webpush.sendNotification(
       { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh_key, auth: sub.auth_key } },
