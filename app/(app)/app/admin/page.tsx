@@ -50,6 +50,7 @@ export default async function AdminPage() {
       <div className="mx-4 mb-6 bg-card rounded-xl border border-border overflow-hidden">
         <NavRow href="/app/admin/partidos" label="Cargar resultados de partidos" />
         <NavRow href="/app/admin/logros" label="Puntos de logros" />
+        <NavRow href="/app/admin/soporte" label="Soporte (tickets a Jira)" />
       </div>
 
       <Section title="Comunidad">
