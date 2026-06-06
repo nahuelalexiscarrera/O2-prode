@@ -1,0 +1,37 @@
+name: Sync results (Mundial 2026)
+
+# Resultados en vivo: dispara /api/cron/sync-results cada 30 min.
+# Vercel plan Hobby NO permite crons sub-diarios, así que lo corre GitHub Actions
+# y pega al endpoint protegido (Bearer CRON_SECRET). Los crons DIARIOS
+# (refresh-views, daily-streaks, weekly-positions, weekly-digest) siguen en
+# vercel.json. Cuando termine el Mundial, se puede desactivar este workflow.
+
+on:
+  schedule:
+    - cron: "*/30 * * * *" # cada 30 minutos (UTC)
+  workflow_dispatch: {} # permite correrlo a mano desde la pestaña Actions
+
+# Evita solapamiento si una corrida se demora.
+concurrency:
+  group: sync-results
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger /api/cron/sync-results
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "Falta el secret CRON_SECRET en el repo (Settings → Secrets → Actions)."
+            exit 1
+          fi
+          code=$(curl -sS -o /tmp/out.txt -w "%{http_code}" -X POST \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            https://o2-prode.vercel.app/api/cron/sync-results)
+          echo "HTTP $code"
+          cat /tmp/out.txt || true
+          echo ""
+          test "$code" = "200"
