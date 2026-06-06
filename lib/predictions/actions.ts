@@ -52,3 +52,57 @@ export async function upsertPrediction(input: unknown) {
   if (error) return { error: "Error al guardar" as const };
   return { success: true };
 }
+
+// ─── Predicción especial (campeón / subcampeón / mejor de grupos / revelación) ──
+
+const SpecialSchema = z.object({
+  championCode: z.string().trim().min(2),
+  runnerUpCode: z.string().trim().min(2),
+  groupStageBestCode: z.string().trim().min(2),
+  revelationCode: z.string().trim().min(2),
+});
+
+export async function upsertSpecialPrediction(input: unknown) {
+  const parsed = SpecialSchema.safeParse(input);
+  if (!parsed.success) return { error: "Datos inválidos" as const };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "No autenticado" as const };
+
+  // Cierre: la predicción especial se bloquea cuando arranca el torneo (1er partido).
+  const { data: firstMatch } = await supabase
+    .from("match")
+    .select("kickoff_at")
+    .order("kickoff_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  if (firstMatch && Date.now() >= new Date(firstMatch.kickoff_at).getTime()) {
+    return { error: "El torneo ya arrancó: la predicción especial está cerrada." as const };
+  }
+
+  const { data: tournament } = await supabase
+    .from("tournament")
+    .select("id")
+    .limit(1)
+    .maybeSingle();
+  if (!tournament) return { error: "Torneo no encontrado" as const };
+
+  const { error } = await supabase.from("special_prediction").upsert(
+    {
+      user_id: user.id,
+      tournament_id: tournament.id as string,
+      champion_code: parsed.data.championCode,
+      runner_up_code: parsed.data.runnerUpCode,
+      group_stage_best_code: parsed.data.groupStageBestCode,
+      revelation_code: parsed.data.revelationCode,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "user_id" }
+  );
+
+  if (error) return { error: "No se pudo guardar la predicción especial." as const };
+  return { success: true };
+}
