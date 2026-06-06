@@ -28,8 +28,8 @@ export function ProgressBar({ value, max = 100, label, className }: ProgressBarP
         className="h-1.5 w-full bg-border rounded-full overflow-hidden"
       >
         <div
-          className="h-full bg-primary rounded-full transition-[width] duration-slow ease-standard"
-          style={{ width: `${pct}%` }}
+          className="h-full w-full bg-primary rounded-full origin-left transition-transform duration-slow ease-standard"
+          style={{ transform: `scaleX(${pct / 100})` }}
         />
       </div>
     </div>

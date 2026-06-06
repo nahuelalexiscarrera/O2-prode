@@ -242,6 +242,46 @@ export async function resendConfirmationAction(
   return { ok: true };
 }
 
+// ─── Reset password (form de clave nueva tras el link de recovery) ────
+
+const resetSchema = z
+  .object({
+    password: z.string().min(8, "Mínimo 8 caracteres"),
+    passwordConfirm: z.string(),
+  })
+  .refine((d) => d.password === d.passwordConfirm, {
+    path: ["passwordConfirm"],
+    message: "Las contraseñas no coinciden.",
+  });
+
+/**
+ * Setea la nueva contraseña. La sesión de recovery ya quedó activa (el link del
+ * mail pasa por /auth/confirm con type=recovery). updateUser usa esa sesión.
+ */
+export async function resetPasswordAction(
+  _prev: unknown,
+  formData: FormData
+): Promise<ActionResult> {
+  const parsed = resetSchema.safeParse({
+    password: formData.get("password"),
+    passwordConfirm: formData.get("passwordConfirm"),
+  });
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    return { ok: false, error: issue?.message ?? "Datos inválidos", field: String(issue?.path?.[0] ?? "") };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
+  if (error) {
+    return {
+      ok: false,
+      error: "No se pudo cambiar la contraseña. El link puede haber vencido — pedí uno nuevo.",
+    };
+  }
+  redirect("/app");
+}
+
 // ─── Sign out ─────────────────────────────────────────────────────────
 
 export async function signOutAction(): Promise<void> {
