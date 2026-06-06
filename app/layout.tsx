@@ -7,6 +7,7 @@
  */
 
 import type { Metadata, Viewport } from "next";
+import { MotionConfig } from "framer-motion";
 import { Anton, Hanken_Grotesk } from "next/font/google";
 import "./styles/globals.css";
 import { ToastProvider } from "@/components/ui/Toast";
@@ -81,7 +82,11 @@ export default function RootLayout({
         <svg aria-hidden="true" style={{ position: "absolute", width: 0, height: 0 }}>
           <use href="/design/icons.svg" />
         </svg>
-        <ToastProvider>{children}</ToastProvider>
+        {/* reducedMotion="user": Framer Motion respeta prefers-reduced-motion
+            (transform/scale/rotate se reducen a fade). a11y WCAG 2.3.3. */}
+        <MotionConfig reducedMotion="user">
+          <ToastProvider>{children}</ToastProvider>
+        </MotionConfig>
       </body>
     </html>
   );
