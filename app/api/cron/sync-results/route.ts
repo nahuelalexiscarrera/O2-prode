@@ -18,6 +18,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getWcMatches, type FdMatch } from "@/lib/football-api/client";
 import { TLA_TO_CODE, stageToPhase, fdStatusToMatch } from "@/lib/football-api/team-map";
+import { evaluateMatchSettledForUsers } from "@/lib/achievements/match-settled";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -80,6 +81,7 @@ async function handle(req: NextRequest) {
 
   const changes: SyncChange[] = [];
   const finishedNotifs: Array<{ homeCode: string; awayCode: string; h: number; a: number }> = [];
+  const finishedMatchIds: string[] = [];
 
   for (const fx of fixtures) {
     const homeTla = fx.homeTeam?.tla;
@@ -162,6 +164,7 @@ async function handle(req: NextRequest) {
       if (!mErr) {
         changes.push({ fdId: fx.id, action: "set_finished", detail: `${db.home_code} ${dbHome}-${dbAway} ${db.away_code}` });
         finishedNotifs.push({ homeCode: db.home_code, awayCode: db.away_code, h: dbHome, a: dbAway });
+        finishedMatchIds.push(db.id);
       }
     }
   }
@@ -170,8 +173,18 @@ async function handle(req: NextRequest) {
     await sendMatchResultNotifications(supabase, n.homeCode, n.awayCode, n.h, n.a);
   }
   await sendUpcomingMatchNotifications(supabase);
-  if (changes.some((c) => c.action === "set_finished")) {
+
+  if (finishedMatchIds.length > 0) {
     await supabase.rpc("fn_refresh_views");
+    // Logros de skill (A01-A05) y posición (P01-P03/P05): el scope match-settled
+    // necesita un evaluador en runtime. Para cada socio que predijo un partido
+    // que acaba de cerrar, recomputamos su contexto y desbloqueamos lo que aplique.
+    const { data: affected } = await supabase
+      .from("prediction")
+      .select("user_id")
+      .in("match_id", finishedMatchIds);
+    const userIds = [...new Set((affected ?? []).map((p) => p.user_id as string))];
+    if (userIds.length > 0) await evaluateMatchSettledForUsers(userIds);
   }
 
   return NextResponse.json({ ok: true, processed: fixtures.length, changes: changes.length, detail: changes });
