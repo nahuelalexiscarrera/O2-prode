@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getIsAdmin } from "@/lib/users/queries";
-import { getSupportTickets, getErrorEvents, isJiraConfigured } from "@/lib/support/queries";
+import { getSupportTickets, isJiraConfigured } from "@/lib/support/queries";
 import { ScreenHeader } from "@/components/features/ScreenHeader";
 import { SupportTicketForm } from "@/components/features/SupportTicketForm";
 import { cn } from "@/lib/utils/cn";
@@ -26,7 +26,7 @@ export default async function SoportePage() {
   if (error || !data?.user) redirect("/login");
   if (!(await getIsAdmin())) notFound();
 
-  const [tickets, errorEvents] = await Promise.all([getSupportTickets(), getErrorEvents()]);
+  const tickets = await getSupportTickets();
   const jiraOn = isJiraConfigured();
 
   return (
@@ -84,48 +84,6 @@ export default async function SoportePage() {
                     </a>
                   )}
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="px-4">
-        <h2 className="text-[11px] font-bold uppercase tracking-[0.15em] text-text-muted mb-1">
-          Errores automáticos
-        </h2>
-        <p className="text-[11px] text-text-disabled mb-3">
-          Capturados solos y deduplicados: el contador agrupa repeticiones del mismo error.
-        </p>
-
-        {errorEvents.length === 0 ? (
-          <p className="text-body-sm text-text-muted">Sin errores capturados. (Buena señal.)</p>
-        ) : (
-          <div className="bg-card rounded-xl border border-border overflow-hidden">
-            {errorEvents.map((ev) => (
-              <div
-                key={ev.id}
-                className="flex items-start justify-between gap-3 px-4 py-3 border-b border-border last:border-b-0"
-              >
-                <div className="flex flex-col gap-0.5 min-w-0">
-                  <span className="text-body-sm text-text font-medium truncate">{ev.message}</span>
-                  <span className="text-[11px] text-text-muted">
-                    {ev.kind === "server" ? "Servidor" : "Cliente"}
-                    {ev.route ? ` · ${ev.route}` : ""} · ×{ev.count}
-                  </span>
-                </div>
-                {ev.jira_url ? (
-                  <a
-                    href={ev.jira_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[11px] text-primary underline shrink-0"
-                  >
-                    Ver en Jira
-                  </a>
-                ) : (
-                  <span className="text-[10px] text-text-disabled shrink-0">solo local</span>
-                )}
               </div>
             ))}
           </div>
