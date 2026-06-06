@@ -6,25 +6,30 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-// OJO: las NEXT_PUBLIC_* se INYECTAN en build (no se leen en runtime en el código
-// server). Tienen que estar en Vercel AL MOMENTO DEL BUILD. Si se agregan después,
-// hay que redeployar SIN build cache, o quedan horneadas como undefined.
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// Acceso por BRACKET a propósito: Next inyecta en build solo `process.env.NEXT_PUBLIC_X`
+// (dot). Con bracket NO se hornea → se lee del runtime, igual que el middleware. Así
+// el server-side de Supabase anda mientras el env esté en Vercel (runtime), sin
+// depender de que estuviera presente en el momento exacto del build.
+function supabaseEnv() {
+  const url = process.env["NEXT_PUBLIC_SUPABASE_URL"];
+  const key = process.env["NEXT_PUBLIC_SUPABASE_ANON_KEY"];
+  return { url, key };
+}
 
 export async function createClient() {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  const { url, key } = supabaseEnv();
+  if (!url || !key) {
     throw new Error(
       "Supabase mal configurado: faltan NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY " +
-        "en el build de Vercel. Si las cargaste recién, redeployá SIN build cache."
+        "en las Environment Variables de Vercel (Production)."
     );
   }
 
   const cookieStore = await cookies();
 
   return createServerClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY,
+    url,
+    key,
     {
       cookies: {
         get(name: string) {
