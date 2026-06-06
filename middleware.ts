@@ -31,13 +31,22 @@ export async function middleware(request: NextRequest) {
   );
 
   // `getUser()` validates the JWT against the auth server, so it can fail in
-  // ways that are NOT a clean "logged out": an expired refresh token, or — the
-  // case that bit us in beta — a JWT whose `sub` references a deleted auth user
-  // ("User from sub claim in JWT does not exist"). In those cases it returns an
-  // `error` and may return a null `data`, so we never blindly destructure
-  // `data.user`. Anything that isn't a valid, existing user is logged-out.
-  const { data, error } = await supabase.auth.getUser();
-  const user = data?.user ?? null;
+  // ways that are NOT a clean "logged out": un refresh token vencido/inexistente
+  // ("Invalid Refresh Token: Refresh Token Not Found"), o — el caso que nos pegó
+  // en beta — un JWT cuyo `sub` apunta a un auth user borrado ("User from sub
+  // claim in JWT does not exist"). En la mayoría devuelve `error`, PERO el
+  // auto-refresh del token a veces LANZA (rechaza) en vez de devolver error, y
+  // sin este try/catch el middleware tiraba 500 al socio con sesión vieja.
+  // Cualquier cosa que no sea un usuario válido y existente = deslogueado.
+  let user: Awaited<ReturnType<typeof supabase.auth.getUser>>["data"]["user"] = null;
+  let error: unknown = null;
+  try {
+    const res = await supabase.auth.getUser();
+    user = res.data?.user ?? null;
+    error = res.error;
+  } catch (e) {
+    error = e;
+  }
   const hasValidUser = !error && !!user;
 
   const { pathname } = request.nextUrl;
