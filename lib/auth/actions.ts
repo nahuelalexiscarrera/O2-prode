@@ -282,6 +282,66 @@ export async function resetPasswordAction(
   redirect("/app");
 }
 
+// ─── Cambiar contraseña (desde la app, con sesión activa) ─────────────
+
+const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Ingresá tu contraseña actual"),
+    newPassword: z.string().min(8, "Mínimo 8 caracteres"),
+    passwordConfirm: z.string(),
+  })
+  .refine((d) => d.newPassword === d.passwordConfirm, {
+    path: ["passwordConfirm"],
+    message: "Las contraseñas no coinciden.",
+  })
+  .refine((d) => d.newPassword !== d.currentPassword, {
+    path: ["newPassword"],
+    message: "La nueva contraseña tiene que ser distinta a la actual.",
+  });
+
+/**
+ * Cambia la contraseña de un socio logueado. Re-autentica con la contraseña
+ * actual antes de actualizar (defensa por si la sesión quedó abierta en un
+ * dispositivo ajeno). NO redirige: vuelve un ActionResult para mostrar toast.
+ */
+export async function changePasswordAction(formData: FormData): Promise<ActionResult> {
+  const parsed = changePasswordSchema.safeParse({
+    currentPassword: formData.get("currentPassword"),
+    newPassword: formData.get("newPassword"),
+    passwordConfirm: formData.get("passwordConfirm"),
+  });
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    return { ok: false, error: issue?.message ?? "Datos inválidos", field: String(issue?.path?.[0] ?? "") };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user?.email) return { ok: false, error: "No autenticado" };
+
+  // Verificar la contraseña actual re-autenticando.
+  const { error: signInErr } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: parsed.data.currentPassword,
+  });
+  if (signInErr) {
+    return { ok: false, error: "La contraseña actual no es correcta.", field: "currentPassword" };
+  }
+
+  const { error: updateErr } = await supabase.auth.updateUser({ password: parsed.data.newPassword });
+  if (updateErr) {
+    const msg = updateErr.message.toLowerCase();
+    if (msg.includes("different") || msg.includes("should be")) {
+      return { ok: false, error: "La nueva contraseña tiene que ser distinta a la actual.", field: "newPassword" };
+    }
+    return { ok: false, error: "No se pudo cambiar la contraseña. Probá de nuevo.", field: "newPassword" };
+  }
+
+  return { ok: true };
+}
+
 // ─── Sign out ─────────────────────────────────────────────────────────
 
 export async function signOutAction(): Promise<void> {

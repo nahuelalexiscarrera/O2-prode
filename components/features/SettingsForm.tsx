@@ -10,6 +10,7 @@ import { useToast } from "@/components/ui/Toast";
 import { updateNotificationPrefs, updateVisibility } from "@/lib/users/actions";
 import { PushToggle } from "@/components/features/PushToggle";
 import { AvatarPicker } from "@/components/features/AvatarPicker";
+import { ChangePasswordSheet } from "@/components/features/ChangePasswordSheet";
 import { Avatar } from "@/components/ui/Avatar";
 import { cn } from "@/lib/utils/cn";
 
@@ -76,6 +77,7 @@ export function SettingsForm({ email, initialPrefs, initialVisibility, avatarUrl
   const [prefs, setPrefs] = useState<NotifPrefs>(initialPrefs);
   const [visibility, setVisibility] = useState(initialVisibility);
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
+  const [changePwOpen, setChangePwOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const router = useRouter();
@@ -116,10 +118,14 @@ export function SettingsForm({ email, initialPrefs, initialVisibility, avatarUrl
       <SectionLabel>Cuenta</SectionLabel>
       <div className="mx-4 bg-card rounded-xl border border-border overflow-hidden">
         <StaticRow label="Email" value={email} />
-        <div className="flex items-center justify-between px-4 py-3.5 border-b border-border">
+        <button
+          type="button"
+          onClick={() => setChangePwOpen(true)}
+          className="w-full flex items-center justify-between px-4 py-3.5 border-b border-border hover:bg-elevated/50 transition-colors"
+        >
           <span className="text-body-sm text-text">Cambiar contraseña</span>
-          <span className="text-body-sm text-text-muted text-[11px]">Próximamente</span>
-        </div>
+          <Icon name="arrow-right" size={16} className="text-text-muted" />
+        </button>
         <button
           type="button"
           onClick={() => setAvatarPickerOpen(true)}
@@ -138,6 +144,8 @@ export function SettingsForm({ email, initialPrefs, initialVisibility, avatarUrl
         onClose={() => setAvatarPickerOpen(false)}
         currentAvatarUrl={avatarUrl}
       />
+
+      <ChangePasswordSheet open={changePwOpen} onClose={() => setChangePwOpen(false)} />
 
       {/* Notifications */}
       <SectionLabel>Notificaciones</SectionLabel>
