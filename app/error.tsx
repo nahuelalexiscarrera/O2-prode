@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { reportClientError } from "@/lib/errors/client";
 
 export default function GlobalError({
   error,
@@ -13,6 +14,8 @@ export default function GlobalError({
 
   useEffect(() => {
     console.error(error);
+    // React no dispara window.onerror para errores de render; los reportamos acá.
+    reportClientError(error.message, error.stack);
   }, [error]);
 
   return (
@@ -27,6 +30,7 @@ export default function GlobalError({
       </div>
       <div className="flex flex-col gap-3 w-full max-w-[200px]">
         <button
+          type="button"
           onClick={reset}
           className="h-11 rounded-xl bg-primary text-[#0B0B0D] text-body-sm font-semibold"
         >

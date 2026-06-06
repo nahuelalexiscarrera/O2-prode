@@ -11,6 +11,7 @@ import { MotionConfig } from "framer-motion";
 import { Anton, Hanken_Grotesk } from "next/font/google";
 import "./styles/globals.css";
 import { ToastProvider } from "@/components/ui/Toast";
+import { ErrorReporter } from "@/components/features/ErrorReporter";
 
 const anton = Anton({
   subsets: ["latin"],
@@ -84,6 +85,7 @@ export default function RootLayout({
         </svg>
         {/* reducedMotion="user": Framer Motion respeta prefers-reduced-motion
             (transform/scale/rotate se reducen a fade). a11y WCAG 2.3.3. */}
+        <ErrorReporter />
         <MotionConfig reducedMotion="user">
           <ToastProvider>{children}</ToastProvider>
         </MotionConfig>
