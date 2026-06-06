@@ -58,12 +58,14 @@ export async function fetchShareData(
     // Fetch special prediction if available
     const { data: special } = await supabase
       .from("special_prediction")
-      .select("champion_team_code, top_scorer_player_id")
+      .select("champion_code, top_scorer_player_id")
       .eq("user_id", userId)
       .maybeSingle();
 
-    const championCode = (special?.champion_team_code as string | null) ?? "arg";
-    const isArg = championCode.toLowerCase() === "arg";
+    // OJO: la columna es champion_code (no champion_team_code). Y sin predicción
+    // especial cargada NO defaulteamos a Argentina (era el bug: todos campeón ARG).
+    const championCode = (special?.champion_code as string | null) ?? null;
+    const isArg = championCode?.toLowerCase() === "arg";
 
     const summaryData: SummaryShareData = {
       template: "summary",
@@ -72,16 +74,19 @@ export async function fetchShareData(
       userInitials: user.userInitials,
       userLevel: user.userLevel,
       userLevelName: user.userLevelName,
-      champion: { country: championCode.toUpperCase(), flagCode: championCode.toLowerCase() },
-      topScorer: { name: "—", country: "—", flagCode: "arg" },
+      champion: {
+        country: (championCode ?? "—").toUpperCase(),
+        flagCode: (championCode ?? "ar").toLowerCase(),
+      },
+      topScorer: { name: "—", country: "—", flagCode: "ar" },
       finalResult: {
-        home: { country: "—", flagCode: "arg" },
-        away: { country: "—", flagCode: "arg" },
+        home: { country: "—", flagCode: "ar" },
+        away: { country: "—", flagCode: "ar" },
         score: [0, 0],
       },
       points: user.totalPoints,
       position: user.position,
-      isArgentinaChampion: isArg,
+      isArgentinaChampion: isArg ?? false,
     };
     return summaryData;
   }

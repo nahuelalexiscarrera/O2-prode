@@ -66,11 +66,17 @@ async function handle(req: NextRequest) {
   const byFdId = new Map<number, DbMatch>();
   for (const m of dbMatches) if (m.fd_id != null) byFdId.set(m.fd_id, m);
 
-  // Índice por par de equipos (ordenado) para enganchar partidos de grupos que
-  // todavía no tienen fd_id (primera corrida sin backfill).
-  const pairKey = (a: string, b: string) => [a, b].sort().join("|");
+  // Índice por par de equipos + FASE para enganchar partidos que todavía no
+  // tienen fd_id (primera corrida). Incluye la fase porque en el formato de 48
+  // dos selecciones pueden cruzarse en grupos Y de nuevo en eliminatorias: sin
+  // la fase, el cruce de knockout matchearía contra la fila de grupos. Además
+  // solo indexamos los NO vinculados, para no re-matchear lo ya enganchado.
+  const pairKey = (a: string, b: string, phase: string) =>
+    `${[a, b].sort().join("|")}::${phase}`;
   const byPair = new Map<string, DbMatch>();
-  for (const m of dbMatches) byPair.set(pairKey(m.home_code, m.away_code), m);
+  for (const m of dbMatches) {
+    if (m.fd_id == null) byPair.set(pairKey(m.home_code, m.away_code, m.phase), m);
+  }
 
   const changes: SyncChange[] = [];
   const finishedNotifs: Array<{ homeCode: string; awayCode: string; h: number; a: number }> = [];
@@ -88,8 +94,8 @@ async function handle(req: NextRequest) {
     const status = fdStatusToMatch(fx.status);
     if (!phase || !status) continue;
 
-    // Enganchar el partido local
-    let db = byFdId.get(fx.id) ?? byPair.get(pairKey(homeCode, awayCode));
+    // Enganchar el partido local (por fd_id, o por par+fase si aún no se vinculó)
+    let db = byFdId.get(fx.id) ?? byPair.get(pairKey(homeCode, awayCode, phase));
 
     if (!db) {
       // Cruce nuevo (eliminatorias recién definidas) → crear
