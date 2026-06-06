@@ -263,18 +263,56 @@ describe("P04 — weekly_rise_10", () => {
   });
 });
 
-describe("P05 — tournament_winner", () => {
-  it("no se desbloquea si el torneo no terminó", () => {
-    const ctx = baseCtx({ tournamentEnded: false, tournamentWinnerUserId: "u-test" });
-    expect(unlockedIds(ctx)).not.toContain("P05");
+describe("P05 — eliminado", () => {
+  it("ya no existe en el catálogo", () => {
+    expect(unlockedIds(baseCtx({ tournamentEnded: true, tournamentWinnerUserId: "u-test" }))).not.toContain("P05");
   });
-  it("no se desbloquea si el userId no coincide", () => {
-    const ctx = baseCtx({ tournamentEnded: true, tournamentWinnerUserId: "u-other" });
-    expect(unlockedIds(ctx)).not.toContain("P05");
+});
+
+// ─── Predicción especial: Subcampeón / Finalistas ─────────────────────
+
+describe("A06 — runner_up_correct", () => {
+  it("no se desbloquea sin subcampeón real", () => {
+    expect(unlockedIds(baseCtx({ predictedRunnerUpCode: "fr", actualRunnerUpCode: null }))).not.toContain("A06");
   });
-  it("se desbloquea cuando el torneo terminó y userId coincide", () => {
-    const ctx = baseCtx({ tournamentEnded: true, tournamentWinnerUserId: "u-test" });
-    expect(unlockedIds(ctx)).toContain("P05");
+  it("no se desbloquea si difiere", () => {
+    expect(unlockedIds(baseCtx({ predictedRunnerUpCode: "fr", actualRunnerUpCode: "br" }))).not.toContain("A06");
+  });
+  it("se desbloquea si coincide", () => {
+    expect(unlockedIds(baseCtx({ predictedRunnerUpCode: "fr", actualRunnerUpCode: "fr" }))).toContain("A06");
+  });
+});
+
+describe("A07 — finalists_correct", () => {
+  it("no se desbloquea si falta data", () => {
+    expect(unlockedIds(baseCtx({ predictedChampionCode: "ar", actualChampionCode: "ar" }))).not.toContain("A07");
+  });
+  it("se desbloquea si acertó ambos finalistas (mismo orden)", () => {
+    const ctx = baseCtx({
+      predictedChampionCode: "ar",
+      predictedRunnerUpCode: "fr",
+      actualChampionCode: "ar",
+      actualRunnerUpCode: "fr",
+    });
+    expect(unlockedIds(ctx)).toContain("A07");
+  });
+  it("se desbloquea aunque haya invertido quién gana (set de finalistas)", () => {
+    const ctx = baseCtx({
+      predictedChampionCode: "fr",
+      predictedRunnerUpCode: "ar",
+      actualChampionCode: "ar",
+      actualRunnerUpCode: "fr",
+    });
+    expect(unlockedIds(ctx)).toContain("A07");
+  });
+  it("no se desbloquea si uno de los finalistas no coincide", () => {
+    const ctx = baseCtx({
+      predictedChampionCode: "ar",
+      predictedRunnerUpCode: "br",
+      actualChampionCode: "ar",
+      actualRunnerUpCode: "fr",
+    });
+    expect(unlockedIds(ctx)).not.toContain("A07");
   });
 });
 

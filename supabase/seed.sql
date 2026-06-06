@@ -270,6 +270,8 @@ INSERT INTO achievement_catalog (id, category, name, description, icon_ref, poin
 ('A03', 'skill',       'Mufa controlada', 'Acertá un upset: predijiste al no-favorito y ganó.', 'flame',    10, 'upset_correct'),
 ('A04', 'skill',       'Pleno',           'Acertá TODOS los partidos de un grupo.',         'check',        20, 'group_complete_correct'),
 ('A05', 'skill',       'Eliminator',      'Acertá todos los cruces de octavos.',            'medal',        25, 'knockout_round_correct'),
+('A06', 'skill',       'Subcampeón',      'Acertá al subcampeón del Mundial antes del torneo.', 'medal',    30, 'runner_up_correct'),
+('A07', 'skill',       'Finalistas',      'Acertá a los 2 finalistas del Mundial.',         'world-trophy', 40, 'finalists_correct'),
 -- Consistency
 ('C01', 'consistency', 'Constante',       '7 días seguidos cargando predicciones.',         'flame',        10, 'streak_days_7'),
 ('C02', 'consistency', 'Maratonista',     '21 días seguidos cargando predicciones.',        'flame',        30, 'streak_days_21'),
@@ -282,11 +284,10 @@ INSERT INTO achievement_catalog (id, category, name, description, icon_ref, poin
 ('S04', 'social',      'Conector',        'Comentaste en 10 posts distintos.',              'comment',      5,  'comments_made_10'),
 ('S05', 'social',      'Tribu',           'Tres amigos tuyos del gym también activaron la app.', 'nav-user', 10, 'friends_active_3'),
 -- Position
-('P01', 'position',    'Top 10',          'Llegaste al top 10 del ranking.',                'nav-chart',    10, 'position_top_10'),
-('P02', 'position',    'Podio',           'Llegaste al top 3 del ranking.',                 'medal',        25, 'position_top_3'),
-('P03', 'position',    'Líder',           'Liderás el ranking general.',                    'crown',        50, 'position_1'),
-('P04', 'position',    'Remontada',       'Subiste 10 o más posiciones en una semana.',     'arrow-up',     15, 'weekly_rise_10'),
-('P05', 'position',    'Campeón',         'Sos el ganador final del torneo.',               'world-trophy', 100,'tournament_winner')
+('P01', 'position',    'Top 10',          'Llegaste al top 10 del ranking.',                'nav-chart',    0, 'position_top_10'),
+('P02', 'position',    'Podio',           'Llegaste al top 3 del ranking.',                 'medal',        0, 'position_top_3'),
+('P03', 'position',    'Líder',           'Liderás el ranking general.',                    'crown',        0, 'position_1'),
+('P04', 'position',    'Remontada',       'Subiste 10 o más posiciones en una semana.',     'arrow-up',     15, 'weekly_rise_10')
 ON CONFLICT (id) DO UPDATE SET
   category     = EXCLUDED.category,
   name         = EXCLUDED.name,
@@ -312,4 +313,4 @@ ON CONFLICT (id) DO UPDATE SET
 --   SELECT COUNT(*) FROM match WHERE phase = 'groups';  -- debe ser 72
 --   SELECT COUNT(*) FROM team;                          -- debe ser 48
 --   SELECT COUNT(*) FROM groups;                        -- debe ser 12
---   SELECT COUNT(*) FROM achievement_catalog;           -- debe ser 19
+--   SELECT COUNT(*) FROM achievement_catalog;           -- debe ser 20

@@ -42,7 +42,7 @@ export async function evaluateMatchSettledForUsers(userIds: string[]): Promise<v
   const [matchesRes, resultsRes, specialsRes, usersRes, predsRes] = await Promise.all([
     admin.from("match").select("id, phase, group_id, home_code, away_code, kickoff_at, status"),
     admin.from("match_result").select("match_id, home_score, away_score"),
-    admin.from("special_prediction").select("user_id, champion_code").in("user_id", ids),
+    admin.from("special_prediction").select("user_id, champion_code, runner_up_code").in("user_id", ids),
     admin.from("user").select("id, position").in("id", ids),
     admin.from("prediction").select("user_id, match_id, home_score, away_score").in("user_id", ids),
   ]);
@@ -50,8 +50,12 @@ export async function evaluateMatchSettledForUsers(userIds: string[]): Promise<v
   const matches = (matchesRes.data ?? []) as MatchRow[];
   const matchById = new Map(matches.map((m) => [m.id, m]));
   const resultByMatch = new Map((resultsRes.data ?? []).map((r) => [(r as ResultRow).match_id, r as ResultRow]));
+  type SpecialRow = { user_id: string; champion_code: string | null; runner_up_code: string | null };
   const championByUser = new Map(
-    (specialsRes.data ?? []).map((s) => [(s as { user_id: string; champion_code: string | null }).user_id, (s as { champion_code: string | null }).champion_code])
+    (specialsRes.data ?? []).map((s) => [(s as SpecialRow).user_id, (s as SpecialRow).champion_code])
+  );
+  const runnerUpByUser = new Map(
+    (specialsRes.data ?? []).map((s) => [(s as SpecialRow).user_id, (s as SpecialRow).runner_up_code])
   );
   const positionByUser = new Map((usersRes.data ?? []).map((u) => [(u as { id: string; position: number }).id, (u as { position: number }).position]));
 
@@ -66,11 +70,14 @@ export async function evaluateMatchSettledForUsers(userIds: string[]): Promise<v
   const finalMatch = matches.find((m) => m.phase === "final");
   const tournamentEnded = !!finalMatch && finalMatch.status === "finished";
   let actualChampionCode: string | null = null;
+  let actualRunnerUpCode: string | null = null;
   let tournamentWinnerUserId: string | null = null;
   if (tournamentEnded && finalMatch) {
     const fr = resultByMatch.get(finalMatch.id);
     if (fr) {
-      actualChampionCode = fr.home_score > fr.away_score ? finalMatch.home_code : finalMatch.away_code;
+      const homeWon = fr.home_score > fr.away_score;
+      actualChampionCode = homeWon ? finalMatch.home_code : finalMatch.away_code;
+      actualRunnerUpCode = homeWon ? finalMatch.away_code : finalMatch.home_code;
     }
     const { data: leader } = await admin
       .from("user")
@@ -95,6 +102,8 @@ export async function evaluateMatchSettledForUsers(userIds: string[]): Promise<v
         position: positionByUser.get(userId) ?? 0,
         predictedChampionCode: championByUser.get(userId) ?? null,
         actualChampionCode,
+        predictedRunnerUpCode: runnerUpByUser.get(userId) ?? null,
+        actualRunnerUpCode,
         tournamentEnded,
         tournamentWinnerUserId,
         totalMatches,
@@ -114,6 +123,8 @@ function buildContext(args: {
   position: number;
   predictedChampionCode: string | null;
   actualChampionCode: string | null;
+  predictedRunnerUpCode: string | null;
+  actualRunnerUpCode: string | null;
   tournamentEnded: boolean;
   tournamentWinnerUserId: string | null;
   totalMatches: number;
@@ -194,6 +205,8 @@ function buildContext(args: {
     activatedFriendsCount: 0,
     predictedChampionCode: args.predictedChampionCode,
     actualChampionCode: args.actualChampionCode,
+    predictedRunnerUpCode: args.predictedRunnerUpCode,
+    actualRunnerUpCode: args.actualRunnerUpCode,
     tournamentEnded: args.tournamentEnded,
     tournamentWinnerUserId: args.tournamentWinnerUserId,
   };

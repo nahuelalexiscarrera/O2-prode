@@ -47,6 +47,24 @@
       "triggerKey": "knockout_round_correct"
     },
     {
+      "id": "A06",
+      "category": "skill",
+      "name": "Subcampeón",
+      "description": "Acertá al subcampeón del Mundial antes del torneo.",
+      "iconRef": "medal",
+      "pointsBonus": 30,
+      "triggerKey": "runner_up_correct"
+    },
+    {
+      "id": "A07",
+      "category": "skill",
+      "name": "Finalistas",
+      "description": "Acertá a los 2 finalistas del Mundial.",
+      "iconRef": "world-trophy",
+      "pointsBonus": 40,
+      "triggerKey": "finalists_correct"
+    },
+    {
       "id": "C01",
       "category": "consistency",
       "name": "Constante",
@@ -133,7 +151,7 @@
       "name": "Top 10",
       "description": "Llegaste al top 10 del ranking.",
       "iconRef": "nav-chart",
-      "pointsBonus": 10,
+      "pointsBonus": 0,
       "triggerKey": "position_top_10"
     },
     {
@@ -142,7 +160,7 @@
       "name": "Podio",
       "description": "Llegaste al top 3.",
       "iconRef": "medal",
-      "pointsBonus": 25,
+      "pointsBonus": 0,
       "triggerKey": "position_top_3"
     },
     {
@@ -151,7 +169,7 @@
       "name": "Líder",
       "description": "Liderás el ranking.",
       "iconRef": "crown",
-      "pointsBonus": 50,
+      "pointsBonus": 0,
       "triggerKey": "position_1"
     },
     {
@@ -162,15 +180,6 @@
       "iconRef": "arrow-up",
       "pointsBonus": 15,
       "triggerKey": "weekly_rise_10"
-    },
-    {
-      "id": "P05",
-      "category": "position",
-      "name": "Campeón",
-      "description": "Ganador final del torneo.",
-      "iconRef": "world-trophy",
-      "pointsBonus": 100,
-      "triggerKey": "tournament_winner"
     }
   ]
 }

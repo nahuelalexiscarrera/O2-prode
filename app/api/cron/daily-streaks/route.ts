@@ -13,6 +13,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { evaluateForEvent } from "@/lib/achievements/triggers";
 import type { TriggerContext } from "@/lib/achievements/triggers";
 import { pushToUser } from "@/lib/push/notify";
+import { sumEffectivePoints } from "@/lib/achievements/points";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -114,8 +115,8 @@ async function handle(req: NextRequest) {
     }));
     await supabase.from("user_achievement").insert(rows);
 
-    // Apply bonus points
-    const totalBonus = newAchievements.reduce((s, r) => s + r.achievement.pointsBonus, 0);
+    // Apply bonus points — desde la DB (editables por el admin)
+    const totalBonus = await sumEffectivePoints(newAchievements.map((r) => r.achievement.id));
     if (totalBonus > 0) {
       await supabase.rpc("fn_add_points", { p_user_id: userId, p_delta: totalBonus });
     }

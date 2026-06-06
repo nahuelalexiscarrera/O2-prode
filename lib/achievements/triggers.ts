@@ -60,6 +60,10 @@ export interface TriggerContext {
   /** special prediction */
   predictedChampionCode: string | null;
   actualChampionCode: string | null;
+  /** subcampeón (finalista perdedor). Opcionales: solo el scope match-settled
+   *  los computa; los demás scopes los dejan undefined (= no se evalúan). */
+  predictedRunnerUpCode?: string | null;
+  actualRunnerUpCode?: string | null;
   /** tournament state */
   tournamentEnded: boolean;
   tournamentWinnerUserId: string | null;
@@ -74,6 +78,15 @@ const evaluators: Record<string, Evaluator> = {
   streak_exact_5: (c) => c.exactStreak >= 5,
   champion_correct: (c) =>
     c.actualChampionCode !== null && c.predictedChampionCode === c.actualChampionCode,
+  runner_up_correct: (c) =>
+    !!c.actualRunnerUpCode && c.predictedRunnerUpCode === c.actualRunnerUpCode,
+  finalists_correct: (c) => {
+    if (!c.actualChampionCode || !c.actualRunnerUpCode) return false;
+    if (!c.predictedChampionCode || !c.predictedRunnerUpCode) return false;
+    // Acertar a los 2 finalistas sin importar quién ganó (set de equipos).
+    const predicted = new Set([c.predictedChampionCode, c.predictedRunnerUpCode]);
+    return predicted.has(c.actualChampionCode) && predicted.has(c.actualRunnerUpCode);
+  },
   upset_correct: (c) => c.upsets.upsetsCorrect >= 1,
   group_complete_correct: (c) =>
     c.groups.some((g) => g.predictedCount === 6 && g.winnersCorrect === 6),
@@ -98,7 +111,7 @@ const evaluators: Record<string, Evaluator> = {
   position_top_3: (c) => c.position > 0 && c.position <= 3,
   position_1: (c) => c.position === 1,
   weekly_rise_10: (c) => c.weeklyPositionDelta >= 10,
-  tournament_winner: (c) => c.tournamentEnded && c.tournamentWinnerUserId === c.userId,
+  // P05 "tournament_winner" eliminado: no se premia con puntos al #1 del ranking.
 };
 
 // ─── Public API ──────────────────────────────────────────────────────
@@ -143,10 +156,11 @@ const scopeMap: Record<EventScope, readonly string[]> = {
     "knockout_round_correct",
     "tournament_100",
     "champion_correct",
+    "runner_up_correct",
+    "finalists_correct",
     "position_top_10",
     "position_top_3",
     "position_1",
-    "tournament_winner",
   ],
   social: [
     "first_post",
