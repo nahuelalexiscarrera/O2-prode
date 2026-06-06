@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getIsAdmin } from "@/lib/users/queries";
-import { getSupportTickets, isJiraConfigured } from "@/lib/support/queries";
+import { getSupportTickets } from "@/lib/support/queries";
 import { ScreenHeader } from "@/components/features/ScreenHeader";
 import { SupportTicketForm } from "@/components/features/SupportTicketForm";
 import { cn } from "@/lib/utils/cn";
@@ -15,9 +15,9 @@ const SEV_LABEL: Record<string, string> = {
   critica: "Crítica",
 };
 const STATUS_LABEL: Record<string, string> = {
-  abierto: "Abierto",
-  enviado: "En Jira",
-  error_jira: "Falló Jira",
+  abierto: "Pendiente",
+  enviado: "Enviado",
+  error_jira: "Pendiente",
 };
 
 export default async function SoportePage() {
@@ -27,17 +27,16 @@ export default async function SoportePage() {
   if (!(await getIsAdmin())) notFound();
 
   const tickets = await getSupportTickets();
-  const jiraOn = isJiraConfigured();
 
   return (
     <div className="min-h-screen pb-[calc(5rem+env(safe-area-inset-bottom))] flex flex-col gap-5">
       <ScreenHeader title="Soporte" backHref="/app/admin" />
 
       <p className="px-4 text-body-sm text-text-muted">
-        Generá un ticket de soporte. Cada uno recibe un número (OST-XXXX) y se espeja en Jira.
+        Reportá un problema o una consulta. Cada ticket recibe un número de seguimiento.
       </p>
 
-      <SupportTicketForm jiraConfigured={jiraOn} />
+      <SupportTicketForm />
 
       <div className="px-4">
         <h2 className="text-[11px] font-bold uppercase tracking-[0.15em] text-text-muted mb-3">
@@ -60,30 +59,14 @@ export default async function SoportePage() {
                     {t.area ? ` · ${t.area}` : ""}
                   </span>
                 </div>
-                <div className="flex flex-col items-end gap-1 shrink-0">
-                  <span
-                    className={cn(
-                      "text-[10px] font-bold uppercase tracking-wide",
-                      t.status === "enviado"
-                        ? "text-success"
-                        : t.status === "error_jira"
-                          ? "text-error"
-                          : "text-text-muted"
-                    )}
-                  >
-                    {STATUS_LABEL[t.status] ?? t.status}
-                  </span>
-                  {t.jira_url && (
-                    <a
-                      href={t.jira_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[11px] text-primary underline"
-                    >
-                      Ver en Jira
-                    </a>
+                <span
+                  className={cn(
+                    "text-[10px] font-bold uppercase tracking-wide shrink-0",
+                    t.status === "enviado" ? "text-success" : "text-text-muted"
                   )}
-                </div>
+                >
+                  {STATUS_LABEL[t.status] ?? t.status}
+                </span>
               </div>
             ))}
           </div>
