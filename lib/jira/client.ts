@@ -43,8 +43,11 @@ function adfParagraph(text: string) {
 export async function createJiraIssue(input: JiraIssueInput): Promise<JiraResult> {
   if (!isJiraConfigured()) return { ok: false, error: "Jira no configurado" };
 
-  // Basic auth: base64(email:token). Buffer existe en el runtime nodejs.
-  const auth = Buffer.from(`${EMAIL}:${TOKEN}`).toString("base64");
+  // Basic auth: base64(email:token). Buffer en nodejs, btoa en edge (email:token
+  // son ASCII, así que btoa alcanza).
+  const creds = `${EMAIL}:${TOKEN}`;
+  const auth =
+    typeof Buffer !== "undefined" ? Buffer.from(creds).toString("base64") : btoa(creds);
 
   const meta = `Severidad: ${input.severity}${input.area ? ` · Área: ${input.area}` : ""}`;
   const footer = `Ticket O2 PRODE: ${input.ticketNumber}${input.reporter ? ` · Reportó: ${input.reporter}` : ""}`;
