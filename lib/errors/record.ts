@@ -13,7 +13,7 @@
  */
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createJiraIssue, isJiraConfigured } from "@/lib/jira/client";
+import { sendSupportEmail, isEmailConfigured } from "@/lib/email/send";
 
 const NOISE: RegExp[] = [
   /resizeobserver/i,
@@ -57,7 +57,9 @@ function hash(s: string): string {
   return h.toString(16);
 }
 
-const JIRA_BUDGET = Number(process.env.AUTO_ERROR_JIRA_BUDGET ?? "8");
+// Tope de emails de error AUTOMÁTICOS por hora — clave para no inundar el inbox
+// si un deploy rompe muchas cosas a la vez. El resto se registra sin notificar.
+const EMAIL_BUDGET = Number(process.env.AUTO_ERROR_EMAIL_BUDGET ?? "8");
 
 export interface ErrorReport {
   kind: "server" | "client";
@@ -89,30 +91,34 @@ export async function recordError(r: ErrorReport): Promise<void> {
     const row = (Array.isArray(data) ? data[0] : data) as
       | { is_new?: boolean; ev_count?: number }
       | null;
-    if (!row?.is_new || !isJiraConfigured()) return;
+    if (!row?.is_new || !isEmailConfigured()) return;
 
-    // Presupuesto horario: no más de N issues automáticos por hora.
+    // Presupuesto horario: no más de N emails automáticos por hora.
+    // (jira_issue_key se reusa como marca de "ya notificado".)
     const sinceISO = new Date(Date.now() - 3600_000).toISOString();
     const { count } = await admin
       .from("error_event")
       .select("id", { count: "exact", head: true })
       .not("jira_issue_key", "is", null)
       .gte("first_seen", sinceISO);
-    if ((count ?? 0) >= JIRA_BUDGET) return; // se registró igual, sin Jira
+    if ((count ?? 0) >= EMAIL_BUDGET) return; // se registró igual, sin mail
 
-    const severity = r.kind === "server" ? "alta" : "media";
-    const jira = await createJiraIssue({
-      summary: `[AUTO][${r.kind}] ${message}`,
-      description: `${message}\n\n${(r.stack ?? "").slice(0, 1500)}`,
-      severity,
-      area: route,
-      ticketNumber: `ERR-${fingerprint}`,
-      reporter: "auto-captura",
+    const mail = await sendSupportEmail({
+      subject: `[O2 PRODE][AUTO][${r.kind}] ${message}`.slice(0, 200),
+      lines: [
+        `Tipo: ${r.kind === "server" ? "Servidor" : "Cliente"}`,
+        `Ruta: ${route ?? "—"}`,
+        "",
+        `Mensaje: ${message}`,
+        "",
+        "Stack:",
+        (r.stack ?? "—").slice(0, 1500),
+      ],
     });
-    if (jira.ok) {
+    if (mail.ok) {
       await admin
         .from("error_event")
-        .update({ jira_issue_key: jira.key, jira_url: jira.url })
+        .update({ jira_issue_key: mail.id })
         .eq("fingerprint", fingerprint);
     }
   } catch {
