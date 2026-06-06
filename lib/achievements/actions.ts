@@ -18,7 +18,10 @@ import { ACHIEVEMENT_BY_ID } from "./catalog";
 // ─── Helper: get user's already-unlocked achievement IDs ─────────────
 
 async function getUnlockedIds(userId: string): Promise<Set<string>> {
-  const supabase = await createClient();
+  // service role: funciona tanto desde un server action (sesión) como desde un
+  // cron (sin sesión, ej. el evaluador match-settled). Opera sobre el userId
+  // explícito, no sobre el de la sesión.
+  const supabase = createAdminClient();
   const { data } = await supabase
     .from("user_achievement")
     .select("achievement_id")
@@ -38,7 +41,7 @@ export async function processAchievements(
 ): Promise<
   Array<{ id: string; name: string; iconRef: string; pointsBonus: number; impact: string }>
 > {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const alreadyUnlocked = await getUnlockedIds(ctx.userId);
   const newlyUnlocked = evaluateForEvent(scope, ctx, alreadyUnlocked);
 

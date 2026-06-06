@@ -21,7 +21,7 @@ export interface GroupCompletionSummary {
 }
 
 export interface KnockoutRoundSummary {
-  phase: "round-of-16" | "quarter" | "semi" | "final";
+  phase: "round-of-32" | "round-of-16" | "quarter" | "semi" | "final";
   totalMatches: number;
   winnersCorrect: number;
 }
