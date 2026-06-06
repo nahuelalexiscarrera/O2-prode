@@ -14,6 +14,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { evaluateForEvent } from "@/lib/achievements/triggers";
 import type { TriggerContext } from "@/lib/achievements/triggers";
+import { pushToUser } from "@/lib/push/notify";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -106,6 +107,14 @@ async function handle(req: NextRequest) {
         deep_link: `/perfil/logros#${r.achievement.id}`,
       }));
       await supabase.from("notification").insert(notifs);
+      await pushToUser(userId, {
+        title: "Logro desbloqueado",
+        body:
+          newAchievements.length === 1
+            ? (newAchievements[0]?.achievement.name ?? "Nuevo logro")
+            : `Desbloqueaste ${newAchievements.length} logros nuevos`,
+        deep_link: "/app/perfil/logros",
+      });
 
       results.push({ userId, unlocked: newAchievements.map((r) => r.achievement.id) });
     }

@@ -19,6 +19,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getWcMatches, type FdMatch } from "@/lib/football-api/client";
 import { TLA_TO_CODE, stageToPhase, fdStatusToMatch } from "@/lib/football-api/team-map";
 import { evaluateMatchSettledForUsers } from "@/lib/achievements/match-settled";
+import { broadcastPush } from "@/lib/push/notify";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -212,6 +213,15 @@ async function sendMatchResultNotifications(
   for (let i = 0; i < notifs.length; i += 100) {
     await supabase.from("notification").insert(notifs.slice(i, i + 100));
   }
+  // Push a los suscriptos que tengan 'results' activo (default ON).
+  await broadcastPush(
+    {
+      title: "Resultado del partido",
+      body: `${homeCode.toUpperCase()} ${homeScore} - ${awayScore} ${awayCode.toUpperCase()} · Mirá tus puntos`,
+      deep_link: "/app",
+    },
+    "results",
+  );
 }
 
 async function sendUpcomingMatchNotifications(
@@ -249,6 +259,16 @@ async function sendUpcomingMatchNotifications(
     for (let i = 0; i < notifs.length; i += 100) {
       await supabase.from("notification").insert(notifs.slice(i, i + 100));
     }
+    // Push solo a los no-predictores con 'matchReminders' activo (default ON).
+    await broadcastPush(
+      {
+        title: "¡Partido en 1 hora!",
+        body: `${match.home_code.toUpperCase()} vs ${match.away_code.toUpperCase()} · Cargá tu predicción`,
+        deep_link: "/app/prode",
+      },
+      "matchReminders",
+      without.map((u: { id: string }) => u.id),
+    );
   }
 }
 
