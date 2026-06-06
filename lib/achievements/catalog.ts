@@ -73,6 +73,26 @@ export const ACHIEVEMENTS: readonly AchievementDef[] = [
     triggerKey: "knockout_round_correct",
     impact: "high",
   },
+  {
+    id: "A06",
+    category: "skill",
+    name: "Subcampeón",
+    description: "Acertá al subcampeón del Mundial antes del torneo.",
+    iconRef: "medal",
+    pointsBonus: 30,
+    triggerKey: "runner_up_correct",
+    impact: "high",
+  },
+  {
+    id: "A07",
+    category: "skill",
+    name: "Finalistas",
+    description: "Acertá a los 2 finalistas del Mundial.",
+    iconRef: "world-trophy",
+    pointsBonus: 40,
+    triggerKey: "finalists_correct",
+    impact: "high",
+  },
 
   // ─── Consistency ───────────────────────────────────────────────────
   {
@@ -209,16 +229,9 @@ export const ACHIEVEMENTS: readonly AchievementDef[] = [
     triggerKey: "weekly_rise_10",
     impact: "medium",
   },
-  {
-    id: "P05",
-    category: "position",
-    name: "Campeón",
-    description: "Sos el ganador final del torneo.",
-    iconRef: "world-trophy",
-    pointsBonus: 0, // insignia: el campeón ya ganó; sumarle puntos no tiene sentido
-    triggerKey: "tournament_winner",
-    impact: "high",
-  },
+  // P05 "Campeón" se eliminó: no tiene sentido darle MÁS puntos al que ya ganó
+  // el ranking (circular). Los puntos de los logros de posición ahora los define
+  // el admin desde el panel (achievement_catalog.points_bonus).
 ] as const;
 
 // ─── Lookup helpers ──────────────────────────────────────────────────

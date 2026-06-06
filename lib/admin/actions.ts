@@ -74,6 +74,31 @@ export async function setMatchResultAction(input: {
   return { ok: true };
 }
 
+/** Edita los puntos bonus de un logro (achievement_catalog). El awarding usa
+ *  este valor, así que el admin controla cuánto suma cada logro. */
+export async function setAchievementPointsAction(input: {
+  id: string;
+  pointsBonus: number;
+}): Promise<AdminActionResult> {
+  const schema = z.object({
+    id: z.string().min(2).max(8),
+    pointsBonus: z.number().int().min(0).max(500),
+  });
+  const parsed = schema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Datos inválidos." };
+  if (!(await getIsAdmin())) return { ok: false, error: "No autorizado." };
+
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("achievement_catalog")
+    .update({ points_bonus: parsed.data.pointsBonus })
+    .eq("id", parsed.data.id);
+  if (error) return { ok: false, error: "No se pudo guardar los puntos." };
+
+  revalidatePath("/app/admin/logros");
+  return { ok: true };
+}
+
 /** Cambia el status de un partido (live / scheduled / postponed) sin cargar resultado. */
 export async function setMatchStatusAction(input: {
   matchId: string;

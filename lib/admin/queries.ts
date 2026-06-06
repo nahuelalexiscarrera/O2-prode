@@ -55,6 +55,30 @@ export async function getMatchesForAdmin(): Promise<AdminMatch[]> {
   });
 }
 
+export type AdminAchievement = {
+  id: string;
+  category: string;
+  name: string;
+  description: string;
+  pointsBonus: number;
+};
+
+/** Lista el catálogo de logros con sus puntos (para editarlos en el panel). */
+export async function getAchievementCatalogForAdmin(): Promise<AdminAchievement[]> {
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("achievement_catalog")
+    .select("id, category, name, description, points_bonus")
+    .order("id", { ascending: true });
+  return (data ?? []).map((a) => ({
+    id: a.id as string,
+    category: a.category as string,
+    name: a.name as string,
+    description: a.description as string,
+    pointsBonus: (a.points_bonus as number) ?? 0,
+  }));
+}
+
 export type AdminMetrics = {
   socios: number;
   sociosNuevos7d: number;

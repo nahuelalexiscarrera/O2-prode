@@ -14,6 +14,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidateTag } from "next/cache";
 import { evaluateForEvent, type EventScope, type TriggerContext } from "./triggers";
 import { ACHIEVEMENT_BY_ID } from "./catalog";
+import { sumEffectivePoints } from "./points";
 import { pushToUser } from "@/lib/push/notify";
 
 // ─── Helper: get user's already-unlocked achievement IDs ─────────────
@@ -59,8 +60,8 @@ export async function processAchievements(
 
   if (insertErr) throw insertErr;
 
-  // Sum bonus points
-  const totalBonus = newlyUnlocked.reduce((sum, r) => sum + r.achievement.pointsBonus, 0);
+  // Sum bonus points — puntos EFECTIVOS desde la DB (editables por el admin).
+  const totalBonus = await sumEffectivePoints(newlyUnlocked.map((r) => r.achievement.id));
 
   if (totalBonus > 0) {
     // service role: fn_add_points queda REVOCADA para usuarios (un socio no debe
