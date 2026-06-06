@@ -52,13 +52,6 @@ export default async function RankingPage() {
         </div>
       ) : (
         <>
-          {/* Tabs placeholder — Global only for now */}
-          <div className="flex px-4 pb-2">
-            <span className="text-body-sm font-semibold text-primary border-b-2 border-primary pb-1 px-1">
-              Global
-            </span>
-          </div>
-
           {/* Podium */}
           {podiumEntries.length > 0 && (
             <PodiumCard entries={podiumEntries} myUserId={user.id} />
@@ -78,7 +71,7 @@ export default async function RankingPage() {
                 avatarUrl={u.avatar_url}
                 level={Number(u.level) as UserLevel}
                 points={u.total_points}
-                delta={0}
+                delta={u.position_last_week != null ? u.position_last_week - u.computedPosition : 0}
                 isMe={u.id === user.id}
               />
             ))}
@@ -109,7 +102,11 @@ export default async function RankingPage() {
               avatarUrl={myEntry.avatar_url}
               level={Number(myEntry.level) as UserLevel}
               points={myEntry.total_points}
-              delta={0}
+              delta={
+                myEntry.position_last_week != null
+                  ? myEntry.position_last_week - myEntry.computedPosition
+                  : 0
+              }
               isMe
             />
           </div>

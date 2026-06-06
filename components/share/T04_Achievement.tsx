@@ -1,4 +1,5 @@
 import type { AchievementShareData, ShareFormat } from "@/lib/share/templates";
+import { ShareIcon } from "./ShareIcon";
 
 const C = {
   bg: "#0a0a0c",
@@ -25,9 +26,6 @@ export function T04_Achievement({
   const h = format === "story" ? 1920 : 1080;
   const circleSize = format === "story" ? 480 : 360;
   const catLabel = CAT_LABELS[data.achievementCategory] ?? data.achievementCategory.toUpperCase();
-
-  // Icon letter — first char of iconRef, uppercased
-  const iconLetter = data.iconRef.slice(0, 1).toUpperCase();
 
   return (
     <div
@@ -89,17 +87,7 @@ export function T04_Achievement({
             marginBottom: 48,
           }}
         >
-          <span
-            style={{
-              fontFamily: "Anton",
-              fontSize: circleSize * 0.5,
-              color: C.lime,
-              lineHeight: 1,
-              textShadow: `0 0 60px rgba(217,255,63,0.5)`,
-            }}
-          >
-            {iconLetter}
-          </span>
+          <ShareIcon name={data.iconRef} size={circleSize * 0.46} color={C.lime} />
         </div>
 
         {/* Category + Name */}
