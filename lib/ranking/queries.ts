@@ -12,6 +12,7 @@ export type RankingUserRow = {
   level: string;
   total_points: number;
   joined_at: string;
+  position_last_week: number | null;
   computedPosition: number;
 };
 
@@ -19,7 +20,7 @@ export async function getGlobalRanking(limit = 100): Promise<RankingUserRow[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("user")
-    .select("id, name, initials, avatar_url, level, total_points, joined_at")
+    .select("id, name, initials, avatar_url, level, total_points, joined_at, position_last_week")
     .is("deleted_at", null)
     .order("total_points", { ascending: false })
     .order("joined_at", { ascending: true })
@@ -40,7 +41,7 @@ export async function getMyRankEntry(userId: string): Promise<RankingUserRow | n
 
   const { data: me, error: meErr } = await supabase
     .from("user")
-    .select("id, name, initials, avatar_url, level, total_points, joined_at")
+    .select("id, name, initials, avatar_url, level, total_points, joined_at, position_last_week")
     .eq("id", userId)
     .is("deleted_at", null)
     .maybeSingle();

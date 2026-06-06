@@ -62,10 +62,22 @@ export async function fetchShareData(
       .eq("user_id", userId)
       .maybeSingle();
 
-    // OJO: la columna es champion_code (no champion_team_code). Y sin predicción
-    // especial cargada NO defaulteamos a Argentina (era el bug: todos campeón ARG).
+    // OJO: la columna es champion_code (no champion_team_code) y guarda el code
+    // ISO-2 del team (ej "ar", "br"), NO el de 3 letras. Sin predicción especial
+    // cargada NO defaulteamos a Argentina (era el bug: todos campeón ARG).
     const championCode = (special?.champion_code as string | null) ?? null;
-    const isArg = championCode?.toLowerCase() === "arg";
+    const isArg = championCode?.toLowerCase() === "ar";
+
+    // Resolvemos el nombre real del equipo para mostrar "Argentina" y no "AR".
+    let championName: string | null = null;
+    if (championCode) {
+      const { data: champTeam } = await supabase
+        .from("team")
+        .select("name")
+        .eq("code", championCode.toLowerCase())
+        .maybeSingle();
+      championName = (champTeam?.name as string | null) ?? null;
+    }
 
     const summaryData: SummaryShareData = {
       template: "summary",
@@ -75,8 +87,8 @@ export async function fetchShareData(
       userLevel: user.userLevel,
       userLevelName: user.userLevelName,
       champion: {
-        country: (championCode ?? "—").toUpperCase(),
-        flagCode: (championCode ?? "ar").toLowerCase(),
+        country: championName ?? (championCode ? championCode.toUpperCase() : "—"),
+        flagCode: championCode ? championCode.toLowerCase() : "",
       },
       topScorer: { name: "—", country: "—", flagCode: "ar" },
       finalResult: {
