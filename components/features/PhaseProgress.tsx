@@ -5,13 +5,14 @@ import type { Phase } from "@/types/domain";
 
 const PHASES: { key: Phase; label: string; short: string }[] = [
   { key: "groups", label: "Grupos", short: "G" },
+  { key: "round-of-32", label: "16avos", short: "16" },
   { key: "round-of-16", label: "Octavos", short: "O" },
   { key: "quarter", label: "Cuartos", short: "C" },
   { key: "semi", label: "Semis", short: "S" },
   { key: "final", label: "Final", short: "F" },
 ];
 
-const ORDER: Phase[] = ["groups", "round-of-16", "quarter", "semi", "final"];
+const ORDER: Phase[] = ["groups", "round-of-32", "round-of-16", "quarter", "semi", "final"];
 
 interface PhaseProgressProps {
   currentPhase: Phase;

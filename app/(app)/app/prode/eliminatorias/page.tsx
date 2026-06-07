@@ -12,6 +12,12 @@ import { cn } from "@/lib/utils/cn";
 
 const PHASES = [
   {
+    phase: "round-of-32" as const,
+    label: "16avos de Final",
+    multiplier: 2,
+    unlockLabel: "Disponible desde el 28 de junio",
+  },
+  {
     phase: "round-of-16" as const,
     label: "Octavos de Final",
     multiplier: 2,

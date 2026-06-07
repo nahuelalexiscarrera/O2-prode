@@ -61,7 +61,7 @@ export async function getKnockoutMatches() {
   const { data, error } = await supabase
     .from("match")
     .select(MATCH_FIELDS)
-    .in("phase", ["round-of-16", "quarter", "semi", "final"])
+    .in("phase", ["round-of-32", "round-of-16", "quarter", "semi", "final"])
     .order("kickoff_at", { ascending: true });
   if (error) throw error;
   return data ?? [];
