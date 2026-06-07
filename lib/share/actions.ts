@@ -6,9 +6,12 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { evalSocialAchievements } from "@/lib/social/actions";
 
+// contextId puede ser un UUID (match) o la clave de catálogo de un logro ("A01").
+// Por eso NO se valida como uuid acá; el insert en columnas UUID se guarda como
+// null si no es uuid (ver recordShareAction).
 const schema = z.object({
   template: z.enum(["summary", "position", "match", "achievement"]),
-  contextId: z.string().uuid().optional(),
+  contextId: z.string().trim().min(1).max(64).optional(),
   body: z.string().trim().min(1).max(280),
 });
 
@@ -55,7 +58,7 @@ export async function shareToWall(input: {
 const recordSchema = z.object({
   template: z.enum(["summary", "position", "match", "achievement"]),
   channel: z.enum(["instagram", "whatsapp", "download", "more"]),
-  contextId: z.string().uuid().optional(),
+  contextId: z.string().trim().min(1).max(64).optional(),
 });
 
 /**
@@ -77,12 +80,17 @@ export async function recordShareAction(input: {
   } = await supabase.auth.getUser();
   if (!user) return { ok: false };
 
+  // share_intent.context_id es UUID: si el contextId es la clave de un logro
+  // (ej. "A01"), guardamos null para no romper el tipo (el share igual cuenta).
+  const ctx = parsed.data.contextId;
+  const contextUuid = ctx && z.string().uuid().safeParse(ctx).success ? ctx : null;
+
   const admin = createAdminClient();
   const { error } = await admin.from("share_intent").insert({
     user_id: user.id,
     template: parsed.data.template,
     channel: parsed.data.channel,
-    context_id: parsed.data.contextId ?? null,
+    context_id: contextUuid,
   });
   if (error) return { ok: false };
 
