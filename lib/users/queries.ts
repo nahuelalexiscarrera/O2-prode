@@ -3,6 +3,7 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
+import { pointsToLevel } from "@/lib/ranking/compute";
 
 export type UserProfile = {
   id: string;
@@ -61,7 +62,8 @@ export async function getMyProfile(): Promise<UserProfile | null> {
     .eq("id", user.id)
     .single();
   if (error) return null;
-  return data as UserProfile;
+  // Nivel derivado de los puntos (la columna está estancada en 1).
+  return { ...(data as UserProfile), level: String(pointsToLevel(data.total_points ?? 0).level) };
 }
 
 /** ¿El usuario actual es admin/superusuario? Falla a `false` (ej. si la columna
@@ -142,5 +144,5 @@ export async function getUserProfileById(userId: string): Promise<UserProfile | 
     .eq("id", userId)
     .maybeSingle();
   if (error || !data) return null;
-  return data as UserProfile;
+  return { ...(data as UserProfile), level: String(pointsToLevel(data.total_points ?? 0).level) };
 }

@@ -6,6 +6,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ACHIEVEMENT_BY_ID } from "@/lib/achievements/catalog";
 import { getLevelMeta } from "@/lib/achievements/levels";
+import { pointsToLevel } from "@/lib/ranking/compute";
 import type {
   ShareData,
   ShareTemplateId,
@@ -32,7 +33,8 @@ async function fetchUserCore(userId: string) {
     .eq("id", userId)
     .single();
   if (!data) return null;
-  const level = Number(data.level ?? 1) as UserLevel;
+  // Nivel derivado de los puntos (la columna user.level está estancada en 1).
+  const level = pointsToLevel((data.total_points as number) ?? 0).level;
   return {
     userId,
     userName: data.name as string,
