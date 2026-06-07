@@ -47,21 +47,38 @@ async function ensureUserRow(): Promise<void> {
     phone: meta.phone ?? null,
   });
 
-  // Referidos: genera el código propio + linkea al referidor si vino uno.
+  // Referidos: linkea al referidor (si vino uno) y genera el código propio.
   // Graceful: si las columnas referral_code/referred_by no existen todavía
-  // (antes de la migración), el update falla en silencio y no rompe el registro.
-  const updates: Record<string, unknown> = {
-    referral_code: crypto.randomUUID().replace(/-/g, "").slice(0, 6).toUpperCase(),
-  };
+  // (antes de la migración), los updates fallan en silencio y no rompen el registro.
+
+  // 1) referred_by va en su PROPIO update: no tiene índice único, así que una
+  //    colisión del referral_code (abajo) no debe arrastrar este link (B1).
   if (meta.referralCode) {
     const { data: referrer } = await admin
       .from("user")
       .select("id")
       .eq("referral_code", meta.referralCode.toUpperCase())
       .maybeSingle();
-    if (referrer && referrer.id !== user.id) updates.referred_by = referrer.id;
+    if (referrer && referrer.id !== user.id) {
+      await admin.from("user").update({ referred_by: referrer.id }).eq("id", user.id);
+    }
   }
-  await admin.from("user").update(updates).eq("id", user.id);
+
+  // 2) referral_code propio con REINTENTO ante colisión del índice único
+  //    idx_user_referral_code (antes: un solo intento → colisión = socio sin código,
+  //    rompía el flujo de referidos para él). 5 intentos hacen la colisión
+  //    despreciable (espacio 16^6).
+  const genCode = () => crypto.randomUUID().replace(/-/g, "").slice(0, 6).toUpperCase();
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const { error } = await admin
+      .from("user")
+      .update({ referral_code: genCode() })
+      .eq("id", user.id);
+    if (!error) break;
+    // 23505 = unique_violation → reintentar con otro código. Cualquier otro error
+    // (p.ej. 42703 columna inexistente antes de la migración) → cortar, graceful.
+    if ((error as { code?: string }).code !== "23505") break;
+  }
 }
 
 export async function GET(request: NextRequest) {
