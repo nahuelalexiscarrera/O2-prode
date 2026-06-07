@@ -66,6 +66,13 @@ export async function upsertSpecialPrediction(input: unknown) {
   const parsed = SpecialSchema.safeParse(input);
   if (!parsed.success) return { error: "Datos inválidos" as const };
 
+  // Estado imposible: el campeón y el subcampeón juegan la final entre sí, no
+  // pueden ser el mismo equipo (B2). Esto también bloquea el caso degenerado de
+  // elegir el mismo equipo en todos los slots.
+  if (parsed.data.championCode.trim().toLowerCase() === parsed.data.runnerUpCode.trim().toLowerCase()) {
+    return { error: "El campeón y el subcampeón no pueden ser el mismo equipo." as const };
+  }
+
   const supabase = await createClient();
   const {
     data: { user },

@@ -107,10 +107,17 @@ CREATE TABLE "user" (
   level                user_level_t NOT NULL DEFAULT '1',
   total_points         INTEGER NOT NULL DEFAULT 0,
   position             INTEGER NOT NULL DEFAULT 0,
+  -- Posición de la semana pasada: el cron weekly-positions la usa para el delta
+  -- semanal del logro P04 "Remontada" (migración 20260605_audit_fixes).
+  position_last_week   INTEGER,
   joined_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   -- Registro abierto (Sprint 8): el invite dejó de ser obligatorio.
   -- Se conserva el FK para el histórico de quienes sí usaron código.
   invite_code_used     TEXT REFERENCES invite_code(code),
+  -- Referidos (migración 20260605_referrals): código propio que el socio comparte
+  -- y el referidor que lo trajo. Alimenta el logro S05 "Tribu".
+  referral_code        TEXT,
+  referred_by          UUID REFERENCES "user"(id) ON DELETE SET NULL,
   notification_prefs   JSONB NOT NULL DEFAULT '{"matchReminders":true,"results":true,"socialReactions":false,"weeklyDigest":true}',
   visibility           visibility_t NOT NULL DEFAULT 'public',
   is_admin             BOOLEAN NOT NULL DEFAULT false,  -- superusuario: modera muro, sube fotos de premios
@@ -119,6 +126,8 @@ CREATE TABLE "user" (
 
 CREATE INDEX idx_user_position ON "user"(position) WHERE deleted_at IS NULL;
 CREATE INDEX idx_user_total_points ON "user"(total_points DESC) WHERE deleted_at IS NULL;
+CREATE UNIQUE INDEX idx_user_referral_code ON "user"(referral_code) WHERE referral_code IS NOT NULL;
+CREATE INDEX idx_user_referred_by ON "user"(referred_by) WHERE referred_by IS NOT NULL;
 
 -- ┌─────────────────────────────────────────────────────────────────┐
 -- │  Predictions                                                    │
