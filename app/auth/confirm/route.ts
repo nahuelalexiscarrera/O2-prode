@@ -39,13 +39,24 @@ async function ensureUserRow(): Promise<void> {
     referralCode?: string;
   };
   const name = (meta.name && meta.name.trim()) || user.email?.split("@")[0] || "Socio";
-  await admin.from("user").insert({
-    id: user.id,
-    email: user.email,
-    name,
-    initials: deriveInitials(name),
-    phone: meta.phone ?? null,
-  });
+  // upsert idempotente: si dos requests concurrentes pasan el SELECT de arriba
+  // (TOCTOU: doble click, prefetch, escáner de links del mail), el segundo no
+  // rompe ni pisa la fila (ignoreDuplicates). Chequeamos el error para no seguir
+  // de largo como "éxito" si el alta realmente falló.
+  const { error: insertErr } = await admin.from("user").upsert(
+    {
+      id: user.id,
+      email: user.email,
+      name,
+      initials: deriveInitials(name),
+      phone: meta.phone ?? null,
+    },
+    { onConflict: "id", ignoreDuplicates: true }
+  );
+  if (insertErr) {
+    console.error("[auth/confirm] no se pudo crear la fila user", insertErr);
+    return;
+  }
 
   // Referidos: linkea al referidor (si vino uno) y genera el código propio.
   // Graceful: si las columnas referral_code/referred_by no existen todavía
@@ -73,11 +84,16 @@ async function ensureUserRow(): Promise<void> {
     const { error } = await admin
       .from("user")
       .update({ referral_code: genCode() })
-      .eq("id", user.id);
+      .eq("id", user.id)
+      .is("referral_code", null); // nunca pisar un código ya emitido (re-entrada concurrente)
     if (!error) break;
     // 23505 = unique_violation → reintentar con otro código. Cualquier otro error
-    // (p.ej. 42703 columna inexistente antes de la migración) → cortar, graceful.
-    if ((error as { code?: string }).code !== "23505") break;
+    // (p.ej. 42703 columna inexistente antes de la migración) → cortar, pero
+    // logueando para tener visibilidad (antes el break era silencioso).
+    if ((error as { code?: string }).code !== "23505") {
+      console.error("[auth/confirm] no se pudo asignar referral_code", error);
+      break;
+    }
   }
 }
 
@@ -86,14 +102,23 @@ export async function GET(request: NextRequest) {
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
   const nextParam = searchParams.get("next");
-  // Solo rutas internas: rechazar protocol-relative (//host) y backslash (/\host)
-  // que el navegador interpreta como host externo (open redirect / phishing).
-  const isSafeNext =
-    !!nextParam &&
-    nextParam.startsWith("/") &&
-    !nextParam.startsWith("//") &&
-    !nextParam.startsWith("/\\");
-  const next = isSafeNext ? nextParam : "/app";
+  // Solo rutas internas. Resolvemos `next` contra el propio origin y exigimos que
+  // el origin resultante coincida. Una blacklist de prefijos (//, /\) se podía
+  // evadir con control chars (%09/%0A/%0D): el navegador los strippea y convierte
+  // "/\t//evil" en "//evil" (host externo). new URL() normaliza igual que el
+  // navegador, así que candidate.origin === origin SOLO para rutas internas reales.
+  const origin = new URL(request.url).origin;
+  let next = "/app";
+  if (nextParam) {
+    try {
+      const candidate = new URL(nextParam, origin);
+      if (candidate.origin === origin && candidate.pathname.startsWith("/")) {
+        next = candidate.pathname + candidate.search + candidate.hash;
+      }
+    } catch {
+      /* nextParam inválido → queda /app */
+    }
+  }
 
   if (token_hash && type) {
     const supabase = await createClient();

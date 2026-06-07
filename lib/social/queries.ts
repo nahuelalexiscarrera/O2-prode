@@ -74,15 +74,18 @@ export async function getFeedDestacados(limit = 20) {
   // Traemos los candidatos de las últimas 48h y los ordenamos por el score REAL
   // de Destacados (reactions + comments*1.5 con decaimiento por antigüedad) en
   // JS. PostgREST no puede ordenar por esa fórmula compuesta; antes ordenaba solo
-  // por reaction_count, ignorando comentarios y recencia. El volumen de 48h está
-  // acotado, así que traer hasta 200 candidatos es barato.
+  // por reaction_count, ignorando comentarios y recencia. El cap por recencia
+  // podría, en un pico de tráfico, descartar un post viejo pero muy reaccionado
+  // antes de puntuar; subimos el cap a 500 (filas livianas, ~800 socios) para que
+  // eso sea inalcanzable en la práctica. Para corrección exacta a futuro, mover el
+  // ranking a una RPC/vista en Postgres con la misma fórmula que destacadosScore.
   const { data, error } = await supabase
     .from("post")
     .select(POST_WITH_AUTHOR)
     .is("deleted_at", null)
     .gte("created_at", cutoff)
     .order("created_at", { ascending: false })
-    .limit(200);
+    .limit(500);
 
   if (error) throw error;
 
