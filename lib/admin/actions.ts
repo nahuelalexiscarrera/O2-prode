@@ -8,6 +8,7 @@ import {
   evaluateMatchSettledForUsers,
   revertMatchSettledAchievements,
 } from "@/lib/achievements/match-settled";
+import { reconcilePositionAchievements } from "@/lib/achievements/position-reconcile";
 
 const resultSchema = z.object({
   matchId: z.string().uuid(),
@@ -85,6 +86,11 @@ export async function setMatchResultAction(input: {
       if (wasFinished) await revertMatchSettledAchievements(affected);
       await evaluateMatchSettledForUsers(affected);
     }
+    // Logros de posición (P01-P03): dependen del ranking GLOBAL, que se reordena
+    // para ~todos los socios (no solo los predictores) al re-puntuar. Se reconcilian
+    // ranking-wide DESPUÉS de los logros de skill (que pueden mover puntos). Corre
+    // siempre: un socio que no predijo este partido pudo cruzar/caer de un umbral.
+    await reconcilePositionAchievements();
   } catch (e) {
     console.error("[admin setMatchResult] eval de logros falló", e);
   }

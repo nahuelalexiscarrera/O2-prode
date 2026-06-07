@@ -7,7 +7,12 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { evaluateAchievements, evaluateForEvent } from "../triggers";
+import {
+  evaluateAchievements,
+  evaluateForEvent,
+  positionAchievementIdsFor,
+  POSITION_ACHIEVEMENT_IDS,
+} from "../triggers";
 import type { TriggerContext } from "../triggers";
 
 // ─── Helpers ─────────────────────────────────────────────────────────
@@ -396,14 +401,61 @@ describe("evaluateForEvent — scope weekly-cron", () => {
 });
 
 describe("evaluateForEvent — scope match-settled", () => {
-  it("incluye logros de skill + posición pero no sociales", () => {
-    const ctx = baseCtx({ exactStreak: 5, position: 1, postsCount: 10 });
+  it("incluye logros de skill/consistencia pero NO posición ni sociales", () => {
+    const ctx = baseCtx({ exactStreak: 5, position: 1, postsCount: 10, tournamentCompletionPercent: 100 });
     const ids = evaluateForEvent("match-settled", ctx).map((r) => r.achievement.id);
     expect(ids).toContain("A01");
+    expect(ids).toContain("C03");
+    // posición se reconcilia ranking-wide, no en match-settled
+    expect(ids).not.toContain("P01");
+    expect(ids).not.toContain("P02");
+    expect(ids).not.toContain("P03");
+    expect(ids).not.toContain("S01");
+  });
+});
+
+describe("evaluateForEvent — scope position", () => {
+  it("solo evalúa los logros de posición", () => {
+    const ctx = baseCtx({ position: 1, exactStreak: 5, postsCount: 10, streakDays: 7 });
+    const ids = evaluateForEvent("position", ctx).map((r) => r.achievement.id);
     expect(ids).toContain("P01");
     expect(ids).toContain("P02");
     expect(ids).toContain("P03");
+    // nada de otros scopes
+    expect(ids).not.toContain("A01");
     expect(ids).not.toContain("S01");
+    expect(ids).not.toContain("C01");
+  });
+
+  it("respeta deduplicación", () => {
+    const ctx = baseCtx({ position: 2 });
+    const already = new Set(["P01"]);
+    const ids = evaluateForEvent("position", ctx, already).map((r) => r.achievement.id);
+    expect(ids).not.toContain("P01");
+    expect(ids).toContain("P02");
+  });
+});
+
+// ─── positionAchievementIdsFor (umbrales ranking-wide) ────────────────
+
+describe("positionAchievementIdsFor", () => {
+  it("sin ranking (posición 0) no merece ningún logro", () => {
+    expect(positionAchievementIdsFor(0)).toEqual([]);
+  });
+  it("fuera del top 10 (posición 11) no merece ninguno", () => {
+    expect(positionAchievementIdsFor(11)).toEqual([]);
+  });
+  it("top 10 (posición 10) merece solo P01", () => {
+    expect(positionAchievementIdsFor(10).sort()).toEqual(["P01"]);
+  });
+  it("podio (posición 3) merece P01 y P02", () => {
+    expect(positionAchievementIdsFor(3).sort()).toEqual(["P01", "P02"]);
+  });
+  it("líder (posición 1) merece P01, P02 y P03", () => {
+    expect(positionAchievementIdsFor(1).sort()).toEqual(["P01", "P02", "P03"]);
+  });
+  it("POSITION_ACHIEVEMENT_IDS expone P01-P03", () => {
+    expect([...POSITION_ACHIEVEMENT_IDS].sort()).toEqual(["P01", "P02", "P03"]);
   });
 });
 

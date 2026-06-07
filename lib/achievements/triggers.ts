@@ -146,9 +146,12 @@ export function evaluateAchievements(
  * Evaluates a subset of achievements relevant to a given event type.
  * Cheaper than full evaluation when we know the trigger source.
  */
-export type EventScope = "match-settled" | "social" | "daily-cron" | "weekly-cron";
+export type EventScope = "match-settled" | "position" | "social" | "daily-cron" | "weekly-cron";
 
 export const scopeMap: Record<EventScope, readonly string[]> = {
+  // Logros que dependen SOLO de las predicciones del socio en el partido que
+  // acaba de cerrar. Se evalúan por-predictor. La POSICIÓN NO va acá: depende del
+  // ranking global (se reordena para ~todos, no solo predictores) → scope aparte.
   "match-settled": [
     "streak_exact_5",
     "upset_correct",
@@ -158,10 +161,11 @@ export const scopeMap: Record<EventScope, readonly string[]> = {
     "champion_correct",
     "runner_up_correct",
     "finalists_correct",
-    "position_top_10",
-    "position_top_3",
-    "position_1",
   ],
+  // Logros de posición: dependen del ranking GLOBAL. Tras un settle/resettle las
+  // posiciones se reordenan para todos los socios, así que se reconcilian
+  // ranking-wide (ver lib/achievements/position-reconcile.ts), NO por-predictor.
+  position: ["position_top_10", "position_top_3", "position_1"],
   social: [
     "first_post",
     "post_10_reactions",
@@ -191,4 +195,54 @@ export function evaluateForEvent(
     }
   }
   return results;
+}
+
+// ─── Posición (ranking-wide) ─────────────────────────────────────────
+
+/** Contexto base con todas las condiciones en falso/cero (sin desbloquear nada). */
+const ZERO_CONTEXT: TriggerContext = {
+  userId: "",
+  exactStreak: 0,
+  streakDays: 0,
+  tournamentCompletionPercent: 0,
+  loadedGroupFirstDay: false,
+  groups: [],
+  knockoutRounds: [],
+  upsets: { upsetsCorrect: 0 },
+  position: 0,
+  weeklyPositionDelta: 0,
+  postsCount: 0,
+  bestPostReactions: 0,
+  commentsMadeOnDistinctPostsCount: 0,
+  externalSharesCount: 0,
+  activatedFriendsCount: 0,
+  predictedChampionCode: null,
+  actualChampionCode: null,
+  predictedRunnerUpCode: null,
+  actualRunnerUpCode: null,
+  tournamentEnded: false,
+  tournamentWinnerUserId: null,
+};
+
+/** Achievement IDs del scope "position" (P01-P03), derivados del catálogo. */
+export const POSITION_ACHIEVEMENT_IDS: readonly string[] = scopeMap.position
+  .map((k) => ACHIEVEMENT_BY_TRIGGER.get(k)?.id)
+  .filter((id): id is string => Boolean(id));
+
+/**
+ * IDs de logros de posición que un socio MERECE en una posición dada del ranking
+ * global. Source of truth de los umbrales: reusa los mismos evaluadores que el
+ * resto del engine (no duplica thresholds). `position` 0 = sin ranking → ninguno.
+ *
+ * La reconciliación ranking-wide (position-reconcile.ts) compara este conjunto
+ * "merecido" contra lo que el socio ya tiene para otorgar/revocar P01-P03 a TODOS
+ * los socios cuya posición cambió, no solo a los que predijeron el último partido.
+ */
+export function positionAchievementIdsFor(position: number): string[] {
+  // Contexto completo (todos los demás campos en cero) para no castear: los
+  // evaluadores de posición solo leen `position`, pero pasamos un TriggerContext
+  // válido para mantener el type-safety si alguno pasa a leer otro campo.
+  return evaluateForEvent("position", { ...ZERO_CONTEXT, position }).map(
+    (r) => r.achievement.id
+  );
 }
