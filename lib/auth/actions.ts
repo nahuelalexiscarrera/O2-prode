@@ -146,6 +146,7 @@ export async function signUpAction(
     phone: formData.get("phone"),
     password: formData.get("password"),
     passwordConfirm: formData.get("passwordConfirm"),
+    referralCode: formData.get("referralCode"),
     acceptTerms: formData.get("acceptTerms"),
   });
 
