@@ -26,18 +26,23 @@ export default function ResetPasswordPage() {
     null
   );
   const errorField = state && !state.ok ? state.field : undefined;
+  const [exchange, setExchange] = useState<"idle" | "working" | "error">("idle");
 
   // Defensa en profundidad: el flujo principal de recovery pasa por /auth/confirm
   // (template custom) y ya deja la sesión lista. Pero si el link llega como
   // ?code=... (template default de Supabase), lo intercambiamos acá para
   // establecer la sesión de recovery; sin esto, updateUser fallaría con "link
   // vencido". (Mismo dispositivo; cross-device sigue usando /auth/confirm.)
+  // GATEAMOS el form hasta que el exchange resuelva: si el usuario enviara antes,
+  // updateUser correría sin sesión y daría el mismo error engañoso.
   useEffect(() => {
     const code = new URLSearchParams(window.location.search).get("code");
     if (!code) return;
+    setExchange("working");
     createClient()
       .auth.exchangeCodeForSession(code)
-      .catch(() => {});
+      .then(({ error }) => setExchange(error ? "error" : "idle"))
+      .catch(() => setExchange("error"));
   }, []);
 
   return (
@@ -96,8 +101,24 @@ export default function ResetPasswordPage() {
           </p>
         )}
 
+        {exchange === "error" && (
+          <p role="alert" className="text-body-sm text-error">
+            El link no es válido o ya venció.{" "}
+            <Link href="/forgot" className="underline">
+              Pedí uno nuevo
+            </Link>
+            .
+          </p>
+        )}
+
         <div className="mt-2">
-          <SubmitButton />
+          {exchange === "working" ? (
+            <Button variant="primary" size="lg" fullWidth loading disabled>
+              Validando link…
+            </Button>
+          ) : (
+            <SubmitButton />
+          )}
         </div>
       </form>
     </div>
