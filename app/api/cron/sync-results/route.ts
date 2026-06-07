@@ -19,6 +19,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getWcMatches, type FdMatch } from "@/lib/football-api/client";
 import { TLA_TO_CODE, stageToPhase, fdStatusToMatch } from "@/lib/football-api/team-map";
 import { evaluateMatchSettledForUsers } from "@/lib/achievements/match-settled";
+import { reconcilePositionAchievements } from "@/lib/achievements/position-reconcile";
 import { broadcastPush } from "@/lib/push/notify";
 
 export const runtime = "nodejs";
@@ -177,7 +178,7 @@ async function handle(req: NextRequest) {
 
   if (finishedMatchIds.length > 0) {
     await supabase.rpc("fn_refresh_views");
-    // Logros de skill (A01-A05) y posición (P01-P03/P05): el scope match-settled
+    // Logros de skill (A01-A07) y consistencia (C03): el scope match-settled
     // necesita un evaluador en runtime. Para cada socio que predijo un partido
     // que acaba de cerrar, recomputamos su contexto y desbloqueamos lo que aplique.
     const { data: affected } = await supabase
@@ -186,6 +187,11 @@ async function handle(req: NextRequest) {
       .in("match_id", finishedMatchIds);
     const userIds = [...new Set((affected ?? []).map((p) => p.user_id as string))];
     if (userIds.length > 0) await evaluateMatchSettledForUsers(userIds);
+
+    // Logros de posición (P01-P03): dependen del ranking GLOBAL. Tras settle (y los
+    // bonus de skill recién otorgados) las posiciones se reordenan para ~todos los
+    // socios, no solo los predictores → se reconcilian ranking-wide, al final.
+    await reconcilePositionAchievements();
   }
 
   return NextResponse.json({ ok: true, processed: fixtures.length, changes: changes.length, detail: changes });
@@ -233,6 +239,7 @@ async function sendMatchResultNotifications(
       title: "Resultado del partido",
       body: `${homeCode.toUpperCase()} ${homeScore} - ${awayScore} ${awayCode.toUpperCase()} · Mirá tus puntos`,
       deep_link: "/app",
+      tag: "o2-resultados",
     },
     "results",
   );
@@ -285,6 +292,7 @@ async function sendUpcomingMatchNotifications(
         title: "¡Partido en 1 hora!",
         body: `${match.home_code.toUpperCase()} vs ${match.away_code.toUpperCase()} · Cargá tu predicción`,
         deep_link: "/app/prode",
+        tag: "o2-recordatorios",
       },
       "matchReminders",
       without.map((u: { id: string }) => u.id),
