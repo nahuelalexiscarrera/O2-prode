@@ -82,6 +82,12 @@ export interface MatchShareData extends ShareUserCore {
   home: TeamRef;
   away: TeamRef;
   predictedScore: readonly [number, number];
+  /**
+   * Solo revelar el marcador predicho si el partido ya arrancó/terminó.
+   * Antes del kickoff es secreto (anti-copia + cierra el IDOR del endpoint
+   * público de share, que dejaba leer la predicción de cualquier socio).
+   */
+  revealScore: boolean;
   /** ISO 8601 datetime of kickoff. Rendered in es-AR. */
   kickoffISO: string;
   userPosition: number;
