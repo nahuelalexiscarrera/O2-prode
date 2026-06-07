@@ -3,6 +3,7 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
+import { pointsToLevel } from "@/lib/ranking/compute";
 
 export type RankingUserRow = {
   id: string;
@@ -26,7 +27,12 @@ export async function getGlobalRanking(limit = 100): Promise<RankingUserRow[]> {
     .order("joined_at", { ascending: true })
     .limit(limit);
   if (error) throw error;
-  return (data ?? []).map((u, i) => ({ ...u, computedPosition: i + 1 })) as RankingUserRow[];
+  // El nivel se DERIVA de los puntos (la columna user.level está estancada en 1).
+  return (data ?? []).map((u, i) => ({
+    ...u,
+    level: String(pointsToLevel((u.total_points as number) ?? 0).level),
+    computedPosition: i + 1,
+  })) as RankingUserRow[];
 }
 
 /**
@@ -63,5 +69,9 @@ export async function getMyRankEntry(userId: string): Promise<RankingUserRow | n
     .lt("joined_at", me.joined_at);
 
   const computedPosition = (ahead ?? 0) + (tied ?? 0) + 1;
-  return { ...me, computedPosition } as RankingUserRow;
+  return {
+    ...me,
+    level: String(pointsToLevel((me.total_points as number) ?? 0).level),
+    computedPosition,
+  } as RankingUserRow;
 }
