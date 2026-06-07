@@ -110,6 +110,21 @@ export async function fetchShareData(
       .from("user")
       .select("*", { count: "exact", head: true });
 
+    // Semana real del torneo (antes estaba hardcodeada en 1). Se cuenta desde el
+    // primer kickoff; antes de que arranque el Mundial, semana 1.
+    const { data: firstMatch } = await supabase
+      .from("match")
+      .select("kickoff_at")
+      .order("kickoff_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    let weekNumber = 1;
+    if (firstMatch?.kickoff_at) {
+      const start = new Date(firstMatch.kickoff_at as string).getTime();
+      const elapsed = Date.now() - start;
+      if (elapsed > 0) weekNumber = Math.floor(elapsed / (7 * 86400 * 1000)) + 1;
+    }
+
     const positionData: PositionShareData = {
       template: "position",
       userId: user.userId,
@@ -122,7 +137,7 @@ export async function fetchShareData(
       totalSocios: totalSocios ?? 800,
       deltaPosition: 0,
       weekPoints: 0,
-      weekNumber: 1,
+      weekNumber,
     };
     return positionData;
   }

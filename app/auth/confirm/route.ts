@@ -69,7 +69,14 @@ export async function GET(request: NextRequest) {
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
   const nextParam = searchParams.get("next");
-  const next = nextParam && nextParam.startsWith("/") ? nextParam : "/app";
+  // Solo rutas internas: rechazar protocol-relative (//host) y backslash (/\host)
+  // que el navegador interpreta como host externo (open redirect / phishing).
+  const isSafeNext =
+    !!nextParam &&
+    nextParam.startsWith("/") &&
+    !nextParam.startsWith("//") &&
+    !nextParam.startsWith("/\\");
+  const next = isSafeNext ? nextParam : "/app";
 
   if (token_hash && type) {
     const supabase = await createClient();

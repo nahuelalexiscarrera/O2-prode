@@ -88,10 +88,14 @@ export function PostComposer({
 
         imageUrl = supabase.storage.from("post-images").getPublicUrl(path).data.publicUrl;
 
-        // Read dimensions from preview
+        // Read dimensions from preview. onerror + timeout para que NUNCA cuelgue
+        // el "Publicar" si la imagen no decodifica (formato corrupto, etc.).
         const dims = await new Promise<{ w: number; h: number }>((resolve) => {
           const img = document.createElement("img");
-          img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight });
+          const done = (w: number, h: number) => resolve({ w, h });
+          img.onload = () => done(img.naturalWidth, img.naturalHeight);
+          img.onerror = () => done(0, 0);
+          setTimeout(() => done(0, 0), 5000);
           img.src = imagePreview;
         });
         imageWidth = dims.w;

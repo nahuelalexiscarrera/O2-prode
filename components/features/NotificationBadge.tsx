@@ -72,7 +72,7 @@ export function NotificationBadge() {
       aria-label={`${count} notificaciones sin leer`}
       className="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-error text-[9px] font-bold text-white leading-none"
     >
-      {count > 9 ? "9+" : count}
+      {count > 99 ? "99+" : count}
     </span>
   );
 }
