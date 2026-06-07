@@ -7,6 +7,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { pointsToLevel } from "@/lib/ranking/compute";
+import { destacadosScore } from "@/lib/social/feed";
 
 const POST_WITH_AUTHOR = `
   id, user_id, body, embed_type, embed_ref_id,
@@ -70,16 +71,46 @@ export async function getFeedDestacados(limit = 20) {
   const supabase = await createClient();
   const cutoff = new Date(Date.now() - 48 * 3600 * 1000).toISOString();
 
+  // Traemos los candidatos de las últimas 48h y los ordenamos por el score REAL
+  // de Destacados (reactions + comments*1.5 con decaimiento por antigüedad) en
+  // JS. PostgREST no puede ordenar por esa fórmula compuesta; antes ordenaba solo
+  // por reaction_count, ignorando comentarios y recencia. El volumen de 48h está
+  // acotado, así que traer hasta 200 candidatos es barato.
   const { data, error } = await supabase
     .from("post")
     .select(POST_WITH_AUTHOR)
     .is("deleted_at", null)
     .gte("created_at", cutoff)
-    .order("reaction_count", { ascending: false })
-    .limit(limit);
+    .order("created_at", { ascending: false })
+    .limit(200);
 
   if (error) throw error;
-  return withAuthorLevel(data ?? []);
+
+  const now = new Date();
+  const ranked = (data ?? [])
+    .map((p) => {
+      const row = p as {
+        reaction_count?: number | null;
+        comment_count?: number | null;
+        created_at: string;
+      };
+      return {
+        post: p,
+        score: destacadosScore(
+          {
+            reactionCount: row.reaction_count ?? 0,
+            commentCount: row.comment_count ?? 0,
+            createdAt: row.created_at,
+          },
+          now
+        ),
+      };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map((r) => r.post);
+
+  return withAuthorLevel(ranked);
 }
 
 // ─── Post detail ─────────────────────────────────────────────────────

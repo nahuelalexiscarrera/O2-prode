@@ -20,16 +20,21 @@ const serwist = new Serwist({
 
 self.addEventListener("push", (event) => {
   if (!event.data) return;
-  const { title, body, deep_link } = event.data.json() as {
+  const { title, body, deep_link, tag } = event.data.json() as {
     title: string;
     body: string;
     deep_link?: string;
+    tag?: string;
   };
   event.waitUntil(
     self.registration.showNotification(title, {
       body,
       icon: "/icons/icon-192.png",
       badge: "/icons/icon-192.png",
+      // tag agrupa: mismas categorías se reemplazan en vez de apilarse (B6).
+      // renotify vuelve a avisar aunque reemplace una notificación previa.
+      tag: tag ?? "o2-prode",
+      renotify: true,
       data: { url: deep_link ?? "/app" },
     }),
   );

@@ -25,6 +25,12 @@ export interface PushPayload {
   title: string;
   body: string;
   deep_link?: string;
+  /**
+   * Agrupa notificaciones: dos pushes con el mismo `tag` se reemplazan en la
+   * bandeja en vez de apilarse. Sin tag, cada push genera una notificación nueva
+   * y se acumulan (B6). El SW usa "o2-prode" como fallback.
+   */
+  tag?: string;
 }
 
 interface Subscription {

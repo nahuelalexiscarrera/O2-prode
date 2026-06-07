@@ -30,7 +30,10 @@ export function CommentThread({
   myUserId,
   isAdmin = false,
 }: CommentThreadProps) {
-  const { comments, setComments } = usePostCommentsStream(postId, initialComments);
+  const { comments, setComments, broadcastDeleted } = usePostCommentsStream(
+    postId,
+    initialComments
+  );
   const [reactedIds, setReactedIds] = useState(new Set(commentReactedIds));
   const [body, setBody] = useState("");
   const [posting, setPosting] = useState(false);
@@ -45,6 +48,8 @@ export function CommentThread({
     setComments((prev) => prev.filter((c) => c.id !== commentId));
     try {
       await deleteComment(commentId);
+      // El soft-delete no propaga por postgres_changes (RLS) → avisamos por broadcast.
+      broadcastDeleted(commentId);
     } catch {
       if (removed) {
         setComments((prev) =>
@@ -95,18 +100,24 @@ export function CommentThread({
     setPosting(true);
     try {
       const { comment: saved, unlockedAchievements } = await createComment({ postId, body: trimmed });
-      setComments((prev) => [
-        ...prev,
-        {
-          id: saved.id,
-          post_id: saved.post_id,
-          user_id: saved.user_id,
-          body: saved.body ?? "",
-          reaction_count: saved.reaction_count,
-          created_at: saved.created_at,
-          author: null,
-        },
-      ]);
+      // Dedup: el INSERT realtime puede llegar antes/después de esta confirmación.
+      // Lo agregamos con author: null y el stream lo parchea con el autor real.
+      setComments((prev) =>
+        prev.some((c) => c.id === saved.id)
+          ? prev
+          : [
+              ...prev,
+              {
+                id: saved.id,
+                post_id: saved.post_id,
+                user_id: saved.user_id,
+                body: saved.body ?? "",
+                reaction_count: saved.reaction_count,
+                created_at: saved.created_at,
+                author: null,
+              },
+            ]
+      );
       if (unlockedAchievements.length > 0) setAchievements(unlockedAchievements);
       setBody("");
     } catch {

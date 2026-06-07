@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
-import type { DbComment } from "@/lib/social/types";
+import { pointsToLevel } from "@/lib/ranking/compute";
+import type { AuthorRow, DbComment } from "@/lib/social/types";
 
 // ─── New post notifier (banner "N posts nuevos") ──────────────────────
 
@@ -63,13 +65,45 @@ export function usePostReactionCount(postId: string, initialCount: number) {
 
 // ─── Live comment stream for post detail ─────────────────────────────
 
+/** Trae los datos públicos del autor de un comentario (para no mostrar "Socio"). */
+async function fetchCommentAuthor(
+  supabase: ReturnType<typeof createClient>,
+  userId: string
+): Promise<AuthorRow | null> {
+  const { data } = await supabase
+    .from("user")
+    .select("id, name, initials, avatar_url, total_points")
+    .eq("id", userId)
+    .maybeSingle();
+  if (!data) return null;
+  const row = data as {
+    id: string;
+    name: string;
+    initials: string;
+    avatar_url: string | null;
+    total_points: number | null;
+  };
+  return {
+    id: row.id,
+    name: row.name,
+    initials: row.initials,
+    avatar_url: row.avatar_url ?? null,
+    level: String(pointsToLevel(row.total_points ?? 0).level),
+  };
+}
+
 export function usePostCommentsStream(postId: string, initial: DbComment[]) {
   const [comments, setComments] = useState<DbComment[]>(initial);
+  const channelRef = useRef<RealtimeChannel | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
-    const channel = supabase
-      .channel(`post-${postId}-comments`)
+    const channel = supabase.channel(`post-${postId}-comments`, {
+      config: { broadcast: { self: false } },
+    });
+    channelRef.current = channel;
+
+    channel
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "comment", filter: `post_id=eq.${postId}` },
@@ -82,39 +116,54 @@ export function usePostCommentsStream(postId: string, initial: DbComment[]) {
             reaction_count: number;
             created_at: string;
           };
-          setComments((cs) => {
-            if (cs.some((c) => c.id === row.id)) return cs;
-            return [
-              ...cs,
-              {
-                id: row.id,
-                post_id: row.post_id,
-                user_id: row.user_id,
-                body: row.body,
-                reaction_count: row.reaction_count,
-                created_at: row.created_at,
-                author: null,
-              },
-            ];
+          // Traemos el autor para no renderizar "Socio" (B5). Patcheamos también
+          // el comentario propio que se agregó optimista con author: null.
+          void fetchCommentAuthor(supabase, row.user_id).then((author) => {
+            setComments((cs) => {
+              const existing = cs.find((c) => c.id === row.id);
+              if (existing) {
+                if (existing.author) return cs;
+                return cs.map((c) => (c.id === row.id ? { ...c, author } : c));
+              }
+              return [
+                ...cs,
+                {
+                  id: row.id,
+                  post_id: row.post_id,
+                  user_id: row.user_id,
+                  body: row.body,
+                  reaction_count: row.reaction_count,
+                  created_at: row.created_at,
+                  author,
+                },
+              ];
+            });
           });
         }
       )
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "comment", filter: `post_id=eq.${postId}` },
-        (payload) => {
-          const row = payload.new as { id: string; deleted_at: string | null };
-          if (row.deleted_at) {
-            setComments((cs) => cs.filter((c) => c.id !== row.id));
-          }
-        }
-      )
+      // El soft-delete setea deleted_at → la fila deja de pasar la policy SELECT,
+      // así que Realtime NO entrega ese UPDATE a los clientes. Propagamos el
+      // borrado por broadcast (pub/sub, sin RLS) desde el cliente que borra.
+      .on("broadcast", { event: "comment_deleted" }, (msg) => {
+        const { id } = (msg.payload ?? {}) as { id?: string };
+        if (id) setComments((cs) => cs.filter((c) => c.id !== id));
+      })
       .subscribe();
 
     return () => {
       channel.unsubscribe();
+      channelRef.current = null;
     };
   }, [postId]);
 
-  return { comments, setComments };
+  /** Avisa a los demás viewers que un comentario fue borrado (ver nota arriba). */
+  const broadcastDeleted = useCallback((commentId: string) => {
+    channelRef.current?.send({
+      type: "broadcast",
+      event: "comment_deleted",
+      payload: { id: commentId },
+    });
+  }, []);
+
+  return { comments, setComments, broadcastDeleted };
 }
