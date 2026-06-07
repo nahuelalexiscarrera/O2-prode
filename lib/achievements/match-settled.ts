@@ -2,9 +2,13 @@
  * O2 PRODE — Evaluación de logros tras el cierre de partidos (scope match-settled).
  *
  * El scoring lo hace el trigger de Postgres (fn_settle_match) al marcar el match
- * 'finished'. Pero los logros de SKILL (A01-A05) y de POSICIÓN (P01-P03/P05) viven
- * en el scope "match-settled" y necesitan un evaluador en runtime: este módulo.
- * Lo llama el cron sync-results tras cerrar partidos, para cada socio afectado.
+ * 'finished'. Pero los logros de SKILL (A01-A07) y consistencia (C03) viven en el
+ * scope "match-settled" y necesitan un evaluador en runtime: este módulo. Lo llama
+ * el cron sync-results tras cerrar partidos, para cada socio que PREDIJO el match.
+ *
+ * Los logros de POSICIÓN (P01-P03) NO se evalúan acá: dependen del ranking global
+ * (se reordena para ~todos, no solo predictores), así que se reconcilian aparte en
+ * position-reconcile.ts. Ese módulo corre tras este, sobre TODOS los socios.
  *
  * Pre-fetch de datos compartidos (matches/results/etc.) UNA sola vez y cómputo
  * por-usuario en memoria, para no disparar N queries por socio.
@@ -21,11 +25,14 @@ import {
 } from "./triggers";
 
 /**
- * Revierte los logros de scope "match-settled" de un set de socios y descuenta su
- * bonus de total_points. Se usa al CORREGIR un resultado finalizado: el logro
- * otorgado con el resultado viejo (p.ej. "acierto exacto") puede ya no ser válido.
- * Tras revertir se llama evaluateMatchSettledForUsers, que re-otorga los que SIGUEN
- * válidos (neto 0) y deja fuera los que no.
+ * Revierte los logros de scope "match-settled" (skill/consistencia) de un set de
+ * socios y descuenta su bonus de total_points. Se usa al CORREGIR un resultado
+ * finalizado: el logro otorgado con el resultado viejo (p.ej. "acierto exacto")
+ * puede ya no ser válido. Tras revertir se llama evaluateMatchSettledForUsers, que
+ * re-otorga los que SIGUEN válidos (neto 0) y deja fuera los que no.
+ *
+ * Nota: los logros de POSICIÓN ya no están en el scope "match-settled", así que
+ * esta reversión no los toca — los maneja reconcilePositionAchievements globalmente.
  */
 export async function revertMatchSettledAchievements(userIds: string[]): Promise<void> {
   const ids = [...new Set(userIds)];
@@ -91,11 +98,12 @@ export async function evaluateMatchSettledForUsers(userIds: string[]): Promise<v
 
   const admin = createAdminClient();
 
-  const [matchesRes, resultsRes, specialsRes, usersRes, predsRes] = await Promise.all([
+  // Nota: no se trae `position` — los logros de posición se reconcilian aparte
+  // (position-reconcile.ts), no en este path por-predictor.
+  const [matchesRes, resultsRes, specialsRes, predsRes] = await Promise.all([
     admin.from("match").select("id, phase, group_id, home_code, away_code, kickoff_at, status"),
     admin.from("match_result").select("match_id, home_score, away_score"),
     admin.from("special_prediction").select("user_id, champion_code, runner_up_code").in("user_id", ids),
-    admin.from("user").select("id, position").in("id", ids),
     admin.from("prediction").select("user_id, match_id, home_score, away_score").in("user_id", ids),
   ]);
 
@@ -109,7 +117,6 @@ export async function evaluateMatchSettledForUsers(userIds: string[]): Promise<v
   const runnerUpByUser = new Map(
     (specialsRes.data ?? []).map((s) => [(s as SpecialRow).user_id, (s as SpecialRow).runner_up_code])
   );
-  const positionByUser = new Map((usersRes.data ?? []).map((u) => [(u as { id: string; position: number }).id, (u as { position: number }).position]));
 
   const predsByUser = new Map<string, Pred[]>();
   for (const p of (predsRes.data ?? []) as Pred[]) {
@@ -151,7 +158,6 @@ export async function evaluateMatchSettledForUsers(userIds: string[]): Promise<v
         preds: predsByUser.get(userId) ?? [],
         matchById,
         resultByMatch,
-        position: positionByUser.get(userId) ?? 0,
         predictedChampionCode: championByUser.get(userId) ?? null,
         actualChampionCode,
         predictedRunnerUpCode: runnerUpByUser.get(userId) ?? null,
@@ -172,7 +178,6 @@ function buildContext(args: {
   preds: Pred[];
   matchById: Map<string, MatchRow>;
   resultByMatch: Map<string, ResultRow>;
-  position: number;
   predictedChampionCode: string | null;
   actualChampionCode: string | null;
   predictedRunnerUpCode: string | null;
@@ -248,7 +253,7 @@ function buildContext(args: {
     groups,
     knockoutRounds,
     upsets: { upsetsCorrect: 0 }, // sin datos de favorito (odds) A03 no se computa
-    position: args.position,
+    position: 0, // los logros de posición se reconcilian aparte (position-reconcile.ts)
     weeklyPositionDelta: 0,
     postsCount: 0,
     bestPostReactions: 0,
