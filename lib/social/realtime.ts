@@ -65,31 +65,46 @@ export function usePostReactionCount(postId: string, initialCount: number) {
 
 // ─── Live comment stream for post detail ─────────────────────────────
 
-/** Trae los datos públicos del autor de un comentario (para no mostrar "Socio"). */
+/**
+ * Trae los datos públicos del autor de un comentario (para no mostrar "Socio").
+ * Reintenta ante errores transitorios (red/RLS momentánea): si tragáramos el
+ * error, el comentario de un socio real quedaría como "Socio" para siempre (el
+ * objetivo B5). Solo devuelve null cuando el usuario realmente no existe
+ * (data null SIN error) o tras agotar los reintentos.
+ */
 async function fetchCommentAuthor(
   supabase: ReturnType<typeof createClient>,
   userId: string
 ): Promise<AuthorRow | null> {
-  const { data } = await supabase
-    .from("user")
-    .select("id, name, initials, avatar_url, total_points")
-    .eq("id", userId)
-    .maybeSingle();
-  if (!data) return null;
-  const row = data as {
-    id: string;
-    name: string;
-    initials: string;
-    avatar_url: string | null;
-    total_points: number | null;
-  };
-  return {
-    id: row.id,
-    name: row.name,
-    initials: row.initials,
-    avatar_url: row.avatar_url ?? null,
-    level: String(pointsToLevel(row.total_points ?? 0).level),
-  };
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const { data, error } = await supabase
+      .from("user")
+      .select("id, name, initials, avatar_url, total_points")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (!error) {
+      if (!data) return null; // el usuario no existe (no es un fallo transitorio)
+      const row = data as {
+        id: string;
+        name: string;
+        initials: string;
+        avatar_url: string | null;
+        total_points: number | null;
+      };
+      return {
+        id: row.id,
+        name: row.name,
+        initials: row.initials,
+        avatar_url: row.avatar_url ?? null,
+        level: String(pointsToLevel(row.total_points ?? 0).level),
+      };
+    }
+
+    // Error transitorio → backoff corto y reintento (no degradar a "Socio").
+    await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
+  }
+  return null;
 }
 
 export function usePostCommentsStream(postId: string, initial: DbComment[]) {
@@ -122,7 +137,8 @@ export function usePostCommentsStream(postId: string, initial: DbComment[]) {
             setComments((cs) => {
               const existing = cs.find((c) => c.id === row.id);
               if (existing) {
-                if (existing.author) return cs;
+                // Ya está; solo parcheamos si le falta el autor y ahora lo tenemos.
+                if (existing.author || !author) return cs;
                 return cs.map((c) => (c.id === row.id ? { ...c, author } : c));
               }
               return [

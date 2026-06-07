@@ -257,8 +257,10 @@ async function sendUpcomingMatchNotifications(
     .from("match")
     .select("id, home_code, away_code, kickoff_at")
     .eq("status", "scheduled")
+    // Ventana semiabierta [now+30, now+60): con el cron cada 30 min, un kickoff en
+    // el borde no cae en dos corridas consecutivas → sin doble recordatorio.
     .gte("kickoff_at", in30min.toISOString())
-    .lte("kickoff_at", in60min.toISOString());
+    .lt("kickoff_at", in60min.toISOString());
   if (!upcomingMatches?.length) return;
 
   for (const match of upcomingMatches) {

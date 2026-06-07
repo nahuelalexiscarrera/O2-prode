@@ -94,7 +94,9 @@ export function rollbackPlaceholder<P extends { id: string }>(list: P[], tempId:
 
 /**
  * Computes a recency-weighted score for "Destacados".
- * Mirrors the SQL view formula for parity in tests / local sort.
+ * This JS function is the SINGLE source of truth for the ranking — no SQL view
+ * computes it. getFeedDestacados (lib/social/queries.ts) trae los candidatos de
+ * 48h y los ordena en JS con esta función.
  *
  *   score = (reactionCount + commentCount * 1.5) * exp(-ageHours / 24)
  */

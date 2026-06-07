@@ -155,7 +155,10 @@ CREATE TABLE special_prediction (
   tournament_id             UUID NOT NULL REFERENCES tournament(id),
   champion_code             TEXT NOT NULL REFERENCES team(code),
   runner_up_code            TEXT NOT NULL REFERENCES team(code),
-  top_scorer_player_id      UUID NOT NULL REFERENCES player(id),
+  -- v1: el goleador queda para v2 (migración 20260605_special_pred_v1 dropeó el
+  -- NOT NULL). upsertSpecialPrediction no lo setea → debe ser nullable o el alta
+  -- de la predicción especial falla en una DB creada desde este schema.
+  top_scorer_player_id      UUID REFERENCES player(id),
   group_stage_best_code     TEXT NOT NULL REFERENCES team(code),
   revelation_code           TEXT NOT NULL REFERENCES team(code),
   locked_at                 TIMESTAMPTZ,

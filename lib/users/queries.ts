@@ -3,6 +3,7 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { pointsToLevel } from "@/lib/ranking/compute";
 
 export type UserProfile = {
@@ -121,8 +122,40 @@ export async function getMyReferral(): Promise<{ code: string; friends: number }
       .select("referral_code")
       .eq("id", user.id)
       .maybeSingle();
-    const code = (data as { referral_code?: string | null } | null)?.referral_code;
-    if (error || !code) return null;
+    if (error) return null;
+    let code = (data as { referral_code?: string | null } | null)?.referral_code ?? null;
+
+    // Red de seguridad (backfill lazy): si la fila existe pero quedó sin código
+    // (p.ej. el alta en /auth/confirm falló transitoriamente al asignarlo), lo
+    // generamos acá. referral_code no es self-updatable por RLS → admin client.
+    if (data && !code) {
+      const admin = createAdminClient();
+      const gen = () => crypto.randomUUID().replace(/-/g, "").slice(0, 6).toUpperCase();
+      for (let i = 0; i < 5; i++) {
+        const candidate = gen();
+        const { error: upErr } = await admin
+          .from("user")
+          .update({ referral_code: candidate })
+          .eq("id", user.id)
+          .is("referral_code", null);
+        if (!upErr) {
+          code = candidate;
+          break;
+        }
+        if ((upErr as { code?: string }).code !== "23505") break;
+      }
+      // Si otro request lo seteó en paralelo, releemos el definitivo.
+      if (!code) {
+        const { data: re } = await admin
+          .from("user")
+          .select("referral_code")
+          .eq("id", user.id)
+          .maybeSingle();
+        code = (re as { referral_code?: string | null } | null)?.referral_code ?? null;
+      }
+    }
+
+    if (!code) return null;
 
     const { count } = await supabase
       .from("user")
