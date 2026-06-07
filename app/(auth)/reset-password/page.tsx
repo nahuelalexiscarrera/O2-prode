@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
+import { createClient } from "@/lib/supabase/client";
 import { resetPasswordAction, type ActionResult } from "@/lib/auth/actions";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -25,6 +26,19 @@ export default function ResetPasswordPage() {
     null
   );
   const errorField = state && !state.ok ? state.field : undefined;
+
+  // Defensa en profundidad: el flujo principal de recovery pasa por /auth/confirm
+  // (template custom) y ya deja la sesión lista. Pero si el link llega como
+  // ?code=... (template default de Supabase), lo intercambiamos acá para
+  // establecer la sesión de recovery; sin esto, updateUser fallaría con "link
+  // vencido". (Mismo dispositivo; cross-device sigue usando /auth/confirm.)
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get("code");
+    if (!code) return;
+    createClient()
+      .auth.exchangeCodeForSession(code)
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col px-6 py-10">
