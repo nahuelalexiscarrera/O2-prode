@@ -6,18 +6,36 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
+import { pointsToLevel } from "@/lib/ranking/compute";
 
 const POST_WITH_AUTHOR = `
   id, user_id, body, embed_type, embed_ref_id,
   image_url, image_width, image_height,
   reaction_count, comment_count, created_at,
-  author:user!user_id ( id, name, initials, avatar_url, level )
+  author:user!user_id ( id, name, initials, avatar_url, level, total_points )
 ` as const;
 
 const COMMENT_WITH_AUTHOR = `
   id, post_id, user_id, body, reaction_count, created_at,
-  author:user!user_id ( id, name, initials, avatar_url, level )
+  author:user!user_id ( id, name, initials, avatar_url, level, total_points )
 ` as const;
+
+// El nivel del autor se DERIVA de sus puntos (user.level está estancada en 1).
+// Así el badge de nivel en el muro/comentarios coincide con ranking/perfil/share.
+type RowWithAuthor = { author: { total_points?: number | null } | null } & Record<string, unknown>;
+function withAuthorLevel<T>(rows: T[]): T[] {
+  return rows.map((row) => {
+    const r = row as RowWithAuthor;
+    if (!r.author) return row;
+    return {
+      ...r,
+      author: { ...r.author, level: pointsToLevel(r.author.total_points ?? 0).level },
+    } as T;
+  });
+}
+function withAuthorLevelOne<T>(row: T): T {
+  return withAuthorLevel([row])[0] as T;
+}
 
 // ─── Feed: Recientes (cursor pagination) ─────────────────────────────
 
@@ -43,7 +61,7 @@ export async function getFeedRecientes(opts: FeedRecientesOptions = {}) {
 
   const { data, error } = await query;
   if (error) throw error;
-  return data ?? [];
+  return withAuthorLevel(data ?? []);
 }
 
 // ─── Feed: Destacados (score = reactions + comments*1.5, últimas 48h) ─
@@ -61,7 +79,7 @@ export async function getFeedDestacados(limit = 20) {
     .limit(limit);
 
   if (error) throw error;
-  return data ?? [];
+  return withAuthorLevel(data ?? []);
 }
 
 // ─── Post detail ─────────────────────────────────────────────────────
@@ -83,8 +101,8 @@ export async function getPostDetail(postId: string) {
   if (commentsRes.error) throw commentsRes.error;
 
   return {
-    post: postRes.data,
-    comments: commentsRes.data ?? [],
+    post: withAuthorLevelOne(postRes.data),
+    comments: withAuthorLevel(commentsRes.data ?? []),
   };
 }
 
