@@ -130,7 +130,7 @@ export async function fetchShareData(
     const { data: match } = await supabase
       .from("match")
       .select(
-        "id, phase, group_id, home_code, away_code, kickoff_at, home_team:team!home_code(code,name), away_team:team!away_code(code,name)"
+        "id, phase, group_id, home_code, away_code, kickoff_at, status, home_team:team!home_code(code,name), away_team:team!away_code(code,name)"
       )
       .eq("id", contextId)
       .single();
@@ -147,6 +147,13 @@ export async function fetchShareData(
     const awayTeam = (match.away_team as unknown as TeamRow | null);
     const phaseKey = match.phase as string;
     const groupLabel = match.group_id ? `Grupo ${match.group_id}` : null;
+
+    // IDOR fix: el endpoint de share es público y sirve la card de CUALQUIER
+    // userId. Solo revelamos el marcador predicho si el partido ya arrancó o
+    // terminó — antes del kickoff es secreto (si no, se espía la predicción del
+    // rival pidiendo su card de un partido futuro).
+    const kickoffPassed = new Date(match.kickoff_at as string).getTime() <= Date.now();
+    const revealScore = match.status === "finished" || kickoffPassed;
 
     const matchData: MatchShareData = {
       template: "match",
@@ -165,10 +172,13 @@ export async function fetchShareData(
         country: awayTeam?.name ?? (match.away_code as string).toUpperCase(),
         flagCode: (match.away_code as string).toLowerCase(),
       },
-      predictedScore: [
-        (prediction?.home_score as number | null) ?? 0,
-        (prediction?.away_score as number | null) ?? 0,
-      ],
+      predictedScore: revealScore
+        ? [
+            (prediction?.home_score as number | null) ?? 0,
+            (prediction?.away_score as number | null) ?? 0,
+          ]
+        : [0, 0],
+      revealScore,
       kickoffISO: match.kickoff_at as string,
       userPosition: user.position,
     };

@@ -103,7 +103,7 @@ export function T03_Match({
               textShadow: `0 0 70px rgba(${C.accentRGB},0.45), 0 0 140px rgba(${C.accentRGB},0.2)`,
             }}
           >
-            {data.predictedScore[0]}
+            {data.revealScore ? data.predictedScore[0] : "?"}
           </span>
           <span
             style={{
@@ -124,12 +124,12 @@ export function T03_Match({
               textShadow: `0 0 70px rgba(${C.accentRGB},0.45), 0 0 140px rgba(${C.accentRGB},0.2)`,
             }}
           >
-            {data.predictedScore[1]}
+            {data.revealScore ? data.predictedScore[1] : "?"}
           </span>
         </div>
 
         <span style={{ fontSize: 30, letterSpacing: "0.2em", color: C.ghost, marginTop: story ? 40 : 24, fontWeight: 700 }}>
-          MI MARCADOR
+          {data.revealScore ? "MI MARCADOR" : "SE REVELA AL ARRANCAR"}
         </span>
       </div>
 
