@@ -4,6 +4,10 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getIsAdmin } from "@/lib/users/queries";
+import {
+  evaluateMatchSettledForUsers,
+  revertMatchSettledAchievements,
+} from "@/lib/achievements/match-settled";
 
 const resultSchema = z.object({
   matchId: z.string().uuid(),
@@ -64,6 +68,25 @@ export async function setMatchResultAction(input: {
     // Primera vez: marcar finished dispara fn_settle_match vía trigger.
     const { error } = await admin.from("match").update({ status: "finished" }).eq("id", matchId);
     if (error) return { ok: false, error: "No se pudo cerrar el partido." };
+  }
+
+  // Logros match-settled de los socios que predijeron este partido. El cron
+  // hace esto tras settle; en carga/corrección MANUAL hay que replicarlo (si no,
+  // por esta vía los logros de skill/posición nunca se evaluaban). En una
+  // corrección, primero revertimos los logros viejos (el bonus puede haber
+  // quedado inflado con el resultado erróneo) y re-evaluamos limpio.
+  try {
+    const { data: preds } = await admin
+      .from("prediction")
+      .select("user_id")
+      .eq("match_id", matchId);
+    const affected = [...new Set((preds ?? []).map((p: { user_id: string }) => p.user_id))];
+    if (affected.length > 0) {
+      if (wasFinished) await revertMatchSettledAchievements(affected);
+      await evaluateMatchSettledForUsers(affected);
+    }
+  } catch (e) {
+    console.error("[admin setMatchResult] eval de logros falló", e);
   }
 
   await admin.rpc("fn_refresh_views");

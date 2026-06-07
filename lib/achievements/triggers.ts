@@ -148,7 +148,7 @@ export function evaluateAchievements(
  */
 export type EventScope = "match-settled" | "social" | "daily-cron" | "weekly-cron";
 
-const scopeMap: Record<EventScope, readonly string[]> = {
+export const scopeMap: Record<EventScope, readonly string[]> = {
   "match-settled": [
     "streak_exact_5",
     "upset_correct",

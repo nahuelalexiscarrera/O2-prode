@@ -12,11 +12,63 @@
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { processAchievements } from "./actions";
-import type {
-  TriggerContext,
-  GroupCompletionSummary,
-  KnockoutRoundSummary,
+import { ACHIEVEMENT_BY_TRIGGER } from "./catalog";
+import {
+  scopeMap,
+  type TriggerContext,
+  type GroupCompletionSummary,
+  type KnockoutRoundSummary,
 } from "./triggers";
+
+/**
+ * Revierte los logros de scope "match-settled" de un set de socios y descuenta su
+ * bonus de total_points. Se usa al CORREGIR un resultado finalizado: el logro
+ * otorgado con el resultado viejo (p.ej. "acierto exacto") puede ya no ser válido.
+ * Tras revertir se llama evaluateMatchSettledForUsers, que re-otorga los que SIGUEN
+ * válidos (neto 0) y deja fuera los que no.
+ */
+export async function revertMatchSettledAchievements(userIds: string[]): Promise<void> {
+  const ids = [...new Set(userIds)];
+  if (ids.length === 0) return;
+
+  const achIds = scopeMap["match-settled"]
+    .map((k) => ACHIEVEMENT_BY_TRIGGER.get(k)?.id)
+    .filter((x): x is string => Boolean(x));
+  if (achIds.length === 0) return;
+
+  const admin = createAdminClient();
+
+  // Bonus efectivo desde el catálogo (admin-editable).
+  const { data: cat } = await admin
+    .from("achievement_catalog")
+    .select("id, points_bonus")
+    .in("id", achIds);
+  const bonusById = new Map(
+    (cat ?? []).map((c) => [c.id as string, (c.points_bonus as number) ?? 0])
+  );
+
+  const { data: rows } = await admin
+    .from("user_achievement")
+    .select("user_id, achievement_id")
+    .in("user_id", ids)
+    .in("achievement_id", achIds);
+  if (!rows?.length) return;
+
+  const revertByUser = new Map<string, number>();
+  for (const r of rows) {
+    const uid = r.user_id as string;
+    revertByUser.set(
+      uid,
+      (revertByUser.get(uid) ?? 0) + (bonusById.get(r.achievement_id as string) ?? 0)
+    );
+  }
+
+  await admin.from("user_achievement").delete().in("user_id", ids).in("achievement_id", achIds);
+
+  for (const [uid, total] of revertByUser) {
+    if (total > 0) await admin.rpc("fn_add_points", { p_user_id: uid, p_delta: -total });
+  }
+}
 
 type Pred = { user_id: string; match_id: string; home_score: number; away_score: number };
 type MatchRow = {
