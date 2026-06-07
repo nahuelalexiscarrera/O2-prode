@@ -193,6 +193,14 @@ async function handle(req: NextRequest) {
 
 // ─── Notificaciones ───────────────────────────────────────────────────
 
+// Respeta la preferencia del socio (default ON: solo se excluye si la apagó).
+// Misma semántica que prefAllows del push, ahora también para la notif in-app.
+function prefOn(prefs: Record<string, boolean> | null | undefined, key: string): boolean {
+  return prefs ? prefs[key] !== false : true;
+}
+
+type UserPrefRow = { id: string; notification_prefs: Record<string, boolean> | null };
+
 async function sendMatchResultNotifications(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any,
@@ -201,15 +209,21 @@ async function sendMatchResultNotifications(
   homeScore: number,
   awayScore: number
 ) {
-  const { data: users } = await supabase.from("user").select("id").is("deleted_at", null);
+  const { data: users } = await supabase
+    .from("user")
+    .select("id, notification_prefs")
+    .is("deleted_at", null);
   if (!users?.length) return;
-  const notifs = users.map((u: { id: string }) => ({
-    user_id: u.id,
-    type: "match-result",
-    title: "Resultado del partido",
-    body: `${homeCode.toUpperCase()} ${homeScore} - ${awayScore} ${awayCode.toUpperCase()} · Mirá tus puntos`,
-    deep_link: "/app",
-  }));
+  // Solo a quienes tienen 'results' activo (antes se insertaba a TODOS).
+  const notifs = (users as UserPrefRow[])
+    .filter((u) => prefOn(u.notification_prefs, "results"))
+    .map((u) => ({
+      user_id: u.id,
+      type: "match-result",
+      title: "Resultado del partido",
+      body: `${homeCode.toUpperCase()} ${homeScore} - ${awayScore} ${awayCode.toUpperCase()} · Mirá tus puntos`,
+      deep_link: "/app",
+    }));
   for (let i = 0; i < notifs.length; i += 100) {
     await supabase.from("notification").insert(notifs.slice(i, i + 100));
   }
@@ -246,8 +260,14 @@ async function sendUpcomingMatchNotifications(
       .select("user_id")
       .eq("match_id", match.id);
     const predicted = new Set((usersWithPred ?? []).map((p: { user_id: string }) => p.user_id));
-    const { data: allUsers } = await supabase.from("user").select("id").is("deleted_at", null);
-    const without = (allUsers ?? []).filter((u: { id: string }) => !predicted.has(u.id));
+    const { data: allUsers } = await supabase
+      .from("user")
+      .select("id, notification_prefs")
+      .is("deleted_at", null);
+    // No-predictores QUE además tienen 'matchReminders' activo (antes: todos).
+    const without = (allUsers ?? []).filter(
+      (u: UserPrefRow) => !predicted.has(u.id) && prefOn(u.notification_prefs, "matchReminders")
+    );
     if (!without.length) continue;
     const notifs = without.map((u: { id: string }) => ({
       user_id: u.id,
