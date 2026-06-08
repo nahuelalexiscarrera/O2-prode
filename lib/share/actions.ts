@@ -4,7 +4,7 @@ import { z } from "zod";
 import { revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { evalSocialAchievements } from "@/lib/social/actions";
+import { triggerSocialAchievements } from "@/lib/social/actions";
 
 // contextId puede ser un UUID (match) o la clave de catálogo de un logro ("A01").
 // Por eso NO se valida como uuid acá; el insert en columnas UUID se guarda como
@@ -94,6 +94,7 @@ export async function recordShareAction(input: {
   });
   if (error) return { ok: false };
 
-  await evalSocialAchievements(user.id);
+  // triggerSocialAchievements() no toma userId como arg → safe para export "use server".
+  await triggerSocialAchievements();
   return { ok: true };
 }

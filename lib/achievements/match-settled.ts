@@ -15,7 +15,9 @@
  */
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { processAchievements } from "./actions";
+// API-003: importar de ./process (no de ./actions "use server") para que
+// processAchievements no quede expuesta como Server Action RPC endpoint.
+import { processAchievements } from "./process";
 import { ACHIEVEMENT_BY_TRIGGER } from "./catalog";
 import {
   scopeMap,

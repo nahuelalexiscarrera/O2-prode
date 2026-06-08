@@ -42,7 +42,12 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const url = (event.notification.data as { url?: string })?.url ?? "/app";
+  const rawUrl = (event.notification.data as { url?: string })?.url ?? "/app";
+  // XSS-001: validar que la URL es una ruta relativa del propio origen antes de
+  // navegar. Un payload de push malicioso podría incluir una URL externa para
+  // redirigir al usuario a un sitio de phishing vía client.navigate().
+  // Todas las deep_links de O2 PRODE son rutas relativas (empiezan con "/").
+  const url = rawUrl.startsWith("/") ? rawUrl : "/app";
   event.waitUntil(
     self.clients
       .matchAll({ type: "window", includeUncontrolled: true })

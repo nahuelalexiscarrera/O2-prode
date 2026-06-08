@@ -4,7 +4,7 @@ import { z } from "zod";
 import { revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { processAchievements } from "@/lib/achievements/actions";
+import { processAchievements } from "@/lib/achievements/process";
 import {
   checkPostRateLimit,
   checkCommentRateLimit,
@@ -139,13 +139,38 @@ function buildSocialCtx(userId: string, stats: SocialStats): TriggerContext {
 }
 
 /** Evalúa los logros sociales (post/comentario/share/referido) del usuario. */
-export async function evalSocialAchievements(userId: string): Promise<UnlockedAchievement[]> {
+// Interna: toma userId explícito (solo la llaman funciones que ya lo obtuvieron
+// de requireUser() o de supabase.auth.getUser()). No exportada directamente porque
+// recibir userId como parámetro en un "use server" la haría RPC-invocable con
+// cualquier UUID — un cliente podría otorgarse logros de otro socio. (API-003)
+async function evalSocialAchievements(userId: string): Promise<UnlockedAchievement[]> {
   try {
     const stats = await fetchSocialStats(userId);
     const ctx = buildSocialCtx(userId, stats);
     return await processAchievements("social", ctx);
   } catch {
     // Achievement errors must never break the main action
+    return [];
+  }
+}
+
+// ─── Trigger de logros sociales (session-safe) ────────────────────────────
+
+/**
+ * Versión exportable de la evaluación de logros sociales.
+ * NO acepta userId como parámetro → usa la sesión activa → safe para export.
+ * Llamar desde lib/share/actions.ts y cualquier Server Action que no tenga
+ * el user.id ya disponible. (API-003 fix)
+ */
+export async function triggerSocialAchievements(): Promise<UnlockedAchievement[]> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return [];
+    return evalSocialAchievements(user.id);
+  } catch {
     return [];
   }
 }
@@ -157,6 +182,17 @@ export async function createPost(
 ): Promise<{ post: PostRow; unlockedAchievements: UnlockedAchievement[] }> {
   const parsed = postSchema.parse(input);
   const { supabase, user } = await requireUser();
+
+  // SOCIAL-001: solo se permite imageUrl del propio bucket de Supabase Storage.
+  // Evita que un socio postee con URLs externas arbitrarias (contenido de terceros,
+  // tracking pixels, SSRF potencial). El storage de O2 Prode es la única fuente válida.
+  if (parsed.imageUrl) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "") ?? "";
+    const storageBase = `${supabaseUrl}/storage/v1/object/public/`;
+    if (!supabaseUrl || !parsed.imageUrl.startsWith(storageBase)) {
+      throw new Error("INVALID_IMAGE_URL");
+    }
+  }
 
   await checkPostRateLimit(supabase, user.id);
 

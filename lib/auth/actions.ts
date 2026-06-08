@@ -273,6 +273,39 @@ export async function resetPasswordAction(
   }
 
   const supabase = await createClient();
+
+  // AUTH-005: verificar que la sesión actual corresponde al flujo de recovery.
+  // Sin esta check, un socio ya logueado con sesión normal podría invocar esta
+  // acción vía Server Action RPC y cambiar su contraseña sin conocer la actual
+  // (bypass del check de currentPassword de changePasswordAction).
+  // Supabase marca las sesiones de recovery con method='otp' en el AMR.
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session) {
+    return {
+      ok: false,
+      error: "Sesión de recuperación no encontrada. El link puede haber vencido — pedí uno nuevo.",
+    };
+  }
+  // session.user.amr existe en runtime (viene en el JWT) pero @supabase/supabase-js
+  // no lo expone en el tipo User → accedemos con cast defensivo.
+  // Si Supabase lo elimina en futuras versiones, isRecoverySession será false
+  // y se mostrará error al usuario (fail-safe, no fail-open).
+  // session.user.amr existe en runtime (viene en el JWT) pero @supabase/supabase-js
+  // no lo expone en el tipo User. El doble cast (via unknown) es intencional:
+  // accedemos a la propiedad con seguridad de tipo y fallback defensivo.
+  type AmrEntry = { method: string; timestamp: number };
+  const amr =
+    ((session.user as unknown as Record<string, unknown>).amr as AmrEntry[] | undefined) ?? [];
+  const isRecoverySession = amr.some((entry) => entry.method === "otp");
+  if (!isRecoverySession) {
+    return {
+      ok: false,
+      error: "Esta acción requiere el link de recuperación enviado a tu email.",
+    };
+  }
+
   const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
   if (error) {
     return {

@@ -6,6 +6,7 @@
  * Protegido por Authorization: Bearer <CRON_SECRET>.
  */
 
+import { timingSafeEqual } from "node:crypto";
 import { type NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -15,7 +16,13 @@ export const dynamic = "force-dynamic";
 function authOk(req: NextRequest): boolean {
   const secret = process.env.CRON_SECRET;
   if (!secret) return false;
-  return req.headers.get("authorization") === `Bearer ${secret}`;
+  const auth = req.headers.get("authorization") ?? "";
+  const expected = `Bearer ${secret}`;
+  // AUTH-009: comparación en tiempo constante para prevenir timing attacks.
+  const a = Buffer.from(auth);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
 }
 
 async function handle(req: NextRequest) {

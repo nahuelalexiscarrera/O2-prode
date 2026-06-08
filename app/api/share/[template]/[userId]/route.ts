@@ -16,6 +16,34 @@ export const runtime = "edge";
 
 const VALID_TEMPLATES = new Set(["summary", "position", "match", "achievement"]);
 
+// ─── Rate limiting por IP (API-002 / IDOR-001) ─────────────────────────────
+// El share endpoint es intencionalmente público para el flujo viral (el PNG se
+// embebe en Instagram Stories, WhatsApp, etc. — no puede requerir auth).
+// Sin rate limiting, un atacante podría enumerar todos los userId de la DB y
+// descargar tarjetas de ~800 socios en segundos.
+// Límite: 40 req / 5 min por IP → suficiente para compartir (1 req/template),
+// demasiado poco para enumerar el padrón completo.
+// Nota: en edge functions, este Map es per-instance; en entornos multi-instance
+// (Vercel prodution) el límite aplica por instancia. Esto es una primera línea
+// de defensa razonable sin infra adicional (Redis no disponible en edge).
+
+type Bucket = { count: number; resetAt: number };
+const ipBuckets = new Map<string, Bucket>();
+const RL_MAX = 40;
+const RL_WINDOW_MS = 5 * 60 * 1000; // 5 minutos
+
+function ipRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const bucket = ipBuckets.get(ip);
+  if (!bucket || now > bucket.resetAt) {
+    ipBuckets.set(ip, { count: 1, resetAt: now + RL_WINDOW_MS });
+    return true;
+  }
+  if (bucket.count >= RL_MAX) return false;
+  bucket.count++;
+  return true;
+}
+
 async function tryFetchFont(url: string): Promise<ArrayBuffer | null> {
   try {
     const res = await fetch(url);
@@ -30,6 +58,18 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ template: string; userId: string }> }
 ) {
+  // Rate limit check antes de cualquier procesamiento costoso.
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    request.headers.get("x-real-ip") ??
+    "unknown";
+  if (!ipRateLimit(ip)) {
+    return new Response("Too many requests", {
+      status: 429,
+      headers: { "Retry-After": "300" },
+    });
+  }
+
   const { template, userId } = await params;
   const { searchParams } = request.nextUrl;
   const format: ShareFormat =

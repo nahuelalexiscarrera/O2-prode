@@ -15,11 +15,20 @@ export async function middleware(request: NextRequest) {
   const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const SUPABASE_ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // Sin config de Supabase NO podemos validar sesión. En vez de tirar 500 en
-  // TODA ruta (MIDDLEWARE_INVOCATION_FAILED — pasó cuando el env quedó mal
-  // cargado en Vercel), dejamos pasar: las páginas protegidas hacen su propio
-  // getUser y redirigen. El middleware "falla abierto", nunca tira el sitio.
-  if (!SUPABASE_URL || !SUPABASE_ANON) return response;
+  // Sin config de Supabase NO podemos validar sesión.
+  // AUTH-001: fallo cerrado — rutas protegidas (/app/*) redirigen al login en vez
+  // de dejar pasar sin autenticación. Las rutas públicas (login, register, etc.)
+  // siguen pasando para no romper el acceso al sitio si la config es temporal.
+  if (!SUPABASE_URL || !SUPABASE_ANON) {
+    const { pathname } = request.nextUrl;
+    if ((pathname.startsWith("/app") || pathname === "/") && pathname !== "/splash") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("redirect", pathname);
+      return NextResponse.redirect(url);
+    }
+    return response;
+  }
 
   try {
     const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON, {
@@ -82,8 +91,16 @@ export async function middleware(request: NextRequest) {
 
     return response;
   } catch {
-    // Blindaje final: ante CUALQUIER fallo del middleware, dejar pasar en vez de
-    // tirar MIDDLEWARE_INVOCATION_FAILED (que cae todo el sitio).
+    // Blindaje final: ante CUALQUIER fallo del middleware, AUTH-001:
+    // rutas protegidas → redirigir al login (antes: fail-open, cualquier error
+    // dejaba entrar sin autenticación). Rutas públicas → dejar pasar.
+    const { pathname } = request.nextUrl;
+    if ((pathname.startsWith("/app") || pathname === "/") && pathname !== "/splash") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("redirect", pathname);
+      return NextResponse.redirect(url);
+    }
     return response;
   }
 }

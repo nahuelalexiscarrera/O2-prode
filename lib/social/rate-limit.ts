@@ -22,12 +22,15 @@ export async function checkPostRateLimit(
   userId: string
 ): Promise<void> {
   const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  // SOCIAL-004: contar TODOS los posts del período (incluidos los borrados).
+  // Sin esto, un usuario podía publicar 5, borrar todo y repetir el ciclo
+  // indefinidamente, evadiendo el rate limit. El soft-delete no debe resetear
+  // el contador — lo que importa es la tasa de creación, no el estado actual.
   const { count } = await supabase
     .from("post")
     .select("*", { count: "exact", head: true })
     .eq("user_id", userId)
-    .gte("created_at", since)
-    .is("deleted_at", null);
+    .gte("created_at", since);
 
   if ((count ?? 0) >= 5) {
     throw new RateLimitError(
@@ -41,12 +44,13 @@ export async function checkCommentRateLimit(
   userId: string
 ): Promise<void> {
   const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  // SOCIAL-004: igual que posts — contar TODOS (incluidos borrados) para que
+  // el soft-delete no resetee la ventana de rate limiting.
   const { count } = await supabase
     .from("comment")
     .select("*", { count: "exact", head: true })
     .eq("user_id", userId)
-    .gte("created_at", since)
-    .is("deleted_at", null);
+    .gte("created_at", since);
 
   if ((count ?? 0) >= 30) {
     throw new RateLimitError(

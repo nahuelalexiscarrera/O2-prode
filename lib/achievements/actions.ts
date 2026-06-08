@@ -2,131 +2,27 @@
  * O2 PRODE — Achievement Server Actions
  * Agente 11 · Gamification
  *
- * Persists unlocked achievements, applies bonus points,
- * creates notifications, and returns the list of newly-unlocked items
- * for the client to display via Modal M16.
+ * Exported Server Actions (seguras para llamar desde el cliente):
+ *   · markAchievementShared — marca un logro como compartido (flow de share card)
+ *
+ * La función processAchievements fue movida a lib/achievements/process.ts
+ * (API-003): al estar en un archivo "use server", Next.js la exponía como
+ * endpoint RPC cifrado en /_next/action → cualquier cliente podía invocarla
+ * con scope/userId arbitrario para auto-otorgarse logros. Al moverla a un
+ * archivo sin "use server", solo puede importarse desde código server-side.
  */
 
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
-import { revalidateTag } from "next/cache";
-import { evaluateForEvent, type EventScope, type TriggerContext } from "./triggers";
 import { ACHIEVEMENT_BY_ID } from "./catalog";
-import { sumEffectivePoints } from "./points";
-import { pushToUser } from "@/lib/push/notify";
 
-// ─── Helper: get user's already-unlocked achievement IDs ─────────────
-
-async function getUnlockedIds(userId: string): Promise<Set<string>> {
-  // service role: funciona tanto desde un server action (sesión) como desde un
-  // cron (sin sesión, ej. el evaluador match-settled). Opera sobre el userId
-  // explícito, no sobre el de la sesión.
-  const supabase = createAdminClient();
-  const { data } = await supabase
-    .from("user_achievement")
-    .select("achievement_id")
-    .eq("user_id", userId);
-  return new Set((data ?? []).map((r) => r.achievement_id));
-}
-
-// ─── Main: evaluate + persist ────────────────────────────────────────
+// ─── markAchievementShared ────────────────────────────────────────────────
 
 /**
- * Called from match settle handler, social action handlers, or cron jobs.
- * Returns the list of newly-unlocked achievements (for UI to display).
- */
-export async function processAchievements(
-  scope: EventScope,
-  ctx: TriggerContext
-): Promise<
-  Array<{ id: string; name: string; iconRef: string; pointsBonus: number; impact: string }>
-> {
-  const supabase = createAdminClient();
-  const alreadyUnlocked = await getUnlockedIds(ctx.userId);
-  const newlyUnlocked = evaluateForEvent(scope, ctx, alreadyUnlocked);
-
-  if (newlyUnlocked.length === 0) return [];
-
-  const rowsToInsert = newlyUnlocked.map((r) => ({
-    user_id: ctx.userId,
-    achievement_id: r.achievement.id,
-    unlocked_at: new Date().toISOString(),
-    shared: false,
-  }));
-
-  const { error: insertErr } = await supabase.from("user_achievement").insert(rowsToInsert);
-
-  if (insertErr) throw insertErr;
-
-  // Sum bonus points — puntos EFECTIVOS desde la DB (editables por el admin).
-  const totalBonus = await sumEffectivePoints(newlyUnlocked.map((r) => r.achievement.id));
-
-  if (totalBonus > 0) {
-    // service role: fn_add_points queda REVOCADA para usuarios (un socio no debe
-    // poder auto-sumarse puntos llamando la RPC directo). Se ejecuta con
-    // privilegios de servicio desde el server. Los crons también usan service role.
-    const adminDb = createAdminClient();
-    const { error: rpcErr } = await adminDb.rpc("fn_add_points", {
-      p_user_id: ctx.userId,
-      p_delta: totalBonus,
-    });
-    if (rpcErr) {
-      // Fallback no atómico (también con service role)
-      const { data: user } = await adminDb
-        .from("user")
-        .select("total_points")
-        .eq("id", ctx.userId)
-        .single();
-      if (user) {
-        await adminDb
-          .from("user")
-          .update({ total_points: (user.total_points ?? 0) + totalBonus })
-          .eq("id", ctx.userId);
-      }
-    }
-  }
-
-  // Create in-app notifications for each unlock.
-  // service role: la tabla notification no tiene policy de INSERT, así que
-  // insertarlas con el cliente de usuario fallaría por RLS (en silencio) y la
-  // campana nunca mostraría los logros. El cron y los triggers ya usan rutas
-  // privilegiadas; acá hacemos lo mismo para la notif propia.
-  const notifs = newlyUnlocked.map((r) => ({
-    user_id: ctx.userId,
-    type: "achievement-unlocked" as const,
-    title: "Logro desbloqueado",
-    body: `${r.achievement.name} · ${r.achievement.description}`,
-    deep_link: `/app/perfil/logros#${r.achievement.id}`,
-  }));
-  await createAdminClient().from("notification").insert(notifs);
-
-  // Push al dispositivo (los logros son hitos infrecuentes → siempre se envían).
-  const pushBody =
-    newlyUnlocked.length === 1
-      ? (newlyUnlocked[0]?.achievement.name ?? "Nuevo logro")
-      : `Desbloqueaste ${newlyUnlocked.length} logros nuevos`;
-  await pushToUser(ctx.userId, {
-    title: "Logro desbloqueado",
-    body: pushBody,
-    deep_link: "/app/perfil/logros",
-  });
-
-  revalidateTag(`user-${ctx.userId}-achievements`);
-
-  return newlyUnlocked.map((r) => ({
-    id: r.achievement.id,
-    name: r.achievement.name,
-    iconRef: r.achievement.iconRef,
-    pointsBonus: r.achievement.pointsBonus,
-    impact: r.achievement.impact,
-  }));
-}
-
-/**
- * Marks an achievement as shared (called from Share completion flow).
- * Can in turn unlock S03 "Embajador" via processAchievements.
+ * Marca un logro del usuario autenticado como compartido.
+ * Llamado desde el flow de share card (Agente 5) tras generar el PNG.
+ * Puede desbloquear S03 "Embajador" (evaluado en lib/social/actions.ts).
  */
 export async function markAchievementShared(achievementId: string): Promise<void> {
   const supabase = await createClient();
