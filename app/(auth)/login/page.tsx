@@ -20,15 +20,11 @@ function ConfirmBanner() {
   if (!confirmed && !errorConfirm && !errorOauth) return null;
 
   if (errorOauth) {
-    const detail = searchParams.get("detail");
     return (
       <div className="mb-6 rounded-md bg-surface border border-error/30 px-4 py-3 flex items-start gap-3">
         <Icon name="info" size={18} className="text-error mt-0.5" />
         <p className="text-body-sm text-text">
-          No se pudo iniciar sesión con Google. Probá de nuevo.
-          {detail && (
-            <span className="block mt-1 text-text-muted break-words">{detail}</span>
-          )}
+          Hubo un problema al iniciar sesión. Intentá nuevamente en unos minutos.
         </p>
       </div>
     );

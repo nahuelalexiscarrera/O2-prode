@@ -26,9 +26,10 @@ export async function GET(request: NextRequest) {
   // el usuario nuevo (un trigger/hook sobre auth.users). Logueamos y propagamos el
   // detalle real para diagnóstico (antes se descartaba y se veía un genérico).
   if (oauthError) {
+    // Logueamos el detalle real para diagnóstico server-side; al usuario solo le
+    // llega ?error=oauth (sin exponer mensajes técnicos de Google/Supabase).
     console.error("[oauth callback] provider error:", oauthError, "·", oauthErrorDesc);
-    const detail = oauthErrorDesc ?? oauthError;
-    return NextResponse.redirect(`${origin}/login?error=oauth&detail=${encodeURIComponent(detail)}`);
+    return NextResponse.redirect(`${origin}/login?error=oauth`);
   }
   if (!code) {
     console.error("[oauth callback] missing ?code");
@@ -38,8 +39,9 @@ export async function GET(request: NextRequest) {
   const supabase = await createClient();
   const { error } = await supabase.auth.exchangeCodeForSession(code);
   if (error) {
+    // Detalle real solo a los logs; el usuario ve un mensaje genérico.
     console.error("[oauth callback] exchangeCodeForSession:", error.message);
-    return NextResponse.redirect(`${origin}/login?error=oauth&detail=${encodeURIComponent(error.message)}`);
+    return NextResponse.redirect(`${origin}/login?error=oauth`);
   }
 
   const {
