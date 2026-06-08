@@ -71,36 +71,44 @@ export async function signInAction(
   _prev: unknown,
   formData: FormData
 ): Promise<ActionResult> {
-  const parsed = loginSchema.safeParse({
-    email: formData.get("email"),
-    password: formData.get("password"),
-  });
+  try {
+    const parsed = loginSchema.safeParse({
+      email: formData.get("email"),
+      password: formData.get("password"),
+    });
 
-  if (!parsed.success) {
-    const issue = parsed.error.issues[0];
-    return { ok: false, error: issue?.message ?? "Datos inválidos", field: String(issue?.path?.[0] ?? "") };
-  }
-
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({
-    email: parsed.data.email,
-    password: parsed.data.password,
-  });
-
-  if (error) {
-    const msg = error.message.toLowerCase();
-    if (error.code === "email_not_confirmed" || msg.includes("not confirmed") || msg.includes("confirm")) {
-      return {
-        ok: false,
-        error: "Confirmá tu email antes de entrar. Revisá tu bandeja (y la carpeta de spam).",
-        field: "email",
-      };
+    if (!parsed.success) {
+      const issue = parsed.error.issues[0];
+      return { ok: false, error: issue?.message ?? "Datos inválidos", field: String(issue?.path?.[0] ?? "") };
     }
-    // Mensaje neutro para no filtrar si el email existe o no.
-    return { ok: false, error: "Email o contraseña incorrectos." };
-  }
 
-  redirect("/app");
+    const supabase = await createClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email: parsed.data.email,
+      password: parsed.data.password,
+    });
+
+    if (error) {
+      const msg = error.message.toLowerCase();
+      if (error.code === "email_not_confirmed" || msg.includes("not confirmed") || msg.includes("confirm")) {
+        return {
+          ok: false,
+          error: "Confirmá tu email antes de entrar. Revisá tu bandeja (y la carpeta de spam).",
+          field: "email",
+        };
+      }
+      // Mensaje neutro para no filtrar si el email existe o no.
+      return { ok: false, error: "Email o contraseña incorrectos." };
+    }
+
+    redirect("/app");
+  } catch (e) {
+    // Capturar redirect() de next/navigation (lanza NEXT_REDIRECT internamente).
+    const err = e as { digest?: string };
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw e;
+    console.error("[signInAction]", e);
+    return { ok: false, error: "Error de conexión. Verificá tu internet o intentá de nuevo." };
+  }
 }
 
 // ─── Validate invite (paso 1 del register) ────────────────────────────
@@ -140,81 +148,98 @@ export async function signUpAction(
   _prev: unknown,
   formData: FormData
 ): Promise<ActionResult<{ email: string }>> {
-  const parsed = registerSchema.safeParse({
-    name: formData.get("name"),
-    email: formData.get("email"),
-    phone: formData.get("phone"),
-    password: formData.get("password"),
-    passwordConfirm: formData.get("passwordConfirm"),
-    referralCode: formData.get("referralCode"),
-    acceptTerms: formData.get("acceptTerms"),
-  });
+  try {
+    const parsed = registerSchema.safeParse({
+      name: formData.get("name"),
+      email: formData.get("email"),
+      phone: formData.get("phone"),
+      password: formData.get("password"),
+      passwordConfirm: formData.get("passwordConfirm"),
+      referralCode: formData.get("referralCode"),
+      acceptTerms: formData.get("acceptTerms"),
+    });
 
-  if (!parsed.success) {
-    const issue = parsed.error.issues[0];
-    return { ok: false, error: issue?.message ?? "Datos inválidos", field: String(issue?.path?.[0] ?? "") };
-  }
+    if (!parsed.success) {
+      const issue = parsed.error.issues[0];
+      return { ok: false, error: issue?.message ?? "Datos inválidos", field: String(issue?.path?.[0] ?? "") };
+    }
 
-  const { name, email, phone, password, referralCode } = parsed.data;
-  const normalizedPhone = phone && phone.trim() !== "" ? phone.trim() : null;
+    const { name, email, phone, password, referralCode } = parsed.data;
+    const normalizedPhone = phone && phone.trim() !== "" ? phone.trim() : null;
 
-  // Registro con CONFIRMACIÓN por email (anti-spam). signUp crea la cuenta SIN
-  // confirmar y dispara el mail de verificación; la fila en `user` se crea recién
-  // al confirmar (en /auth/confirm). Guardamos name/phone en user_metadata para
-  // ese momento. NO auto-logueamos: el socio entra después de confirmar.
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      emailRedirectTo: `${siteUrl()}/auth/confirm`,
-      data: { name, phone: normalizedPhone, referralCode: referralCode || undefined },
-    },
-  });
+    // Registro con CONFIRMACIÓN por email (anti-spam). signUp crea la cuenta SIN
+    // confirmar y dispara el mail de verificación; la fila en `user` se crea recién
+    // al confirmar (en /auth/confirm). Guardamos name/phone en user_metadata para
+    // ese momento. NO auto-logueamos: el socio entra después de confirmar.
+    const supabase = await createClient();
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${siteUrl()}/auth/confirm`,
+        data: { name, phone: normalizedPhone, referralCode: referralCode || undefined },
+      },
+    });
 
-  if (error) {
-    const msg = error.message.toLowerCase();
-    if (msg.includes("already") || msg.includes("registered")) {
+    if (error) {
+      const msg = error.message.toLowerCase();
+      if (msg.includes("already") || msg.includes("registered")) {
+        return { ok: false, error: "Ese email ya tiene una cuenta.", field: "email" };
+      }
+      if (error.status === 429 || msg.includes("rate") || msg.includes("limit")) {
+        return { ok: false, error: "Demasiados intentos. Esperá unos minutos y probá de nuevo." };
+      }
+      if (msg.includes("password")) {
+        return { ok: false, error: error.message, field: "password" };
+      }
+      if (msg.includes("redirect") || msg.includes("not allowed")) {
+        return { ok: false, error: "Error de configuración del servidor. Avisale al staff de O2." };
+      }
+      return { ok: false, error: `No pudimos crear la cuenta: ${error.message}` };
+    }
+
+    // Supabase ofusca el "email ya registrado": devuelve un user con identities []
+    // (para no filtrar qué emails existen). Lo tratamos como cuenta existente.
+    if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
       return { ok: false, error: "Ese email ya tiene una cuenta.", field: "email" };
     }
-    if (error.status === 429 || msg.includes("rate") || msg.includes("limit")) {
-      return { ok: false, error: "Demasiados intentos. Esperá unos minutos y probá de nuevo." };
-    }
-    if (msg.includes("password")) {
-      return { ok: false, error: error.message, field: "password" };
-    }
-    return { ok: false, error: "No pudimos crear la cuenta. Probá de nuevo." };
-  }
 
-  // Supabase ofusca el "email ya registrado": devuelve un user con identities []
-  // (para no filtrar qué emails existen). Lo tratamos como cuenta existente.
-  if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
-    return { ok: false, error: "Ese email ya tiene una cuenta.", field: "email" };
-  }
-
-  // Si la confirmación de email NO está activada en Supabase, signUp ya devuelve
-  // sesión (cuenta auto-confirmada): creamos la fila y entramos directo. Si SÍ
-  // está activada, no hay sesión → mostramos la pantalla "revisá tu email".
-  if (data.session && data.user) {
-    const admin = createAdminClient();
-    const { data: existing } = await admin
-      .from("user")
-      .select("id")
-      .eq("id", data.user.id)
-      .maybeSingle();
-    if (!existing) {
-      await admin.from("user").insert({
-        id: data.user.id,
-        email,
-        name,
-        initials: deriveInitials(name),
-        phone: normalizedPhone,
-      });
+    // Si la confirmación de email NO está activada en Supabase, signUp ya devuelve
+    // sesión (cuenta auto-confirmada): creamos la fila y entramos directo. Si SÍ
+    // está activada, no hay sesión → mostramos la pantalla "revisá tu email".
+    if (data.session && data.user) {
+      try {
+        const admin = createAdminClient();
+        const { data: existing } = await admin
+          .from("user")
+          .select("id")
+          .eq("id", data.user.id)
+          .maybeSingle();
+        if (!existing) {
+          await admin.from("user").insert({
+            id: data.user.id,
+            email,
+            name,
+            initials: deriveInitials(name),
+            phone: normalizedPhone,
+          });
+        }
+      } catch (adminErr) {
+        console.error("[signUpAction] admin insert error:", adminErr);
+        // No bloqueamos el login si falla la creación de la fila;
+        // /auth/confirm o /app la crea de forma idempotente.
+      }
+      redirect("/app");
     }
-    redirect("/app");
-  }
 
-  return { ok: true, data: { email } };
+    return { ok: true, data: { email } };
+  } catch (e) {
+    // Capturar redirect() de next/navigation (lanza NEXT_REDIRECT internamente).
+    const err = e as { digest?: string };
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw e;
+    console.error("[signUpAction]", e);
+    return { ok: false, error: "Error de conexión con el servidor. Verificá tu internet e intentá de nuevo." };
+  }
 }
 
 // ─── Reenviar email de confirmación ───────────────────────────────────
@@ -227,20 +252,25 @@ export async function resendConfirmationAction(
   _prev: unknown,
   formData: FormData
 ): Promise<ActionResult> {
-  const parsed = resendSchema.safeParse({ email: formData.get("email") });
-  if (!parsed.success) return { ok: false, error: "Email inválido" };
+  try {
+    const parsed = resendSchema.safeParse({ email: formData.get("email") });
+    if (!parsed.success) return { ok: false, error: "Email inválido" };
 
-  const supabase = await createClient();
-  const { error } = await supabase.auth.resend({
-    type: "signup",
-    email: parsed.data.email,
-    options: { emailRedirectTo: `${siteUrl()}/auth/confirm` },
-  });
+    const supabase = await createClient();
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email: parsed.data.email,
+      options: { emailRedirectTo: `${siteUrl()}/auth/confirm` },
+    });
 
-  if (error) {
-    return { ok: false, error: "No pudimos reenviar el mail. Esperá unos minutos." };
+    if (error) {
+      return { ok: false, error: "No pudimos reenviar el mail. Esperá unos minutos." };
+    }
+    return { ok: true };
+  } catch (e) {
+    console.error("[resendConfirmationAction]", e);
+    return { ok: false, error: "Error de conexión. Intentá de nuevo." };
   }
-  return { ok: true };
 }
 
 // ─── Reset password (form de clave nueva tras el link de recovery) ────
