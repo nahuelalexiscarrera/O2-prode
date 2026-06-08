@@ -36,8 +36,8 @@ export default function RankingLoading() {
 
       {/* Ranking rows */}
       <div className="flex flex-col">
-        {Array.from({ length: 10 }, (_, i) => (
-          <div key={i} className="flex items-center gap-3 px-4 py-2.5 border-b border-border">
+        {(["r1","r2","r3","r4","r5","r6","r7","r8","r9","r10"] as const).map((k) => (
+          <div key={k} className="flex items-center gap-3 px-4 py-2.5 border-b border-border">
             <Skeleton className="h-4 w-6 rounded" />
             <Skeleton className="h-9 w-9 rounded-full shrink-0" />
             <Skeleton className="h-4 flex-1 rounded" />

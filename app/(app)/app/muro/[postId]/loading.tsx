@@ -34,8 +34,8 @@ export default function PostDetailLoading() {
         <Skeleton className="h-3 w-24 rounded" />
 
         {/* Comment cards */}
-        {Array.from({ length: 3 }, (_, i) => (
-          <div key={i} className="flex gap-3 bg-card rounded-xl border border-border p-4">
+        {(["cmt-a", "cmt-b", "cmt-c"] as const).map((k) => (
+          <div key={k} className="flex gap-3 bg-card rounded-xl border border-border p-4">
             <Skeleton className="h-8 w-8 rounded-full shrink-0" />
             <div className="flex flex-col gap-1.5 flex-1">
               <Skeleton className="h-4 w-24 rounded" />

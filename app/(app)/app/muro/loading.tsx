@@ -28,8 +28,8 @@ export default function MuroLoading() {
         </div>
 
         {/* Post cards */}
-        {Array.from({ length: 3 }, (_, i) => (
-          <div key={i} className="bg-card rounded-xl border border-border overflow-hidden">
+        {(["post-a", "post-b", "post-c"] as const).map((k) => (
+          <div key={k} className="bg-card rounded-xl border border-border overflow-hidden">
             <div className="flex items-center gap-3 px-4 pt-4 pb-3">
               <Skeleton className="h-9 w-9 rounded-full shrink-0" />
               <div className="flex flex-col gap-1 flex-1">
