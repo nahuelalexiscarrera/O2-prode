@@ -56,9 +56,33 @@ async function handle(req: NextRequest) {
 
   if (usersErr) return NextResponse.json({ error: usersErr.message }, { status: 500 });
 
+  const userList = users ?? [];
+
+  // CRON-005: tomar el snapshot de posiciones ANTES de evaluar logros.
+  // Si lo tomamos al final del loop (como antes), los bonus de puntos que
+  // otorgamos durante la evaluación pueden correr fn_recalculate_positions y
+  // modificar las posiciones en DB. El snapshot quedaría con posiciones
+  // post-bonus, no las del inicio de semana → el delta de la PRÓXIMA semana
+  // sería incorrecto. Al snapshottear primero, position_last_week refleja
+  // la posición de entrada a la semana, independientemente de los bonuses.
+  const snapshotRows = userList.map((u) => ({
+    id: u.id as string,
+    position_last_week: (u.position as number) ?? 0,
+  }));
+  // Batch update de todos los snapshots antes de cualquier modificación.
+  for (let i = 0; i < snapshotRows.length; i += 100) {
+    const batch = snapshotRows.slice(i, i + 100);
+    await Promise.all(
+      batch.map((r) =>
+        supabase.from("user").update({ position_last_week: r.position_last_week }).eq("id", r.id)
+      )
+    );
+  }
+
+  // SEGUNDA PASADA: evaluación de logros con las posiciones ya consistentes.
   const results: { userId: string; unlocked: string[] }[] = [];
 
-  for (const u of users ?? []) {
+  for (const u of userList) {
     const userId = u.id as string;
     const position = (u.position as number) ?? 0;
     const positionLastWeek = (u.position_last_week as number | null) ?? position;
@@ -126,15 +150,9 @@ async function handle(req: NextRequest) {
 
       results.push({ userId, unlocked: newAchievements.map((r) => r.achievement.id) });
     }
-
-    // Snapshot current position for next week's delta
-    await supabase
-      .from("user")
-      .update({ position_last_week: position })
-      .eq("id", userId);
   }
 
-  return NextResponse.json({ ok: true, processed: users?.length ?? 0, results });
+  return NextResponse.json({ ok: true, processed: userList.length, results });
 }
 
 // Vercel Cron dispara GET; mantenemos POST para invocación manual.

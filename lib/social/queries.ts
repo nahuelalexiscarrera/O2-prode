@@ -122,7 +122,10 @@ export async function getPostDetail(postId: string) {
   const supabase = await createClient();
 
   const [postRes, commentsRes] = await Promise.all([
-    supabase.from("post").select(POST_WITH_AUTHOR).eq("id", postId).single(),
+    // SOCIAL-006: filtrar deleted_at IS NULL explícitamente además de confiar en RLS.
+    // La policy de SELECT ya impide ver posts borrados, pero la query explícita
+    // evita ambigüedad si la policy cambia y documenta la intención.
+    supabase.from("post").select(POST_WITH_AUTHOR).eq("id", postId).is("deleted_at", null).single(),
     supabase
       .from("comment")
       .select(COMMENT_WITH_AUTHOR)
