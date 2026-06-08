@@ -193,11 +193,11 @@ export default function RegisterPage() {
           />
           <span className="text-body-sm text-text-muted leading-relaxed">
             Acepto los{" "}
-            <Link href="/app/perfil/terminos" className="text-primary underline">
+            <Link href="/terminos" className="text-primary underline" target="_blank">
               términos
             </Link>{" "}
             y la{" "}
-            <Link href="/app/perfil/privacidad" className="text-primary underline">
+            <Link href="/privacidad" className="text-primary underline" target="_blank">
               política de privacidad
             </Link>
             .
