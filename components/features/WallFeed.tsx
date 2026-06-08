@@ -160,20 +160,22 @@ export function WallFeed({
           />
         )}
 
-        {/* New posts banner */}
-        {newPostCount > 0 && (
-          <button
-            type="button"
-            onClick={handleLoadNew}
-            className={cn(
-              "bg-primary/10 text-primary text-body-sm font-semibold",
-              "rounded-xl py-3 text-center transition-colors hover:bg-primary/20"
-            )}
-          >
-            {newPostCount === 1 ? "1 post nuevo" : `${newPostCount} posts nuevos`} — Tocá para
-            cargar
-          </button>
-        )}
+        {/* New posts banner — aria-live="polite" anuncia al screen reader cuando aparece */}
+        <div aria-live="polite" aria-atomic="true">
+          {newPostCount > 0 && (
+            <button
+              type="button"
+              onClick={handleLoadNew}
+              className={cn(
+                "w-full bg-primary/10 text-primary text-body-sm font-semibold",
+                "rounded-xl py-3 text-center transition-colors hover:bg-primary/20"
+              )}
+            >
+              {newPostCount === 1 ? "1 post nuevo" : `${newPostCount} posts nuevos`} — Tocá para
+              cargar
+            </button>
+          )}
+        </div>
 
         {/* Feed */}
         {posts.length === 0 ? (

@@ -188,11 +188,11 @@ export function PostCardFull({
             "min-h-[44px] flex items-center gap-1.5 text-body-sm font-semibold transition-colors",
             reacted ? "text-error" : "text-text-muted hover:text-error"
           )}
-          aria-label={reacted ? "Quitar reacción" : "Reaccionar"}
+          aria-label={reacted ? `Quitar reacción (${count})` : `Reaccionar (${count})`}
           aria-pressed={reacted}
         >
           <Icon name={reacted ? "heart-filled" : "heart"} size={18} />
-          <span>{count}</span>
+          <span aria-hidden="true">{count}</span>
         </motion.button>
 
         {/* Comments */}
