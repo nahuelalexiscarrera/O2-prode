@@ -95,6 +95,11 @@ export default async function HomePage() {
             label="Tu pos."
             value={profile.position > 0 ? `#${profile.position}` : "—"}
             accent="primary"
+            delta={
+              profile.position > 0 && profile.position_last_week != null
+                ? profile.position_last_week - profile.position  // positivo = subió
+                : undefined
+            }
           />
           <StatCard label="Tus pts" value={profile.total_points} accent="lime" />
         </div>

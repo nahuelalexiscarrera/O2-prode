@@ -14,6 +14,8 @@ export type UserProfile = {
   level: string;
   total_points: number;
   position: number;
+  /** Posición de la semana pasada — null si es la primera semana del socio. */
+  position_last_week: number | null;
 };
 
 export type UserSettings = {
@@ -59,12 +61,16 @@ export async function getMyProfile(): Promise<UserProfile | null> {
 
   const { data, error } = await supabase
     .from("user")
-    .select("id, name, initials, avatar_url, level, total_points, position")
+    .select("id, name, initials, avatar_url, level, total_points, position, position_last_week")
     .eq("id", user.id)
     .single();
   if (error) return null;
   // Nivel derivado de los puntos (la columna está estancada en 1).
-  return { ...(data as UserProfile), level: String(pointsToLevel(data.total_points ?? 0).level) };
+  return {
+    ...(data as UserProfile),
+    level: String(pointsToLevel(data.total_points ?? 0).level),
+    position_last_week: (data.position_last_week as number | null) ?? null,
+  };
 }
 
 /** ¿El usuario actual es admin/superusuario? Falla a `false` (ej. si la columna
