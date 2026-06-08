@@ -71,6 +71,9 @@ export interface Player {
 
 // ─── User & auth ────────────────────────────────────────────────────
 
+/** Sucursal del socio O2 (se completa en el onboarding del primer ingreso). */
+export type Branch = "rufina" | "cofico";
+
 export interface User {
   id: string;
   email: string;
@@ -83,6 +86,7 @@ export interface User {
   position: number;
   joinedAt: string;
   phone: string | null;
+  branch: Branch | null; // null hasta que complete el onboarding
   inviteCodeUsed: string | null; // null desde el registro abierto (Sprint 8)
   notificationPrefs: NotificationPrefs;
   visibility: Visibility;
