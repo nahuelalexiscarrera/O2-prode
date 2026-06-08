@@ -47,7 +47,7 @@ Definido en `lib/achievements/catalog.ts`. Fuente: Agente 2 §10.2 + Agente 8 `d
 | P02 | position | Podio | Llegaste al top 3 | +25 |
 | P03 | position | Líder | Liderás el ranking | +50 |
 | P04 | position | Remontada | +10 posiciones en una semana | +15 |
-| P05 | position | Campeón | Ganador final del torneo | +100 |
+| P05 | position | Campeón | Seleccion campeona del mundo | +100 |
 
 ---
 

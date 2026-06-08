@@ -85,7 +85,7 @@ export function ShareButton({
         await navigator.share({
           files: [file],
           title: "Mi prode del Mundial 2026",
-          text: "#WAZEXPERIENCE",
+          text: "#PRODEMUNDIALO2",
         });
         void recordShareAction({ template, channel: "more", contextId });
       } else {

@@ -140,7 +140,7 @@ export default function LoginPage() {
           </Link>
         </p>
         <p className="mt-4 text-[10px] uppercase tracking-[0.28em] text-text-disabled">
-          #WazeExperience
+          #PRODEMUNDIALO2
         </p>
       </footer>
     </div>

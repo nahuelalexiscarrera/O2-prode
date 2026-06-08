@@ -2,7 +2,7 @@ import type { MatchShareData, ShareFormat } from "@/lib/share/templates";
 
 /**
  * T03 — "Mi predicción" (viral share). Marcador predicho gigante + glow,
- * equipos, fase, logo O2 y hashtag #WAZEXPERIENCE.
+ * equipos, fase, logo O2 y hashtag #PRODEMUNDIALO2.
  */
 
 const C = {
@@ -136,7 +136,7 @@ export function T03_Match({
       {/* Footer */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span style={{ fontSize: 30, letterSpacing: "0.12em", color: C.dim, fontWeight: 700 }}>
-          #WAZEXPERIENCE
+          #PRODEMUNDIALO2
         </span>
         {origin ? (
           // eslint-disable-next-line @next/next/no-img-element

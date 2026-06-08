@@ -3,7 +3,7 @@ import type { PositionShareData, ShareFormat } from "@/lib/share/templates";
 /**
  * T02 — "Mi posición" (viral share, estética athletic/Stitch).
  * Número de ranking gigante + glow, percentil ("superó al X%"), logo O2 y
- * hashtag #WAZEXPERIENCE. Story 1080×1920 / square 1080×1080.
+ * hashtag #PRODEMUNDIALO2. Story 1080×1920 / square 1080×1080.
  */
 
 const C = {
@@ -165,7 +165,7 @@ export function T02_Position({
       {/* Footer */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span style={{ fontSize: 30, letterSpacing: "0.12em", color: C.dim, fontWeight: 700 }}>
-          #WAZEXPERIENCE
+          #PRODEMUNDIALO2
         </span>
         {origin ? (
           // eslint-disable-next-line @next/next/no-img-element
