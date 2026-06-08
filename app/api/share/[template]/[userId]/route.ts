@@ -10,6 +10,7 @@ import { ImageResponse } from "@vercel/og";
 import { type NextRequest } from "next/server";
 import { fetchShareData } from "@/lib/share/dataFetchers";
 import { renderTemplate } from "@/lib/share/render";
+import { verifyShareToken } from "@/lib/share/sign";
 import type { ShareFormat, ShareTemplateId } from "@/lib/share/templates";
 
 export const runtime = "edge";
@@ -75,10 +76,16 @@ export async function GET(
   const format: ShareFormat =
     searchParams.get("format") === "square" ? "square" : "story";
   const contextId = searchParams.get("contextId") ?? undefined;
+  const sig = searchParams.get("sig") ?? undefined;
 
   if (!VALID_TEMPLATES.has(template)) {
     return new Response("Invalid template", { status: 400 });
   }
+
+  // El dueño firma su share (token HMAC) → puede revelar su predicción aunque el
+  // partido no haya arrancado. Sin token válido, fetchShareData mantiene la regla
+  // del kickoff (anti-espionaje). HMAC local → rápido, no vale paralelizar.
+  const authorizedReveal = await verifyShareToken(userId, contextId, sig);
 
   const dims =
     format === "story" ? { width: 1080, height: 1920 } : { width: 1080, height: 1080 };
@@ -89,7 +96,7 @@ export async function GET(
   const [antonData, interData, shareData] = await Promise.all([
     tryFetchFont(`${origin}/fonts/Anton-Regular.ttf`),
     tryFetchFont(`${origin}/fonts/Inter-Bold.ttf`),
-    fetchShareData(template as ShareTemplateId, userId, contextId),
+    fetchShareData(template as ShareTemplateId, userId, contextId, authorizedReveal),
   ]);
 
   if (!shareData) {

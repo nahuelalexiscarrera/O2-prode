@@ -6,7 +6,7 @@ import { BottomSheet } from "@/components/ui/Modal";
 import { Icon } from "@/components/ui/Icon";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
-import { shareToWall, recordShareAction } from "@/lib/share/actions";
+import { shareToWall, recordShareAction, getShareSignature } from "@/lib/share/actions";
 import { cn } from "@/lib/utils/cn";
 import type { ShareTemplateId, ShareFormat } from "@/lib/share/templates";
 
@@ -36,7 +36,21 @@ export function ShareButton({
   const [format, setFormat] = useState<ShareFormat>("story");
   const [downloading, setDownloading] = useState(false);
   const [posting, setPosting] = useState(false);
+  // Token HMAC que autoriza revelar la predicción propia (template "match") aun
+  // antes del kickoff. Se pide al servidor al abrir el sheet.
+  const [sig, setSig] = useState<string | null>(null);
   const { toast } = useToast();
+
+  async function handleOpen() {
+    setOpen(true);
+    if (sig) return; // ya lo tenemos de una apertura previa
+    try {
+      const result = await getShareSignature(contextId);
+      if (result?.sig) setSig(result.sig);
+    } catch {
+      // Sin firma, el share igual funciona: el marcador se revela tras el kickoff.
+    }
+  }
 
   async function handlePostToWall() {
     setPosting(true);
@@ -52,6 +66,7 @@ export function ShareButton({
 
   const params = new URLSearchParams({ format });
   if (contextId) params.set("contextId", contextId);
+  if (sig) params.set("sig", sig);
   const imageUrl = `/api/share/${template}/${userId}?${params.toString()}`;
 
   async function handleDownload() {
@@ -103,7 +118,7 @@ export function ShareButton({
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={handleOpen}
         className={cn(
           "flex items-center gap-2 px-4 h-10 rounded-full",
           "bg-primary/10 text-primary text-body-sm font-semibold",

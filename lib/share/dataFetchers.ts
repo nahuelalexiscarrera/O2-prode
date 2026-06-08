@@ -49,7 +49,11 @@ async function fetchUserCore(userId: string) {
 export async function fetchShareData(
   template: ShareTemplateId,
   userId: string,
-  contextId?: string
+  contextId?: string,
+  // authorizedReveal: el dueño autenticado firmó el share (token HMAC válido) →
+  // se revela su marcador aunque el partido no haya arrancado. Default false:
+  // un tercero sin token solo ve el marcador tras el kickoff (anti-espionaje).
+  authorizedReveal = false
 ): Promise<ShareData | null> {
   const user = await fetchUserCore(userId);
   if (!user) return null;
@@ -166,11 +170,13 @@ export async function fetchShareData(
     const groupLabel = match.group_id ? `Grupo ${match.group_id}` : null;
 
     // IDOR fix: el endpoint de share es público y sirve la card de CUALQUIER
-    // userId. Solo revelamos el marcador predicho si el partido ya arrancó o
-    // terminó — antes del kickoff es secreto (si no, se espía la predicción del
-    // rival pidiendo su card de un partido futuro).
+    // userId. Para un TERCERO, solo revelamos el marcador predicho si el partido
+    // ya arrancó o terminó — antes del kickoff es secreto (si no, se espía la
+    // predicción del rival pidiendo su card de un partido futuro).
+    // Excepción: authorizedReveal = el DUEÑO firmó el share (token HMAC) → puede
+    // compartir su propia predicción cuando quiera, incluso antes del kickoff.
     const kickoffPassed = new Date(match.kickoff_at as string).getTime() <= Date.now();
-    const revealScore = match.status === "finished" || kickoffPassed;
+    const revealScore = authorizedReveal || match.status === "finished" || kickoffPassed;
 
     const matchData: MatchShareData = {
       template: "match",

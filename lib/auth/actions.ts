@@ -14,7 +14,7 @@ import { z } from "zod";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { deriveInitials } from "@/lib/auth/initials";
+import { provisionUser } from "@/lib/auth/provision";
 
 /** URL pública del sitio (para el redirect del mail de confirmación). */
 function siteUrl(): string {
@@ -205,29 +205,21 @@ export async function signUpAction(
     }
 
     // Si la confirmación de email NO está activada en Supabase, signUp ya devuelve
-    // sesión (cuenta auto-confirmada): creamos la fila y entramos directo. Si SÍ
-    // está activada, no hay sesión → mostramos la pantalla "revisá tu email".
+    // sesión (cuenta auto-confirmada): provisionamos la fila + referidos y entramos
+    // directo. Si SÍ está activada, no hay sesión → pantalla "revisá tu email" y el
+    // provisioning ocurre en /auth/confirm. Misma función → ambos flujos idénticos.
     if (data.session && data.user) {
       try {
-        const admin = createAdminClient();
-        const { data: existing } = await admin
-          .from("user")
-          .select("id")
-          .eq("id", data.user.id)
-          .maybeSingle();
-        if (!existing) {
-          await admin.from("user").insert({
-            id: data.user.id,
-            email,
-            name,
-            initials: deriveInitials(name),
-            phone: normalizedPhone,
-          });
-        }
+        await provisionUser({
+          userId: data.user.id,
+          email,
+          name,
+          phone: normalizedPhone,
+          referralCode: referralCode || null,
+        });
       } catch (adminErr) {
-        console.error("[signUpAction] admin insert error:", adminErr);
-        // No bloqueamos el login si falla la creación de la fila;
-        // /auth/confirm o /app la crea de forma idempotente.
+        console.error("[signUpAction] provisionUser error:", adminErr);
+        // No bloqueamos el login si falla; /app la crea de forma idempotente.
       }
       redirect("/app");
     }

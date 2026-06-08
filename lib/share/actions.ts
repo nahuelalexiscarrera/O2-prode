@@ -5,6 +5,7 @@ import { revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { triggerSocialAchievements } from "@/lib/social/actions";
+import { signShareToken } from "@/lib/share/sign";
 
 // contextId puede ser un UUID (match) o la clave de catálogo de un logro ("A01").
 // Por eso NO se valida como uuid acá; el insert en columnas UUID se guarda como
@@ -16,6 +17,24 @@ const schema = z.object({
 });
 
 export type ShareToWallResult = { ok: true } | { ok: false; error: string };
+
+/**
+ * Devuelve el userId del socio logueado + un token HMAC que autoriza revelar SU
+ * predicción en el share card aunque el partido no haya arrancado. El cliente
+ * (ShareButton) lo agrega a la URL del PNG. Firma SIEMPRE para el usuario de la
+ * sesión → nadie puede firmar para revelar la predicción de otro.
+ */
+export async function getShareSignature(
+  contextId?: string
+): Promise<{ userId: string; sig: string } | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const sig = await signShareToken(user.id, contextId);
+  return { userId: user.id, sig };
+}
 
 /**
  * Publica el share card seleccionado en el muro. Crea un post cuyo image_url
@@ -38,6 +57,11 @@ export async function shareToWall(input: {
 
   const params = new URLSearchParams({ format: "square" });
   if (parsed.data.contextId) params.set("contextId", parsed.data.contextId);
+  // Firmamos el share: el post del muro muestra la predicción del dueño revelada
+  // (la publicó él mismo). El token es específico de este userId+contextId, no
+  // sirve para espiar otras predicciones.
+  const sig = await signShareToken(user.id, parsed.data.contextId);
+  if (sig) params.set("sig", sig);
   const imageUrl = `/api/share/${parsed.data.template}/${user.id}?${params.toString()}`;
 
   const { error } = await supabase.from("post").insert({
