@@ -20,16 +20,26 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const oauthError = searchParams.get("error");
+  const oauthErrorDesc = searchParams.get("error_description");
 
-  // Google devolvió error (el usuario canceló, etc.) o no hay code → al login.
-  if (oauthError || !code) {
+  // El provider (Google/Supabase) devolvió un error — p.ej. GoTrue falló al CREAR
+  // el usuario nuevo (un trigger/hook sobre auth.users). Logueamos y propagamos el
+  // detalle real para diagnóstico (antes se descartaba y se veía un genérico).
+  if (oauthError) {
+    console.error("[oauth callback] provider error:", oauthError, "·", oauthErrorDesc);
+    const detail = oauthErrorDesc ?? oauthError;
+    return NextResponse.redirect(`${origin}/login?error=oauth&detail=${encodeURIComponent(detail)}`);
+  }
+  if (!code) {
+    console.error("[oauth callback] missing ?code");
     return NextResponse.redirect(`${origin}/login?error=oauth`);
   }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.exchangeCodeForSession(code);
   if (error) {
-    return NextResponse.redirect(`${origin}/login?error=oauth`);
+    console.error("[oauth callback] exchangeCodeForSession:", error.message);
+    return NextResponse.redirect(`${origin}/login?error=oauth&detail=${encodeURIComponent(error.message)}`);
   }
 
   const {
