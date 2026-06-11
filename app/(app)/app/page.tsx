@@ -45,12 +45,16 @@ function NextMatchSection({ match }: { match: NextMatchRow }) {
 
   return (
     <NextMatchHero
+      matchId={match.id}
       homeCode={match.home_code}
       awayCode={match.away_code}
       homeTeamName={homeTeam.name}
       awayTeamName={awayTeam.name}
       kickoffAt={match.kickoff_at}
       groupId={match.group_id}
+      status={match.status}
+      liveHomeScore={match.live_home_score}
+      liveAwayScore={match.live_away_score}
     />
   );
 }

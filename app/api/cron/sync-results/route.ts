@@ -46,11 +46,13 @@ type DbMatch = {
   away_code: string;
   status: string;
   phase: string;
+  live_home_score: number | null;
+  live_away_score: number | null;
 };
 
 interface SyncChange {
   fdId: number;
-  action: "created" | "set_live" | "set_finished" | "set_postponed" | "linked";
+  action: "created" | "set_live" | "live_score" | "set_finished" | "set_postponed" | "linked";
   detail?: string;
 }
 
@@ -69,9 +71,14 @@ async function handle(req: NextRequest) {
   const { data: tournament } = await supabase.from("tournament").select("id").limit(1).maybeSingle();
   const tournamentId = tournament?.id as string | undefined;
 
-  const { data: dbMatchesRaw } = await supabase
+  const { data: dbMatchesRaw, error: dbReadErr } = await supabase
     .from("match")
-    .select("id, fd_id, home_code, away_code, status, phase");
+    .select("id, fd_id, home_code, away_code, status, phase, live_home_score, live_away_score");
+  if (dbReadErr) {
+    // Sin la foto real de la DB el loop "creería" que no existe ningún partido y
+    // tomaría decisiones equivocadas. Abortamos la corrida; la próxima reintenta.
+    return NextResponse.json({ error: `match select: ${dbReadErr.message}` }, { status: 500 });
+  }
   const dbMatches = (dbMatchesRaw ?? []) as DbMatch[];
 
   const byFdId = new Map<number, DbMatch>();
@@ -135,32 +142,79 @@ async function handle(req: NextRequest) {
       changes.push({ fdId: fx.id, action: "linked" });
     }
 
-    // ── En vivo ──
-    if (status === "live" && db.status === "scheduled") {
-      await supabase.from("match").update({ status: "live" }).eq("id", db.id);
+    // Goles de la API mapeados al orden home/away de NUESTRA fila (puede estar
+    // invertido). Sirven tanto para el score en vivo como para el settle.
+    const gh = fx.score?.fullTime?.home;
+    const ga = fx.score?.fullTime?.away;
+    const mapped: { home: number; away: number } | null =
+      gh != null && ga != null
+        ? homeCode === db.home_code
+          ? { home: gh, away: ga }
+          : { home: ga, away: gh }
+        : null;
+
+    // ── En vivo ── (durante IN_PLAY, fullTime trae el score parcial actual)
+    // Incluye postponed→live: un partido reprogramado que arranca debe verse live.
+    if (status === "live" && (db.status === "scheduled" || db.status === "postponed")) {
+      await supabase
+        .from("match")
+        .update({
+          status: "live",
+          live_home_score: mapped?.home ?? 0,
+          live_away_score: mapped?.away ?? 0,
+        })
+        .eq("id", db.id);
       changes.push({ fdId: fx.id, action: "set_live" });
+    } else if (
+      status === "live" &&
+      db.status === "live" &&
+      mapped !== null &&
+      (db.live_home_score !== mapped.home || db.live_away_score !== mapped.away)
+    ) {
+      // Ya estaba live: refrescar solo si el score cambió (sin writes inútiles c/2 min)
+      await supabase
+        .from("match")
+        .update({ live_home_score: mapped.home, live_away_score: mapped.away })
+        .eq("id", db.id);
+      changes.push({ fdId: fx.id, action: "live_score", detail: `${db.home_code} ${mapped.home}-${mapped.away} ${db.away_code}` });
     }
 
     // ── Postergado ──
-    if (status === "postponed" && db.status === "scheduled") {
+    // Incluye live→postponed: SUSPENDED/CANCELLED a mitad de juego (tormenta, etc.)
+    // antes dejaba la fila clavada en 'live' y el Hero pinneado "En vivo" para siempre.
+    if (status === "postponed" && (db.status === "scheduled" || db.status === "live")) {
       await supabase.from("match").update({ status: "postponed" }).eq("id", db.id);
       changes.push({ fdId: fx.id, action: "set_postponed" });
     }
 
     // ── Finalizado ──
-    if (status === "finished" && db.status !== "finished") {
-      const gh = fx.score?.fullTime?.home;
-      const ga = fx.score?.fullTime?.away;
-      if (gh == null || ga == null) continue;
+    // Safety net (caso MEX-RSA 11/06: la API tardó >1h en publicar FINISHED y el
+    // settle se retrasó). Tres condiciones, TODAS necesarias:
+    //  · winner decidido — la API ya sabe el resultado;
+    //  · ≥130 min desde el kickoff programado — un partido reglamentario termina
+    //    ~115-125' de reloj aun con descuentos largos; 130 nunca cae en juego de
+    //    grupos, y en knockout con prórroga winner sigue null hasta el final;
+    //  · lastUpdated de la API con ≥10 min de antigüedad — el fixture está QUIETO
+    //    con resultado decidido (feed colgado, exactamente el caso MEX-RSA). Un
+    //    glitch momentáneo de winner renueva lastUpdated → no dispara.
+    const lastUpdatedAge = fx.lastUpdated
+      ? Date.now() - new Date(fx.lastUpdated).getTime()
+      : 0; // sin lastUpdated no podemos probar estabilidad → no disparar
+    const liveButDone =
+      status === "live" &&
+      fx.score?.winner != null &&
+      Date.now() - new Date(fx.utcDate).getTime() > 130 * 60 * 1000 &&
+      lastUpdatedAge > 10 * 60 * 1000;
 
-      // Mapear goles al orden home/away de NUESTRA fila (puede estar invertido)
-      let dbHome: number, dbAway: number;
-      if (homeCode === db.home_code) {
-        dbHome = gh;
-        dbAway = ga;
-      } else {
-        dbHome = ga;
-        dbAway = gh;
+    if ((status === "finished" || liveButDone) && db.status !== "finished") {
+      if (mapped === null) continue;
+      const dbHome = mapped.home;
+      const dbAway = mapped.away;
+      if (liveButDone) {
+        console.warn(
+          `[sync-results] settle por safety-net (API aún IN_PLAY): fd=${fx.id} ` +
+            `${db.home_code} ${dbHome}-${dbAway} ${db.away_code} · lastUpdated=${fx.lastUpdated ?? "?"}`
+        );
       }
 
       const { error: rErr } = await supabase.from("match_result").upsert(
@@ -169,9 +223,19 @@ async function handle(req: NextRequest) {
       );
       if (rErr) continue;
 
-      // Marcar finished dispara fn_settle_match (puntúa + recalcula ranking)
-      const { error: mErr } = await supabase.from("match").update({ status: "finished" }).eq("id", db.id);
-      if (!mErr) {
+      // Marcar finished dispara fn_settle_match (puntúa + recalcula ranking).
+      // live_* queda con el score final para que el display no muestre uno viejo.
+      // Claim atómico (.neq + .select): si dos corridas del cron se solapan, solo
+      // la que efectivamente transiciona la fila notifica — sin push duplicado.
+      // Los puntos ya estaban doblemente protegidos (trigger + points_earned IS
+      // NULL); esto cierra el duplicado de notificaciones.
+      const { data: claimedFinish, error: mErr } = await supabase
+        .from("match")
+        .update({ status: "finished", live_home_score: dbHome, live_away_score: dbAway })
+        .eq("id", db.id)
+        .neq("status", "finished")
+        .select("id");
+      if (!mErr && claimedFinish?.length) {
         changes.push({ fdId: fx.id, action: "set_finished", detail: `${db.home_code} ${dbHome}-${dbAway} ${db.away_code}` });
         finishedNotifs.push({ homeCode: db.home_code, awayCode: db.away_code, h: dbHome, a: dbAway });
         finishedMatchIds.push(db.id);

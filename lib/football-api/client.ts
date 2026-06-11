@@ -42,6 +42,8 @@ export interface FdMatch {
     winner: string | null;
     fullTime: { home: number | null; away: number | null };
   };
+  /** Última actualización del fixture en football-data (diagnóstico de latencia). */
+  lastUpdated?: string;
 }
 
 interface FdMatchesResponse {
