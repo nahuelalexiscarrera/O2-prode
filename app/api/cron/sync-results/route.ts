@@ -265,13 +265,27 @@ async function sendUpcomingMatchNotifications(
     .from("match")
     .select("id, home_code, away_code, kickoff_at")
     .eq("status", "scheduled")
-    // Ventana semiabierta [now+30, now+60): con el cron cada 30 min, un kickoff en
-    // el borde no cae en dos corridas consecutivas → sin doble recordatorio.
+    .is("reminder_sent_at", null) // aún no notificado (dedup robusto, ver el claim abajo)
+    // Ventana [now+30, now+60): el recordatorio se manda cuando faltan 30-60 min al
+    // kickoff. La dedup ya NO depende de la cadencia del cron (ahora ~2 min) sino del
+    // claim atómico sobre reminder_sent_at.
     .gte("kickoff_at", in30min.toISOString())
     .lt("kickoff_at", in60min.toISOString());
   if (!upcomingMatches?.length) return;
 
   for (const match of upcomingMatches) {
+    // Claim atómico: marcamos reminder_sent_at SOLO si seguía null. Si otra corrida
+    // del cron ya lo tomó (a ~2 min pueden solaparse), el UPDATE afecta 0 filas y no
+    // devuelve nada → lo salteamos. Garantiza exactamente 1 recordatorio por partido,
+    // a cualquier cadencia. (Cron usa service_role → puede escribir la columna.)
+    const { data: claimed } = await supabase
+      .from("match")
+      .update({ reminder_sent_at: new Date().toISOString() })
+      .eq("id", match.id)
+      .is("reminder_sent_at", null)
+      .select("id");
+    if (!claimed?.length) continue;
+
     const { data: usersWithPred } = await supabase
       .from("prediction")
       .select("user_id")
