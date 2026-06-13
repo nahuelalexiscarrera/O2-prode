@@ -19,9 +19,11 @@ export type OnboardingResult =
 const schema = z.object({
   name: z.string().trim().min(2, "Ingresá tu nombre").max(80),
   phone: z.string().trim().max(30, "Teléfono demasiado largo").optional().or(z.literal("")),
-  branch: z.enum(["rufina", "cofico"], {
-    errorMap: () => ({ message: "Elegí tu sucursal." }),
+  mode: z.enum(["socio", "codigo", "externo"], {
+    errorMap: () => ({ message: "Elegí una opción para continuar." }),
   }),
+  branch: z.enum(["rufina", "cofico"]).optional(),
+  referral_code: z.string().trim().max(20).optional().or(z.literal("")),
 });
 
 export async function completeOnboardingAction(
@@ -31,7 +33,9 @@ export async function completeOnboardingAction(
   const parsed = schema.safeParse({
     name: formData.get("name"),
     phone: formData.get("phone"),
-    branch: formData.get("branch"),
+    mode: formData.get("mode"),
+    branch: formData.get("branch") || undefined,
+    referral_code: formData.get("referral_code"),
   });
   if (!parsed.success) {
     const issue = parsed.error.issues[0];
@@ -42,6 +46,15 @@ export async function completeOnboardingAction(
     };
   }
 
+  // Si eligió "Soy socio O2", el local es obligatorio.
+  if (parsed.data.mode === "socio" && !parsed.data.branch) {
+    return { ok: false, error: "Elegí tu local.", field: "branch" };
+  }
+
+  const branch = parsed.data.mode === "socio" ? (parsed.data.branch ?? null) : null;
+  const referralCode =
+    parsed.data.mode === "codigo" ? (parsed.data.referral_code || null) : null;
+
   try {
     const supabase = await createClient();
     const {
@@ -51,12 +64,13 @@ export async function completeOnboardingAction(
       return { ok: false, error: "Sesión no encontrada. Volvé a iniciar sesión." };
     }
 
-    // Client NORMAL → la función SECURITY DEFINER valida auth.uid(), branch y el
-    // "un solo uso" (branch IS NULL) del lado de la DB.
+    // Client NORMAL → la función SECURITY DEFINER valida auth.uid() y el
+    // "un solo uso" (onboarding_completed_at IS NULL) del lado de la DB.
     const { error } = await supabase.rpc("fn_complete_onboarding", {
       p_name: parsed.data.name,
       p_phone: parsed.data.phone ?? "",
-      p_branch: parsed.data.branch,
+      p_branch: branch,
+      p_referral_code: referralCode,
     });
 
     if (error) {

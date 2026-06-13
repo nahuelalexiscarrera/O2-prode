@@ -66,13 +66,15 @@ export async function GET(request: NextRequest) {
     // onboarding/lectura de abajo decide igual el destino.
   }
 
-  // Detección de primer ingreso: ¿ya eligió sucursal?
+  // Detección de primer ingreso: ¿ya completó el onboarding?
   const { data: profile } = await supabase
     .from("user")
-    .select("branch")
+    .select("onboarding_completed_at")
     .eq("id", user.id)
     .maybeSingle();
-  const branch = (profile as { branch?: string | null } | null)?.branch ?? null;
+  const completed =
+    (profile as { onboarding_completed_at?: string | null } | null)
+      ?.onboarding_completed_at ?? null;
 
-  return NextResponse.redirect(`${origin}/${branch ? "app" : "onboarding"}`);
+  return NextResponse.redirect(`${origin}/${completed ? "app" : "onboarding"}`);
 }

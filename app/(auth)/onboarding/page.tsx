@@ -21,12 +21,12 @@ export default async function OnboardingPage() {
 
   const { data: profile } = await supabase
     .from("user")
-    .select("name, branch")
+    .select("name, onboarding_completed_at")
     .eq("id", user.id)
     .maybeSingle();
 
   // Ya completó el onboarding → no lo repetimos.
-  if ((profile as { branch?: string | null } | null)?.branch) {
+  if ((profile as { onboarding_completed_at?: string | null } | null)?.onboarding_completed_at) {
     redirect("/app");
   }
 
