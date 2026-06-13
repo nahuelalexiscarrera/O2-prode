@@ -6,6 +6,7 @@ import { getUnreadNotificationCount } from "@/lib/users/queries";
 import { getNextMatch, type NextMatchRow } from "@/lib/matches/queries";
 import { getCurrentPhase } from "@/lib/matches/queries";
 import { getFeedRecientes } from "@/lib/social/queries";
+import { PRIZES } from "@/lib/i18n/prizes";
 import { ScreenHeader } from "@/components/features/ScreenHeader";
 import { NotificationBell } from "@/components/features/NotificationBell";
 import { StatCard } from "@/components/features/StatCard";
@@ -113,6 +114,14 @@ export default async function HomePage() {
           <Skeleton className="h-24 flex-1 rounded-xl" />
         </div>
       )}
+
+      {/* Acceso a premios — una línea, sin competir visualmente */}
+      <Link
+        href="/app/premios"
+        className="-mt-2 self-start text-body-sm text-primary hover:text-primary-hover"
+      >
+        {PRIZES.linkFromHome}
+      </Link>
 
       {/* Next match hero */}
       <NextMatchSection match={nextMatch} />

@@ -6,347 +6,6 @@
     "date": "2026-05-19",
     "voice": "Voseo argentino, cercano sin chabacano, calmo no eufórico, cero emojis"
   },
-
-  "meta": {
-    "appName": "O2 PRODE",
-    "appTagline": "Competí con tus compañeros del gym. Demostrá que sabés de fútbol.",
-    "tournamentName": "Mundial 2026",
-    "clubName": "O2 Wellness Club",
-    "hashtag": "#PRODEMUNDIALO2"
-  },
-
-  "common": {
-    "continue": "Continuar",
-    "next": "Siguiente",
-    "back": "Volver",
-    "skip": "Saltar",
-    "cancel": "Cancelar",
-    "save": "Guardar",
-    "edit": "Editar",
-    "delete": "Borrar",
-    "share": "Compartir",
-    "close": "Cerrar",
-    "open": "Abrir",
-    "retry": "Reintentar",
-    "loading": "Cargando…",
-    "search": "Buscar",
-    "yes": "Sí",
-    "no": "No",
-    "ok": "Listo",
-    "moreOptions": "Más opciones",
-    "settings": "Configuración",
-    "viewAll": "Ver todos"
-  },
-
-  "auth": {
-    "splash": {
-      "title": "PRODE MUNDIAL O2",
-      "subtitle": "Competí con tus compañeros. Demostrá que sabés de fútbol. Ganá premios.",
-      "ctaEnter": "Entrar",
-      "noAccount": "¿No tenés cuenta?",
-      "linkRegister": "Registrate"
-    },
-    "login": {
-      "title": "Iniciá sesión",
-      "subtitle": "Entrá con tu cuenta de socio O2.",
-      "emailPlaceholder": "Email",
-      "passwordPlaceholder": "Contraseña",
-      "forgotPassword": "¿Olvidaste tu contraseña?",
-      "ctaSubmit": "Ingresar",
-      "ctaGoogle": "Continuar con Google",
-      "noAccount": "¿Sos socio nuevo?",
-      "linkRegister": "Registrate"
-    },
-    "register": {
-      "title": "Hacete socio O2 Prode",
-      "subtitle": "El acceso es solo para socios del gimnasio.",
-      "inviteCodePlaceholder": "Código de invitación",
-      "ctaValidateCode": "Validar código",
-      "codeOkMessage": "Código válido. Bienvenido, socio O2.",
-      "namePlaceholder": "Nombre completo",
-      "emailPlaceholder": "Email",
-      "passwordPlaceholder": "Contraseña",
-      "passwordConfirmPlaceholder": "Repetí la contraseña",
-      "termsLabel": "Acepto los términos y la política de privacidad.",
-      "ctaSubmit": "Crear cuenta",
-      "haveAccount": "¿Ya sos socio?",
-      "linkLogin": "Iniciá sesión"
-    },
-    "forgot": {
-      "title": "Recuperar contraseña",
-      "subtitle": "Te enviamos un link al email asociado a tu cuenta.",
-      "emailPlaceholder": "Email",
-      "ctaSubmit": "Enviar link",
-      "successTitle": "Revisá tu email",
-      "successBody": "Si el email está registrado, te llegó un link para recuperar la contraseña."
-    }
-  },
-
-  "onboarding": {
-    "step1": {
-      "title": "Cómo funciona",
-      "body": "Predecí los resultados de cada partido. Cuanto más acertás, más puntos sumás. Competís contra el resto de los socios del gimnasio."
-    },
-    "step2": {
-      "title": "Tu predicción inicial",
-      "body": "Antes de que empiece el Mundial, marcá tu apuesta de campeón, goleador y final.",
-      "labelChampion": "Campeón del Mundial",
-      "labelTopScorer": "Goleador del torneo",
-      "labelFinal": "Resultado de la final",
-      "placeholderSelection": "Seleccionar selección",
-      "placeholderPlayer": "Seleccionar jugador",
-      "placeholderFinalists": "Seleccionar finalistas"
-    },
-    "step3": {
-      "title": "Activá notificaciones",
-      "body": "Te avisamos antes de cada partido para que no te pierdas de cargar tu prode.",
-      "ctaActivate": "Activar",
-      "ctaLater": "Ahora no"
-    }
-  },
-
-  "home": {
-    "greeting": "Hola, {name}",
-    "labels": {
-      "yourPosition": "Tu posición",
-      "yourPoints": "Tus puntos",
-      "nextMatch": "Próximo partido",
-      "tournamentProgress": "Progreso del torneo",
-      "recentActivity": "Actividad reciente"
-    },
-    "countdown": "Faltan {time}",
-    "ctaGoToProde": "Ir a mi prode",
-    "ctaShareProde": "Compartir mi prode",
-    "noActivity": "Cuando los socios empiecen a postear, vas a ver su actividad acá."
-  },
-
-  "prode": {
-    "screenTitle": "Mi prode",
-    "tabs": {
-      "groups": "Fase de grupos",
-      "knockout": "Eliminatorias"
-    },
-    "groupLabel": "Grupo {letter}",
-    "progress": "{loaded} de {total} cargados",
-    "tags": {
-      "kickoffIn": "Faltan {time}",
-      "live": "En vivo",
-      "closed": "Cerrado",
-      "lockedAvailable": "Disponible {date}",
-      "pointsEarned": "+{points} pts"
-    },
-    "numpad": {
-      "title": "Cargá el resultado",
-      "subtitle": "{home} vs {away}",
-      "backspaceLabel": "Borrar",
-      "confirmLabel": "Confirmar"
-    },
-    "autoSaveToast": "Predicción guardada"
-  },
-
-  "knockout": {
-    "screenTitle": "Eliminatorias",
-    "phaseLabels": {
-      "round-of-16": "Octavos",
-      "quarter": "Cuartos",
-      "semi": "Semifinales",
-      "final": "Final"
-    },
-    "phaseActiveBadge": "{phase} · Activo",
-    "multiplierLabel": "Multiplicador x{multiplier}",
-    "availableOn": "Disponible {date}"
-  },
-
-  "ranking": {
-    "screenTitle": "Ranking",
-    "tabs": {
-      "global": "Global",
-      "weekly": "Semanal",
-      "byPhase": "Por fase"
-    },
-    "myPosition": "Mi puesto",
-    "youLabel": "Vos",
-    "viewFullRanking": "Ver ranking completo ({total})",
-    "stickyBackToMe": "Volver a mi posición",
-    "searchPlaceholder": "Buscar socio",
-    "deltaUp": "Subiste {n}",
-    "deltaDown": "Bajaste {n}",
-    "deltaEqual": "Sin cambios"
-  },
-
-  "wall": {
-    "screenTitle": "Muro",
-    "tabs": {
-      "featured": "Destacados",
-      "recent": "Recientes"
-    },
-    "newPostsBanner": "{n} {n, plural, one {post nuevo} other {posts nuevos}}",
-    "composeFab": "Compartir mi prode",
-    "compose": {
-      "title": "Nuevo post",
-      "placeholder": "¿Qué estás pensando del Mundial?",
-      "attachPrediction": "Anexar mi prode",
-      "attachMatch": "Anexar partido",
-      "attachImage": "Adjuntar imagen",
-      "imageRemove": "Quitar imagen",
-      "imageMaxSize": "Máximo 5MB",
-      "imageFormatsHelp": "JPG, PNG o WebP",
-      "imageUploading": "Subiendo imagen…",
-      "imageUploadFailed": "No se pudo subir la imagen. Probá de nuevo.",
-      "remainingChars": "{n} caracteres",
-      "ctaPublish": "Publicar"
-    },
-    "post": {
-      "reactLabel": "Reaccionar",
-      "unreactLabel": "Quitar reacción",
-      "commentLabel": "Comentar",
-      "shareLabel": "Compartir",
-      "deleteLabel": "Borrar",
-      "deletedNotice": "Borraste este post"
-    },
-    "comments": {
-      "title": "Comentarios ({n})",
-      "placeholder": "Escribí un comentario",
-      "ctaPublish": "Enviar"
-    }
-  },
-
-  "profile": {
-    "screenTitle": "Perfil",
-    "memberRole": "Socio O2 · {levelName}",
-    "labels": {
-      "position": "Posición",
-      "points": "Puntos",
-      "completed": "Completado"
-    },
-    "nav": {
-      "predictions": "Mis predicciones",
-      "history": "Historial",
-      "achievements": "Logros",
-      "settings": "Configuración"
-    },
-    "badgeNew": "Nuevo",
-    "ctaShareProde": "Compartir mi prode",
-    "ctaLogout": "Cerrar sesión",
-    "logoutConfirm": "¿Cerrar sesión?",
-    "settings": {
-      "title": "Configuración",
-      "sections": {
-        "account": "Cuenta",
-        "notifications": "Notificaciones",
-        "privacy": "Privacidad",
-        "app": "App"
-      },
-      "items": {
-        "email": "Email",
-        "changePassword": "Cambiar contraseña",
-        "avatar": "Foto de perfil",
-        "notifMatchReminders": "Recordatorios de partidos",
-        "notifResults": "Resultados",
-        "notifSocial": "Reacciones y comentarios",
-        "notifWeekly": "Resumen semanal",
-        "privacyVisibility": "Mis predicciones son visibles a otros socios",
-        "terms": "Términos y condiciones",
-        "privacyPolicy": "Política de privacidad",
-        "version": "Versión {v}"
-      }
-    }
-  },
-
-  "share": {
-    "screenTitle": "Compartí tu prode",
-    "templateLabels": {
-      "summary": "Resumen general",
-      "position": "Mi posición",
-      "match": "Predicción de partido",
-      "achievement": "Logro desbloqueado"
-    },
-    "ctas": {
-      "download": "Descargar",
-      "instagram": "Instagram",
-      "whatsapp": "WhatsApp",
-      "more": "Más"
-    },
-    "labelsInCard": {
-      "miProde": "MI PRODE",
-      "champion": "CAMPEÓN",
-      "topScorer": "GOLEADOR",
-      "finalResult": "RESULTADO FINAL",
-      "points": "PUNTOS",
-      "position": "POSICIÓN",
-      "myPosition": "MI PUESTO",
-      "rankingTitle": "EN EL RANKING",
-      "soOfTotal": "{total} socios compitiendo",
-      "rose": "SUBÍ",
-      "week": "SEMANA",
-      "mundialTitle": "MUNDIAL",
-      "year": "2 0 2 6",
-      "achievementUnlocked": "LOGRO DESBLOQUEADO"
-    },
-    "downloadedToast": "Imagen guardada en tu device",
-    "shareCompletedToast": "Compartiste tu prode"
-  },
-
-  "notifications": {
-    "centerTitle": "Notificaciones",
-    "markAllRead": "Marcar todas leídas",
-    "groupToday": "Hoy",
-    "groupYesterday": "Ayer",
-    "groupOlder": "Antes",
-    "emptyTitle": "Sin novedades por ahora",
-    "emptyBody": "Cuando pase algo, te avisamos.",
-    "types": {
-      "onboarding-incomplete": {
-        "title": "Tu prode te espera",
-        "body": "Cargá tus primeras predicciones del Mundial."
-      },
-      "match-upcoming": {
-        "title": "Próximo partido",
-        "body": "{homeTeam} vs {awayTeam} en {time}. ¿Listo tu prode?"
-      },
-      "phase-start": {
-        "title": "Empieza una nueva fase",
-        "body": "Se desbloqueó {phaseName}. Multiplicador x{multiplier} activado."
-      },
-      "match-result": {
-        "title": "Sumaste puntos",
-        "body": "Ganaste {points} pts en {homeTeam} vs {awayTeam}."
-      },
-      "reaction": {
-        "title": "Tu post tiene reacción",
-        "body": "A {userName} le gustó tu post."
-      },
-      "comment": {
-        "title": "Comentaron tu post",
-        "body": "{userName} comentó tu post."
-      },
-      "achievement-unlocked": {
-        "title": "Logro desbloqueado",
-        "body": "{achievementName}: {description}"
-      },
-      "close-to-podium": {
-        "title": "Cerca del podio",
-        "body": "Estás a {points} pts del top 3."
-      },
-      "position-change": {
-        "title": "Cambio en tu ranking",
-        "body": "Subiste {positions} posiciones esta semana."
-      },
-      "weekly-digest": {
-        "title": "Tu semana en el prode",
-        "body": "Sumaste {points} pts y quedaste en el puesto {position}."
-      },
-      "tournament-end": {
-        "title": "Terminó el Mundial",
-        "body": "Mirá tu resumen del torneo."
-      },
-      "share-reminder": {
-        "title": "Compartí tu prode",
-        "body": "El Mundial arranca en 3 días. Mostrá tu predicción."
-      }
-    }
-  },
-
   "achievements": {
     "screenTitle": "Logros",
     "categoryLabels": {
@@ -366,7 +25,10 @@
     "modalTitle": "¡Logro desbloqueado!",
     "modalSubtitle": "Sumaste {points} pts.",
     "items": {
-      "A01": { "name": "El que sabe", "description": "Acertá 5 resultados exactos seguidos." },
+      "A01": {
+        "name": "El que sabe",
+        "description": "Acertá 5 resultados exactos seguidos."
+      },
       "A02": {
         "name": "Visionario",
         "description": "Acertá al campeón del Mundial antes del torneo."
@@ -375,10 +37,22 @@
         "name": "Mufa controlada",
         "description": "Acertá un upset: predijiste al no favorito y ganó."
       },
-      "A04": { "name": "Pleno", "description": "Acertá TODOS los partidos de un grupo." },
-      "A05": { "name": "Eliminator", "description": "Acertá todos los cruces de octavos." },
-      "C01": { "name": "Constante", "description": "7 días seguidos cargando predicciones." },
-      "C02": { "name": "Maratonista", "description": "21 días seguidos cargando predicciones." },
+      "A04": {
+        "name": "Pleno",
+        "description": "Acertá TODOS los partidos de un grupo."
+      },
+      "A05": {
+        "name": "Eliminator",
+        "description": "Acertá todos los cruces de octavos."
+      },
+      "C01": {
+        "name": "Constante",
+        "description": "7 días seguidos cargando predicciones."
+      },
+      "C02": {
+        "name": "Maratonista",
+        "description": "21 días seguidos cargando predicciones."
+      },
       "C03": {
         "name": "Todoterreno",
         "description": "Cargaste el 100% de los partidos del torneo."
@@ -387,144 +61,48 @@
         "name": "Madrugador",
         "description": "Cargaste un grupo completo el primer día disponible."
       },
-      "S01": { "name": "Inicio fuerte", "description": "Tu primer post en el muro." },
-      "S02": { "name": "Popular", "description": "Conseguiste 10 reacciones en un solo post." },
-      "S03": { "name": "Embajador", "description": "Compartiste 5 prodes fuera de la app." },
-      "S04": { "name": "Conector", "description": "Comentaste en 10 posts distintos." },
-      "S05": { "name": "Tribu", "description": "Tres amigos del gym también activaron la app." },
-      "P01": { "name": "Top 10", "description": "Llegaste al top 10 del ranking." },
-      "P02": { "name": "Podio", "description": "Llegaste al top 3 del ranking." },
-      "P03": { "name": "Líder", "description": "Liderás el ranking general." },
-      "P04": { "name": "Remontada", "description": "Subiste 10 o más posiciones en una semana." },
-      "P05": { "name": "Campeón", "description": "Sos el ganador final del torneo." }
+      "S01": {
+        "name": "Inicio fuerte",
+        "description": "Tu primer post en el muro."
+      },
+      "S02": {
+        "name": "Popular",
+        "description": "Conseguiste 10 reacciones en un solo post."
+      },
+      "S03": {
+        "name": "Embajador",
+        "description": "Compartiste 5 prodes fuera de la app."
+      },
+      "S04": {
+        "name": "Conector",
+        "description": "Comentaste en 10 posts distintos."
+      },
+      "S05": {
+        "name": "Tribu",
+        "description": "Tres amigos del gym también activaron la app."
+      },
+      "P01": {
+        "name": "Top 10",
+        "description": "Llegaste al top 10 del ranking."
+      },
+      "P02": {
+        "name": "Podio",
+        "description": "Llegaste al top 3 del ranking."
+      },
+      "P03": {
+        "name": "Líder",
+        "description": "Liderás el ranking general."
+      },
+      "P04": {
+        "name": "Remontada",
+        "description": "Subiste 10 o más posiciones en una semana."
+      },
+      "P05": {
+        "name": "Campeón",
+        "description": "Sos el ganador final del torneo."
+      }
     }
   },
-
-  "toasts": {
-    "predictionSaved": "Predicción guardada",
-    "offlineSync": "Sin conexión. Se sincroniza cuando vuelva la señal.",
-    "shareImageReady": "Imagen guardada en tu device",
-    "shareCompleted": "Compartiste tu prode",
-    "postPublished": "Posteaste en el muro",
-    "postDeleted": "Borraste el post",
-    "reactionAdded": "Reaccionaste",
-    "reactionRemoved": "Quitaste tu reacción",
-    "commentPublished": "Comentaste",
-    "pointsEarned": "Sumaste {points} pts",
-    "positionUp": "Subiste {n} posiciones",
-    "positionDown": "Bajaste {n} posiciones",
-    "matchClosed": "Este partido ya cerró"
-  },
-
-  "emptyStates": {
-    "noPredictions": {
-      "title": "Empezá tu prode",
-      "body": "Todavía no cargaste predicciones. Empezá por el Grupo A.",
-      "cta": "Ir a mi prode"
-    },
-    "wallEmpty": {
-      "title": "El muro está vacío",
-      "body": "Animate vos a postear primero.",
-      "cta": "Compartir mi prode"
-    },
-    "notificationsEmpty": {
-      "title": "Sin novedades por ahora",
-      "body": "Cuando pase algo, te avisamos."
-    },
-    "noActivity": {
-      "title": "Sin actividad reciente",
-      "body": "Cuando los socios empiecen a postear, vas a ver su actividad acá."
-    },
-    "noAchievements": {
-      "title": "Tus logros van apareciendo",
-      "body": "A medida que jugás, vas a ir desbloqueando logros."
-    },
-    "searchNoResults": {
-      "title": "Sin resultados",
-      "body": "Probá con otro nombre."
-    }
-  },
-
-  "lockedStates": {
-    "round-of-16": {
-      "label": "Octavos de final",
-      "description": "Disponible el 30 de junio."
-    },
-    "quarter": {
-      "label": "Cuartos de final",
-      "description": "Disponible el 4 de julio."
-    },
-    "semi": {
-      "label": "Semifinales",
-      "description": "Disponible el 9 de julio."
-    },
-    "final": {
-      "label": "Final",
-      "description": "Disponible el 14 de julio."
-    },
-    "matchClosed": {
-      "label": "Partido cerrado",
-      "description": "No podés modificar tu predicción."
-    }
-  },
-
-  "errorStates": {
-    "network": {
-      "title": "Sin conexión",
-      "body": "Tus cambios se sincronizan cuando vuelva la señal.",
-      "cta": "Reintentar"
-    },
-    "matchLocked": {
-      "title": "Partido cerrado",
-      "body": "Este partido ya cerró. No podés modificar el score.",
-      "cta": "Entendido"
-    },
-    "server": {
-      "title": "Algo se rompió",
-      "body": "Algo se rompió de nuestro lado. Ya lo estamos viendo.",
-      "cta": "Reintentar"
-    },
-    "notFound": {
-      "title": "No lo encontramos",
-      "body": "No encontramos lo que buscás.",
-      "cta": "Volver a Inicio"
-    },
-    "unauthorized": {
-      "title": "Solo para socios",
-      "body": "Esta sección es solo para socios activos. Hablá con el gym.",
-      "cta": "Cerrar sesión"
-    },
-    "inviteInvalid": {
-      "title": "Código inválido",
-      "body": "El código es inválido o ya fue usado.",
-      "cta": "Probar otro"
-    },
-    "loginInvalid": {
-      "title": "Datos incorrectos",
-      "body": "Email o contraseña incorrectos.",
-      "cta": "Reintentar"
-    },
-    "passwordMismatch": {
-      "title": "No coinciden",
-      "body": "Las contraseñas no coinciden.",
-      "cta": "Reintentar"
-    },
-    "emailExists": {
-      "title": "Email en uso",
-      "body": "Ese email ya tiene una cuenta. ¿Querés iniciar sesión?",
-      "cta": "Iniciar sesión"
-    },
-    "privateProfile": {
-      "title": "Perfil privado",
-      "body": "Ese socio no acepta predicciones públicas."
-    },
-    "timeout": {
-      "title": "Tardó mucho",
-      "body": "La operación tardó demasiado. Probá de nuevo en unos segundos.",
-      "cta": "Reintentar"
-    }
-  },
-
   "aria": {
     "flags": {
       "ar": "Bandera de Argentina",
@@ -624,7 +202,459 @@
       "predictions": "Predicciones del torneo"
     }
   },
-
+  "auth": {
+    "splash": {
+      "title": "PRODE MUNDIAL O2",
+      "subtitle": "Competí con tus compañeros. Demostrá que sabés de fútbol. Ganá premios.",
+      "ctaEnter": "Entrar",
+      "noAccount": "¿No tenés cuenta?",
+      "linkRegister": "Registrate"
+    },
+    "login": {
+      "title": "Iniciá sesión",
+      "subtitle": "Entrá con tu cuenta de socio O2.",
+      "emailPlaceholder": "Email",
+      "passwordPlaceholder": "Contraseña",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "ctaSubmit": "Ingresar",
+      "ctaGoogle": "Continuar con Google",
+      "noAccount": "¿Sos socio nuevo?",
+      "linkRegister": "Registrate"
+    },
+    "register": {
+      "title": "Hacete socio O2 Prode",
+      "subtitle": "El acceso es solo para socios del gimnasio.",
+      "inviteCodePlaceholder": "Código de invitación",
+      "ctaValidateCode": "Validar código",
+      "codeOkMessage": "Código válido. Bienvenido, socio O2.",
+      "namePlaceholder": "Nombre completo",
+      "emailPlaceholder": "Email",
+      "passwordPlaceholder": "Contraseña",
+      "passwordConfirmPlaceholder": "Repetí la contraseña",
+      "termsLabel": "Acepto los términos y la política de privacidad.",
+      "ctaSubmit": "Crear cuenta",
+      "haveAccount": "¿Ya sos socio?",
+      "linkLogin": "Iniciá sesión"
+    },
+    "forgot": {
+      "title": "Recuperar contraseña",
+      "subtitle": "Te enviamos un link al email asociado a tu cuenta.",
+      "emailPlaceholder": "Email",
+      "ctaSubmit": "Enviar link",
+      "successTitle": "Revisá tu email",
+      "successBody": "Si el email está registrado, te llegó un link para recuperar la contraseña."
+    }
+  },
+  "common": {
+    "continue": "Continuar",
+    "next": "Siguiente",
+    "back": "Volver",
+    "skip": "Saltar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "edit": "Editar",
+    "delete": "Borrar",
+    "share": "Compartir",
+    "close": "Cerrar",
+    "open": "Abrir",
+    "retry": "Reintentar",
+    "loading": "Cargando…",
+    "search": "Buscar",
+    "yes": "Sí",
+    "no": "No",
+    "ok": "Listo",
+    "moreOptions": "Más opciones",
+    "settings": "Configuración",
+    "viewAll": "Ver todos"
+  },
+  "emptyStates": {
+    "noPredictions": {
+      "title": "Empezá tu prode",
+      "body": "Todavía no cargaste predicciones. Empezá por el Grupo A.",
+      "cta": "Ir a mi prode"
+    },
+    "wallEmpty": {
+      "title": "El muro está vacío",
+      "body": "Animate vos a postear primero.",
+      "cta": "Compartir mi prode"
+    },
+    "notificationsEmpty": {
+      "title": "Sin novedades por ahora",
+      "body": "Cuando pase algo, te avisamos."
+    },
+    "noActivity": {
+      "title": "Sin actividad reciente",
+      "body": "Cuando los socios empiecen a postear, vas a ver su actividad acá."
+    },
+    "noAchievements": {
+      "title": "Tus logros van apareciendo",
+      "body": "A medida que jugás, vas a ir desbloqueando logros."
+    },
+    "searchNoResults": {
+      "title": "Sin resultados",
+      "body": "Probá con otro nombre."
+    }
+  },
+  "errorStates": {
+    "network": {
+      "title": "Sin conexión",
+      "body": "Tus cambios se sincronizan cuando vuelva la señal.",
+      "cta": "Reintentar"
+    },
+    "matchLocked": {
+      "title": "Partido cerrado",
+      "body": "Este partido ya cerró. No podés modificar el score.",
+      "cta": "Entendido"
+    },
+    "server": {
+      "title": "Algo se rompió",
+      "body": "Algo se rompió de nuestro lado. Ya lo estamos viendo.",
+      "cta": "Reintentar"
+    },
+    "notFound": {
+      "title": "No lo encontramos",
+      "body": "No encontramos lo que buscás.",
+      "cta": "Volver a Inicio"
+    },
+    "unauthorized": {
+      "title": "Solo para socios",
+      "body": "Esta sección es solo para socios activos. Hablá con el gym.",
+      "cta": "Cerrar sesión"
+    },
+    "inviteInvalid": {
+      "title": "Código inválido",
+      "body": "El código es inválido o ya fue usado.",
+      "cta": "Probar otro"
+    },
+    "loginInvalid": {
+      "title": "Datos incorrectos",
+      "body": "Email o contraseña incorrectos.",
+      "cta": "Reintentar"
+    },
+    "passwordMismatch": {
+      "title": "No coinciden",
+      "body": "Las contraseñas no coinciden.",
+      "cta": "Reintentar"
+    },
+    "emailExists": {
+      "title": "Email en uso",
+      "body": "Ese email ya tiene una cuenta. ¿Querés iniciar sesión?",
+      "cta": "Iniciar sesión"
+    },
+    "privateProfile": {
+      "title": "Perfil privado",
+      "body": "Ese socio no acepta predicciones públicas."
+    },
+    "timeout": {
+      "title": "Tardó mucho",
+      "body": "La operación tardó demasiado. Probá de nuevo en unos segundos.",
+      "cta": "Reintentar"
+    }
+  },
+  "home": {
+    "greeting": "Hola, {name}",
+    "labels": {
+      "yourPosition": "Tu posición",
+      "yourPoints": "Tus puntos",
+      "nextMatch": "Próximo partido",
+      "tournamentProgress": "Progreso del torneo",
+      "recentActivity": "Actividad reciente"
+    },
+    "countdown": "Faltan {time}",
+    "ctaGoToProde": "Ir a mi prode",
+    "ctaShareProde": "Compartir mi prode",
+    "noActivity": "Cuando los socios empiecen a postear, vas a ver su actividad acá."
+  },
+  "knockout": {
+    "screenTitle": "Eliminatorias",
+    "phaseLabels": {
+      "round-of-16": "Octavos",
+      "quarter": "Cuartos",
+      "semi": "Semifinales",
+      "final": "Final"
+    },
+    "phaseActiveBadge": "{phase} · Activo",
+    "multiplierLabel": "Multiplicador x{multiplier}",
+    "availableOn": "Disponible {date}"
+  },
+  "lockedStates": {
+    "round-of-16": {
+      "label": "Octavos de final",
+      "description": "Disponible el 30 de junio."
+    },
+    "quarter": {
+      "label": "Cuartos de final",
+      "description": "Disponible el 4 de julio."
+    },
+    "semi": {
+      "label": "Semifinales",
+      "description": "Disponible el 9 de julio."
+    },
+    "final": {
+      "label": "Final",
+      "description": "Disponible el 14 de julio."
+    },
+    "matchClosed": {
+      "label": "Partido cerrado",
+      "description": "No podés modificar tu predicción."
+    }
+  },
+  "meta": {
+    "appName": "O2 PRODE",
+    "appTagline": "Competí con tus compañeros del gym. Demostrá que sabés de fútbol.",
+    "tournamentName": "Mundial 2026",
+    "clubName": "O2 Wellness Club",
+    "hashtag": "#PRODEMUNDIALO2"
+  },
+  "notifications": {
+    "centerTitle": "Notificaciones",
+    "markAllRead": "Marcar todas leídas",
+    "groupToday": "Hoy",
+    "groupYesterday": "Ayer",
+    "groupOlder": "Antes",
+    "emptyTitle": "Sin novedades por ahora",
+    "emptyBody": "Cuando pase algo, te avisamos.",
+    "types": {
+      "onboarding-incomplete": {
+        "title": "Tu prode te espera",
+        "body": "Cargá tus primeras predicciones del Mundial."
+      },
+      "match-upcoming": {
+        "title": "Próximo partido",
+        "body": "{homeTeam} vs {awayTeam} en {time}. ¿Listo tu prode?"
+      },
+      "phase-start": {
+        "title": "Empieza una nueva fase",
+        "body": "Se desbloqueó {phaseName}. Multiplicador x{multiplier} activado."
+      },
+      "match-result": {
+        "title": "Sumaste puntos",
+        "body": "Ganaste {points} pts en {homeTeam} vs {awayTeam}."
+      },
+      "reaction": {
+        "title": "Tu post tiene reacción",
+        "body": "A {userName} le gustó tu post."
+      },
+      "comment": {
+        "title": "Comentaron tu post",
+        "body": "{userName} comentó tu post."
+      },
+      "achievement-unlocked": {
+        "title": "Logro desbloqueado",
+        "body": "{achievementName}: {description}"
+      },
+      "close-to-podium": {
+        "title": "Cerca del podio",
+        "body": "Estás a {points} pts del top 3."
+      },
+      "position-change": {
+        "title": "Cambio en tu ranking",
+        "body": "Subiste {positions} posiciones esta semana."
+      },
+      "weekly-digest": {
+        "title": "Tu semana en el prode",
+        "body": "Sumaste {points} pts y quedaste en el puesto {position}."
+      },
+      "tournament-end": {
+        "title": "Terminó el Mundial",
+        "body": "Mirá tu resumen del torneo."
+      },
+      "share-reminder": {
+        "title": "Compartí tu prode",
+        "body": "El Mundial arranca en 3 días. Mostrá tu predicción."
+      }
+    }
+  },
+  "onboarding": {
+    "step1": {
+      "title": "Cómo funciona",
+      "body": "Predecí los resultados de cada partido. Cuanto más acertás, más puntos sumás. Competís contra el resto de los socios del gimnasio."
+    },
+    "step2": {
+      "title": "Tu predicción inicial",
+      "body": "Antes de que empiece el Mundial, marcá tu apuesta de campeón, goleador y final.",
+      "labelChampion": "Campeón del Mundial",
+      "labelTopScorer": "Goleador del torneo",
+      "labelFinal": "Resultado de la final",
+      "placeholderSelection": "Seleccionar selección",
+      "placeholderPlayer": "Seleccionar jugador",
+      "placeholderFinalists": "Seleccionar finalistas"
+    },
+    "step3": {
+      "title": "Activá notificaciones",
+      "body": "Te avisamos antes de cada partido para que no te pierdas de cargar tu prode.",
+      "ctaActivate": "Activar",
+      "ctaLater": "Ahora no"
+    }
+  },
+  "prizes": {
+    "sectionTitle": "Premios del torneo",
+    "sectionEyebrow": "7 reconocimientos para los socios que mejor predigan.",
+    "anchorId": "premios",
+    "tiers": [
+      {
+        "id": "P1-grupos",
+        "phaseLabel": "Fase de grupos",
+        "rankLabel": "1° puesto",
+        "reward": "1 mes de O2 gratis"
+      },
+      {
+        "id": "P2-r16",
+        "phaseLabel": "Octavos de final",
+        "rankLabel": "Líder acumulado",
+        "reward": "1 mes de O2 gratis"
+      },
+      {
+        "id": "P3-qf",
+        "phaseLabel": "Cuartos de final",
+        "rankLabel": "Líder acumulado",
+        "reward": "2 meses de O2 gratis"
+      },
+      {
+        "id": "P4-sf",
+        "phaseLabel": "Semifinales",
+        "rankLabel": "Líder acumulado",
+        "reward": "3 meses de O2 gratis"
+      },
+      {
+        "id": "P5-final-1",
+        "phaseLabel": "Final",
+        "rankLabel": "Campeón del PRODE",
+        "reward": "1 año de O2 gratis"
+      },
+      {
+        "id": "P6-final-2",
+        "phaseLabel": "Final",
+        "rankLabel": "Subcampeón",
+        "reward": "6 meses de O2 gratis"
+      },
+      {
+        "id": "P7-final-3",
+        "phaseLabel": "Final",
+        "rankLabel": "Tercer puesto",
+        "reward": "3 meses de O2 gratis"
+      }
+    ],
+    "ruleTitle": "Los premios no son acumulables pero sí mejorables.",
+    "ruleBody": "Si subís de etapa, te quedás con el premio más grande. El premio anterior pasa a otro socio activo.",
+    "coordinationNote": "La entrega de cada premio la coordina el equipo O2 por sus redes sociales.",
+    "linkFromHome": "Ver premios del torneo",
+    "linkFromProfile": "Premios del torneo",
+    "onboardingMention": "Hay 7 premios en juego durante el torneo. Vas a poder verlos en cualquier momento desde Ranking."
+  },
+  "prode": {
+    "screenTitle": "Mi prode",
+    "tabs": {
+      "groups": "Fase de grupos",
+      "knockout": "Eliminatorias"
+    },
+    "groupLabel": "Grupo {letter}",
+    "progress": "{loaded} de {total} cargados",
+    "tags": {
+      "kickoffIn": "Faltan {time}",
+      "live": "En vivo",
+      "closed": "Cerrado",
+      "lockedAvailable": "Disponible {date}",
+      "pointsEarned": "+{points} pts"
+    },
+    "numpad": {
+      "title": "Cargá el resultado",
+      "subtitle": "{home} vs {away}",
+      "backspaceLabel": "Borrar",
+      "confirmLabel": "Confirmar"
+    },
+    "autoSaveToast": "Predicción guardada"
+  },
+  "profile": {
+    "screenTitle": "Perfil",
+    "memberRole": "Socio O2 · {levelName}",
+    "labels": {
+      "position": "Posición",
+      "points": "Puntos",
+      "completed": "Completado"
+    },
+    "nav": {
+      "predictions": "Mis predicciones",
+      "history": "Historial",
+      "achievements": "Logros",
+      "settings": "Configuración"
+    },
+    "badgeNew": "Nuevo",
+    "ctaShareProde": "Compartir mi prode",
+    "ctaLogout": "Cerrar sesión",
+    "logoutConfirm": "¿Cerrar sesión?",
+    "settings": {
+      "title": "Configuración",
+      "sections": {
+        "account": "Cuenta",
+        "notifications": "Notificaciones",
+        "privacy": "Privacidad",
+        "app": "App"
+      },
+      "items": {
+        "email": "Email",
+        "changePassword": "Cambiar contraseña",
+        "avatar": "Foto de perfil",
+        "notifMatchReminders": "Recordatorios de partidos",
+        "notifResults": "Resultados",
+        "notifSocial": "Reacciones y comentarios",
+        "notifWeekly": "Resumen semanal",
+        "privacyVisibility": "Mis predicciones son visibles a otros socios",
+        "terms": "Términos y condiciones",
+        "privacyPolicy": "Política de privacidad",
+        "version": "Versión {v}"
+      }
+    }
+  },
+  "ranking": {
+    "screenTitle": "Ranking",
+    "tabs": {
+      "global": "Global",
+      "weekly": "Semanal",
+      "byPhase": "Por fase"
+    },
+    "myPosition": "Mi puesto",
+    "youLabel": "Vos",
+    "viewFullRanking": "Ver ranking completo ({total})",
+    "stickyBackToMe": "Volver a mi posición",
+    "searchPlaceholder": "Buscar socio",
+    "deltaUp": "Subiste {n}",
+    "deltaDown": "Bajaste {n}",
+    "deltaEqual": "Sin cambios"
+  },
+  "share": {
+    "screenTitle": "Compartí tu prode",
+    "templateLabels": {
+      "summary": "Resumen general",
+      "position": "Mi posición",
+      "match": "Predicción de partido",
+      "achievement": "Logro desbloqueado"
+    },
+    "ctas": {
+      "download": "Descargar",
+      "instagram": "Instagram",
+      "whatsapp": "WhatsApp",
+      "more": "Más"
+    },
+    "labelsInCard": {
+      "miProde": "MI PRODE",
+      "champion": "CAMPEÓN",
+      "topScorer": "GOLEADOR",
+      "finalResult": "RESULTADO FINAL",
+      "points": "PUNTOS",
+      "position": "POSICIÓN",
+      "myPosition": "MI PUESTO",
+      "rankingTitle": "EN EL RANKING",
+      "soOfTotal": "{total} socios compitiendo",
+      "rose": "SUBÍ",
+      "week": "SEMANA",
+      "mundialTitle": "MUNDIAL",
+      "year": "2 0 2 6",
+      "achievementUnlocked": "LOGRO DESBLOQUEADO"
+    },
+    "downloadedToast": "Imagen guardada en tu device",
+    "shareCompletedToast": "Compartiste tu prode"
+  },
   "teamCodes": {
     "$comment": "Abreviación FIFA oficial de 3 letras (Mundial 2026). Se muestra al lado de la bandera; nombre completo en grupos y share card.",
     "mx": "MEX",
@@ -676,7 +706,21 @@
     "gh": "GHA",
     "pa": "PAN"
   },
-
+  "toasts": {
+    "predictionSaved": "Predicción guardada",
+    "offlineSync": "Sin conexión. Se sincroniza cuando vuelva la señal.",
+    "shareImageReady": "Imagen guardada en tu device",
+    "shareCompleted": "Compartiste tu prode",
+    "postPublished": "Posteaste en el muro",
+    "postDeleted": "Borraste el post",
+    "reactionAdded": "Reaccionaste",
+    "reactionRemoved": "Quitaste tu reacción",
+    "commentPublished": "Comentaste",
+    "pointsEarned": "Sumaste {points} pts",
+    "positionUp": "Subiste {n} posiciones",
+    "positionDown": "Bajaste {n} posiciones",
+    "matchClosed": "Este partido ya cerró"
+  },
   "validation": {
     "required": "Este campo es obligatorio",
     "email": "Email inválido",
@@ -685,5 +729,41 @@
     "scoreOutOfRange": "El score debe estar entre 0 y 20",
     "bodyTooLong": "Máximo 280 caracteres",
     "bodyEmpty": "Escribí algo para postear"
+  },
+  "wall": {
+    "screenTitle": "Muro",
+    "tabs": {
+      "featured": "Destacados",
+      "recent": "Recientes"
+    },
+    "newPostsBanner": "{n} {n, plural, one {post nuevo} other {posts nuevos}}",
+    "composeFab": "Compartir mi prode",
+    "compose": {
+      "title": "Nuevo post",
+      "placeholder": "¿Qué estás pensando del Mundial?",
+      "attachPrediction": "Anexar mi prode",
+      "attachMatch": "Anexar partido",
+      "attachImage": "Adjuntar imagen",
+      "imageRemove": "Quitar imagen",
+      "imageMaxSize": "Máximo 5MB",
+      "imageFormatsHelp": "JPG, PNG o WebP",
+      "imageUploading": "Subiendo imagen…",
+      "imageUploadFailed": "No se pudo subir la imagen. Probá de nuevo.",
+      "remainingChars": "{n} caracteres",
+      "ctaPublish": "Publicar"
+    },
+    "post": {
+      "reactLabel": "Reaccionar",
+      "unreactLabel": "Quitar reacción",
+      "commentLabel": "Comentar",
+      "shareLabel": "Compartir",
+      "deleteLabel": "Borrar",
+      "deletedNotice": "Borraste este post"
+    },
+    "comments": {
+      "title": "Comentarios ({n})",
+      "placeholder": "Escribí un comentario",
+      "ctaPublish": "Enviar"
+    }
   }
 }

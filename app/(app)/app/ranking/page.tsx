@@ -59,8 +59,14 @@ export default async function RankingPage() {
 
           <Divider className="mx-4" />
 
-          {/* Ranking list (#4 onward) */}
-          <div className="flex flex-col">
+          {/* Ranking list (#4 onward) — scroll con mask de bordes */}
+          <div
+            className="overflow-y-auto max-h-[300px] flex flex-col"
+            style={{
+              maskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)',
+            }}
+          >
             {listEntries.map((u) => (
               <RankingRow
                 key={u.id}
@@ -76,12 +82,6 @@ export default async function RankingPage() {
               />
             ))}
           </div>
-
-          {ranking.length >= 100 && (
-            <p className="text-center text-[11px] text-text-muted py-4">
-              Mostrando los primeros 100 socios
-            </p>
-          )}
         </>
       )}
 

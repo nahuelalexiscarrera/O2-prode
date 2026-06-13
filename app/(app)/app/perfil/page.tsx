@@ -75,6 +75,7 @@ export default async function PerfilPage() {
         <NavRow href="/app/perfil/notificaciones" label="Notificaciones" />
         <NavRow href="/app/perfil/configuracion" label="Configuración" />
       </div>
+
     </div>
   );
 }
