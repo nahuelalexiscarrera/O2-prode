@@ -39,6 +39,8 @@ const STEPPER_NODES = [
 ];
 
 const BARCODE_WIDTHS = [3, 1, 1, 2, 1, 3, 1, 2, 1, 1, 3, 1, 2, 1, 3, 1, 1, 2, 1, 3, 1, 2, 1, 1, 3, 2, 1, 3];
+// Barras precomputadas con id estable (key por contenido, no por índice de render).
+const BARCODE_BARS = BARCODE_WIDTHS.map((w, i) => ({ w, filled: i % 2 === 0, id: `bar-${i}-${w}` }));
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -92,11 +94,11 @@ function getCardBorder(slide: Slide, status: SlideStatus): CSSProperties {
 function Barcode() {
   return (
     <div className="flex items-end gap-px h-[26px] opacity-65" aria-hidden>
-      {BARCODE_WIDTHS.map((w, i) =>
-        i % 2 === 0 ? (
-          <div key={i} style={{ width: w * 2, height: "100%", background: "rgba(255,255,255,0.82)", borderRadius: 0.5 }} />
+      {BARCODE_BARS.map((bar) =>
+        bar.filled ? (
+          <div key={bar.id} style={{ width: bar.w * 2, height: "100%", background: "rgba(255,255,255,0.82)", borderRadius: 0.5 }} />
         ) : (
-          <div key={i} style={{ width: w * 2 }} />
+          <div key={bar.id} style={{ width: bar.w * 2 }} />
         )
       )}
     </div>
@@ -373,18 +375,18 @@ export function PremiosScreen({ activePhaseIndex }: { activePhaseIndex: number }
 
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
+        for (const entry of entries) {
           if (entry.isIntersecting) {
             const idx = Number((entry.target as HTMLElement).dataset.index);
             if (!Number.isNaN(idx)) setActiveSlide(idx);
           }
-        });
+        }
       },
       { root: container, threshold: 0.5 }
     );
 
     const slides = container.querySelectorAll("[data-slide]");
-    slides.forEach((el) => observer.observe(el));
+    for (const el of slides) observer.observe(el);
     return () => observer.disconnect();
   }, []);
 
@@ -419,7 +421,7 @@ export function PremiosScreen({ activePhaseIndex }: { activePhaseIndex: number }
       >
         {SLIDES.map((slide, i) => (
           <SlideCard
-            key={slide.paseName + i}
+            key={`${slide.phase}-${slide.paseName}`}
             slide={slide}
             status={getSlideStatus(i, activePhaseIndex)}
             dataIndex={i}
@@ -431,9 +433,10 @@ export function PremiosScreen({ activePhaseIndex }: { activePhaseIndex: number }
 
       {/* Dots */}
       <div className="flex items-center justify-center gap-1.5 mt-4">
-        {SLIDES.map((_, i) => (
+        {SLIDES.map((slide, i) => (
           <button
-            key={i}
+            type="button"
+            key={`dot-${slide.phase}-${slide.paseName}`}
             aria-label={`Ir al premio ${i + 1}`}
             onClick={() => scrollToSlide(i)}
             style={{
