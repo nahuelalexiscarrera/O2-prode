@@ -296,6 +296,24 @@ export const homeChild: Variants = {
   },
 };
 
+// ─── Prize link: pulso continuo sutil (loop) ────────────────────────
+// Solo transform + opacity. Apagar con prefers-reduced-motion (usar
+// animate="idle" cuando useReducedMotion() devuelve true).
+export const prizePulse: Variants = {
+  idle: { scale: 1, opacity: 1 },
+  pulse: {
+    scale: [1, 1.045, 1],
+    opacity: [1, 0.9, 1],
+    transition: {
+      duration: 2.4,
+      ease: ease.standard,
+      repeat: Number.POSITIVE_INFINITY,
+      repeatType: "loop",
+      times: [0, 0.5, 1],
+    },
+  },
+};
+
 // ─── Utility: reduced-motion-safe variant resolver ──────────────────
 /**
  * Returns a variant object that respects prefers-reduced-motion.

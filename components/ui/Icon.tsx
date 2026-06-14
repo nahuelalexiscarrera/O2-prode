@@ -48,6 +48,7 @@ export type IconName =
   | "flame"
   | "star"
   | "crown"
+  | "ticket"
   // System
   | "settings"
   | "logout"

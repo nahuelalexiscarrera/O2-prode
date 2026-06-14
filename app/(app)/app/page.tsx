@@ -13,6 +13,7 @@ import { StatCard } from "@/components/features/StatCard";
 import { NextMatchHero } from "@/components/features/NextMatchHero";
 import { PhaseProgress } from "@/components/features/PhaseProgress";
 import { PostCardCompact } from "@/components/features/PostCard";
+import { PrizesLinkHome } from "@/components/features/PrizesLinkHome";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/utils/cn";
@@ -115,13 +116,8 @@ export default async function HomePage() {
         </div>
       )}
 
-      {/* Acceso a premios — una línea, sin competir visualmente */}
-      <Link
-        href="/app/premios"
-        className="-mt-2 self-start text-body-sm text-primary hover:text-primary-hover"
-      >
-        {PRIZES.linkFromHome}
-      </Link>
+      {/* Acceso a premios — dorado, con ticket y pulso sutil */}
+      <PrizesLinkHome label={PRIZES.linkFromHome} />
 
       {/* Next match hero */}
       <NextMatchSection match={nextMatch} />
