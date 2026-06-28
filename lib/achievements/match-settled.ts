@@ -102,11 +102,14 @@ export async function evaluateMatchSettledForUsers(userIds: string[]): Promise<v
 
   // Nota: no se trae `position` — los logros de posición se reconcilian aparte
   // (position-reconcile.ts), no en este path por-predictor.
-  const [matchesRes, resultsRes, specialsRes, predsRes] = await Promise.all([
+  const [matchesRes, resultsRes, specialsRes, predsRes, allPredMatchIdsRes] = await Promise.all([
     admin.from("match").select("id, phase, group_id, home_code, away_code, kickoff_at, status"),
     admin.from("match_result").select("match_id, home_score, away_score"),
     admin.from("special_prediction").select("user_id, champion_code, runner_up_code").in("user_id", ids),
     admin.from("prediction").select("user_id, match_id, home_score, away_score").in("user_id", ids),
+    // Todos los match_id con al menos una predicción de cualquier socio (sin filtro de usuario).
+    // Usado para excluir del denominador partidos bloqueados por bug de sistema.
+    admin.from("prediction").select("match_id"),
   ]);
 
   const matches = (matchesRes.data ?? []) as MatchRow[];
@@ -151,7 +154,15 @@ export async function evaluateMatchSettledForUsers(userIds: string[]): Promise<v
     tournamentWinnerUserId = (leader?.id as string) ?? null;
   }
 
-  const totalMatches = matches.length;
+  // Excluir del denominador partidos finished con 0 predicciones en todo el sistema:
+  // señal de que el sistema no los expuso (bug de acceso). Partidos aún no finalizados
+  // siempre cuentan (están disponibles para predecir).
+  const matchIdsWithAnyPred = new Set(
+    (allPredMatchIdsRes.data ?? []).map((r) => (r as { match_id: string }).match_id)
+  );
+  const totalMatches = matches.filter(
+    (m) => m.status !== "finished" || matchIdsWithAnyPred.has(m.id)
+  ).length;
 
   for (const userId of ids) {
     try {
