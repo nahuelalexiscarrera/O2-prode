@@ -121,7 +121,14 @@ async function handle(req: NextRequest) {
     });
   }
 
-  // 6) Notificación in-app (batch de 100)
+  // 6+7) Insert in-app + push, BATCH POR BATCH (de a 100), en lockstep:
+  // - Si el insert de un batch falla, ABORTAMOS antes de pushear ese batch.
+  // - El push de un batch va SOLO después de que su insert entró OK, así nunca
+  //   se pushea a alguien cuyo in-app no se guardó.
+  // Un re-run es idempotente (dedupe por title) y completa lo que falte sin
+  // duplicar. NOTA OPERATIVA: disparar esta ruta UNA sola vez en serie — el
+  // dedupe es read-then-write sin lock, así que dos disparos CONCURRENTES
+  // (doble-click / retry) podrían ambos notificar.
   const rows = toNotify.map((user_id) => ({
     user_id,
     type: CAMPAIGN.type,
@@ -129,18 +136,34 @@ async function handle(req: NextRequest) {
     body: CAMPAIGN.body,
     deep_link: CAMPAIGN.deep_link,
   }));
+  const payload = {
+    title: CAMPAIGN.title,
+    body: CAMPAIGN.body,
+    deep_link: CAMPAIGN.deep_link,
+    tag: CAMPAIGN.tag,
+  };
+  let notified = 0;
+  let pushed = 0;
   for (let i = 0; i < rows.length; i += 100) {
-    await admin.from("notification").insert(rows.slice(i, i + 100));
+    const slice = rows.slice(i, i + 100);
+    const { error: insErr } = await admin.from("notification").insert(slice);
+    if (insErr) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: `Falló el insert de notificaciones (batch ${i / 100}): ${insErr.message}`,
+          notified,
+          pushed,
+          hint: "Re-ejecutá la ruta: es idempotente (dedupe por title) y completa lo que falta sin duplicar.",
+        },
+        { status: 500 },
+      );
+    }
+    notified += slice.length;
+    pushed += await broadcastPush(payload, "matchReminders", slice.map((r) => r.user_id));
   }
 
-  // 7) Push a los suscriptos de la cohorte (respeta prefs)
-  const pushed = await broadcastPush(
-    { title: CAMPAIGN.title, body: CAMPAIGN.body, deep_link: CAMPAIGN.deep_link, tag: CAMPAIGN.tag },
-    "matchReminders",
-    toNotify,
-  );
-
-  return NextResponse.json({ ok: true, cohort: cohort.length, notified: toNotify.length, pushed });
+  return NextResponse.json({ ok: true, cohort: cohort.length, notified, pushed });
 }
 
 export const POST = handle;
