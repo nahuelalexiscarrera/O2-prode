@@ -314,6 +314,29 @@ export const prizePulse: Variants = {
   },
 };
 
+// ─── Featured match (Argentina): glow celeste en loop sutil ─────────
+// Anima boxShadow (glow) — precedente: tapPrimaryVariants. Apagar con
+// prefers-reduced-motion usando animate="idle".
+export const featuredPulse: Variants = {
+  idle: {
+    boxShadow: "0 0 0 1px rgba(124,185,232,0.22), 0 14px 32px -18px rgba(124,185,232,0.32)",
+  },
+  pulse: {
+    boxShadow: [
+      "0 0 0 1px rgba(124,185,232,0.22), 0 14px 30px -18px rgba(124,185,232,0.30)",
+      "0 0 0 1px rgba(124,185,232,0.48), 0 16px 40px -12px rgba(124,185,232,0.58)",
+      "0 0 0 1px rgba(124,185,232,0.22), 0 14px 30px -18px rgba(124,185,232,0.30)",
+    ],
+    transition: {
+      duration: 2.6,
+      ease: ease.standard,
+      repeat: Number.POSITIVE_INFINITY,
+      repeatType: "loop",
+      times: [0, 0.5, 1],
+    },
+  },
+};
+
 // ─── Utility: reduced-motion-safe variant resolver ──────────────────
 /**
  * Returns a variant object that respects prefers-reduced-motion.

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { ScoreInput, type ScoreStatus } from "@/components/ui/ScoreInput";
 import { Flag } from "@/components/ui/Flag";
 import { teamShortCode } from "@/lib/i18n/team-codes";
@@ -12,6 +13,7 @@ import { useToast } from "@/components/ui/Toast";
 import { createClient } from "@/lib/supabase/client";
 import { upsertPrediction } from "@/lib/predictions/actions";
 import { PREDICTION_LOCKOUT_MS } from "@/lib/predictions/lockout";
+import { featuredPulse } from "@/lib/motion/variants";
 import { cn } from "@/lib/utils/cn";
 
 // ─── Types ────────────────────────────────────────────────────────────
@@ -29,6 +31,10 @@ interface MatchCardProps {
   resultHome?: number | null;
   resultAway?: number | null;
   pointsEarned?: number | null;
+  /** Resalta el card (partido de Argentina): borde/glow celeste + badge + pulso. */
+  featured?: boolean;
+  /** Multiplicador de puntos de la fase (se muestra en el badge del destaque). */
+  multiplier?: number;
   className?: string;
 }
 
@@ -71,6 +77,8 @@ export function MatchCard({
   resultHome,
   resultAway,
   pointsEarned,
+  featured = false,
+  multiplier,
   className,
 }: MatchCardProps) {
   const [homeValue, setHomeValue] = useState<number | null>(predictionHome);
@@ -78,6 +86,7 @@ export function MatchCard({
   const [saving, setSaving] = useState(false);
   const [myUserId, setMyUserId] = useState<string | null>(null);
   const { toast } = useToast();
+  const reduced = useReducedMotion();
 
   // Id del usuario (lectura local de sesión) para el share de la predicción.
   useEffect(() => {
@@ -133,13 +142,42 @@ export function MatchCard({
   }
 
   return (
-    <div
+    <motion.div
       className={cn(
-        "bg-card rounded-xl border border-border p-4",
+        "rounded-xl border p-4",
+        featured ? "bg-[#0e1620] border-[#7CB9E8]" : "bg-card border-border",
         saving && "opacity-70",
         className
       )}
+      variants={featured ? featuredPulse : undefined}
+      initial={featured ? "idle" : undefined}
+      animate={featured ? (reduced ? "idle" : "pulse") : undefined}
     >
+      {/* Destaque del partido de Argentina: badge + multiplicador de la fase */}
+      {featured && (
+        <div className="flex items-center justify-between mb-3">
+          <span
+            className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide"
+            style={{
+              background: "rgba(124,185,232,0.16)",
+              border: "1px solid rgba(124,185,232,0.42)",
+              color: "#BFE0FA",
+            }}
+          >
+            <Icon name="star" size={12} />
+            Partido destacado
+          </span>
+          {multiplier ? (
+            <span
+              className="rounded-full px-2 py-0.5 text-[11px] font-bold"
+              style={{ background: "#7CB9E8", color: "#0c1622" }}
+            >
+              ×{multiplier} puntos
+            </span>
+          ) : null}
+        </div>
+      )}
+
       {/* Header: live badge or kickoff time */}
       <div className="flex items-center justify-between mb-3">
         {matchStatus === "live" ? (
@@ -225,6 +263,6 @@ export function MatchCard({
           />
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

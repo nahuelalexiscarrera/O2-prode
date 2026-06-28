@@ -102,6 +102,8 @@ export default async function KnockoutPage() {
                     const homeTeam = match.home_team as unknown as TeamRow | null;
                     const awayTeam = match.away_team as unknown as TeamRow | null;
                     const result = match.result as unknown as ResultRow | null;
+                    const isArgentina =
+                      match.home_code === "ar" || match.away_code === "ar";
 
                     return (
                       <MatchCard
@@ -124,6 +126,8 @@ export default async function KnockoutPage() {
                         resultHome={result?.home_score ?? null}
                         resultAway={result?.away_score ?? null}
                         pointsEarned={pred?.points_earned ?? null}
+                        featured={isArgentina && match.status !== "finished"}
+                        multiplier={multiplier}
                       />
                     );
                   })}
