@@ -11,6 +11,7 @@ import { ShareButton } from "@/components/features/ShareButton";
 import { useToast } from "@/components/ui/Toast";
 import { createClient } from "@/lib/supabase/client";
 import { upsertPrediction } from "@/lib/predictions/actions";
+import { PREDICTION_LOCKOUT_MS } from "@/lib/predictions/lockout";
 import { cn } from "@/lib/utils/cn";
 
 // ─── Types ────────────────────────────────────────────────────────────
@@ -40,7 +41,7 @@ function resolveScoreStatus(
   if (matchStatus === "finished") return "settled";
   if (matchStatus === "live") return "live";
   if (matchStatus === "postponed") return "locked";
-  const lockoutMs = new Date(kickoffAt).getTime() - 60 * 60 * 1000;
+  const lockoutMs = new Date(kickoffAt).getTime() - PREDICTION_LOCKOUT_MS;
   return Date.now() >= lockoutMs ? "locked" : "default";
 }
 
@@ -113,7 +114,7 @@ export function MatchCard({
   const displayHome = isSettled ? (resultHome ?? null) : homeValue;
   const displayAway = isSettled ? (resultAway ?? null) : awayValue;
 
-  const lockoutMs = new Date(kickoffAt).getTime() - 60 * 60 * 1000;
+  const lockoutMs = new Date(kickoffAt).getTime() - PREDICTION_LOCKOUT_MS;
   const nearLockout =
     !isSettled && scoreStatus === "default" && lockoutMs - Date.now() < 2 * 3600 * 1000;
 

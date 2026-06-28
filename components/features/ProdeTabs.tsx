@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/utils/cn";
 
 export function ProdeTabs() {
@@ -31,7 +30,6 @@ export function ProdeTabs() {
         className={tabClass(isKnockout)}
       >
         Eliminatorias
-        {!isKnockout && <Icon name="lock" size={11} className="text-text-muted" />}
       </Link>
 
       <Link

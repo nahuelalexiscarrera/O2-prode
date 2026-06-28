@@ -370,7 +370,7 @@ CREATE POLICY "User actualiza sus predicciones (si no cerró el partido)"
   ON prediction FOR UPDATE
   USING (
     auth.uid() = user_id
-    AND EXISTS (SELECT 1 FROM match WHERE id = match_id AND (kickoff_at - INTERVAL '1 hour') > NOW())
+    AND EXISTS (SELECT 1 FROM match WHERE id = match_id AND (kickoff_at - INTERVAL '20 minutes') > NOW())
   );
 
 -- Posts y comments: lectura abierta a socios; CRUD del dueño
