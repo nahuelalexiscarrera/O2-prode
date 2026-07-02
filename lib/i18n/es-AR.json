@@ -622,6 +622,61 @@
     "deltaDown": "Bajaste {n}",
     "deltaEqual": "Sin cambios"
   },
+  "reports": {
+    "phase": {
+      "productName": "PRODE O2",
+      "titleTemplate": "Reporte de actividad — {phaseLabel}",
+      "periodTemplate": "{phaseLabel} · {periodStart} al {periodEnd}",
+      "footer": "PRODE O2 · Mundial 2026",
+      "phaseLabels": {
+        "groups": "Fase de grupos",
+        "round-of-32": "16avos de final",
+        "round-of-16": "Octavos de final",
+        "quarter": "Cuartos de final",
+        "semi": "Semifinales",
+        "final": "Final"
+      },
+      "kpiLabels": {
+        "activeUsers": "Usuarios activos",
+        "predictionsLoaded": "Predicciones cargadas",
+        "newUsers": "Nuevos usuarios",
+        "participation": "Participación"
+      },
+      "sections": {
+        "interaction": "Interacción semana a semana",
+        "newUsers": "Nuevos usuarios",
+        "predictions": "Predicciones",
+        "winners": "Ganadores de premios",
+        "secondary": "Datos secundarios"
+      },
+      "contextPhrases": {
+        "interaction": {
+          "growth": "La actividad creció semana a semana durante toda la fase.",
+          "frontloaded": "La comunidad cargó fuerte desde el arranque y sostuvo la fase.",
+          "steady": "Semana a semana, la comunidad se mantuvo activa durante toda la fase."
+        },
+        "newUsersRegistration": "El registro sigue abierto y suma socios fecha a fecha.",
+        "predictionsUsage": "No solo se registran: vuelven cada fecha a jugar.",
+        "winnersProof": "Premios entregados, comunidad activa: la prueba de que el juego mueve gente."
+      },
+      "closing": {
+        "afterGroups": "Seguimos optimizando la experiencia fecha a fecha. Próxima entrega: cierre de 16avos.",
+        "afterR32": "Seguimos optimizando la experiencia fecha a fecha. Próxima entrega: cierre de octavos.",
+        "afterR16": "Seguimos optimizando la experiencia fecha a fecha. Próxima entrega: cierre de cuartos.",
+        "afterQF": "Seguimos optimizando la experiencia fecha a fecha. Próxima entrega: cierre de semifinales.",
+        "afterSF": "Seguimos optimizando la experiencia fecha a fecha. Próxima entrega: reporte final del torneo.",
+        "afterFinal": "Cierre del Mundial 2026. Gracias por acompañar el torneo."
+      },
+      "email": {
+        "subjectTemplate": "Reporte O2 PRODE — {phaseLabel} cerrada",
+        "greeting": "Hola equipo,",
+        "bodyIntro": "Cerró {phaseLabel} y ya está disponible el reporte de actividad.",
+        "kpiIntro": "Titulares de la fase:",
+        "linkLabel": "Ver reporte completo",
+        "signOff": "PRODE O2"
+      }
+    }
+  },
   "share": {
     "screenTitle": "Compartí tu prode",
     "templateLabels": {

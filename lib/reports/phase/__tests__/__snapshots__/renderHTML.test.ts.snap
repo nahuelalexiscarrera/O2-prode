@@ -1,0 +1,157 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`renderHTML > snapshot del HTML (detecta cambios de copy involuntarios) 1`] = `
+"<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Reporte de actividad — Fase de grupos</title>
+<style>
+:root{
+  --accent:#FF6A00; --ok:#10B981; --bg:#0B0B0D;
+  --card:#141417; --text:#F5F5F5; --muted:#8A8A90;
+  --border:#26262B;
+  --fs-lg:48px; --fs-md:18px; --fs-sm:13px; /* §7: solo 3 tamaños */
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;
+  font-size:var(--fs-sm);line-height:1.5;padding:32px 20px;max-width:760px;margin:0 auto}
+.display{font-family:Anton,"Arial Narrow",sans-serif;text-transform:uppercase;letter-spacing:.02em}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+header{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+header img{height:34px;width:auto}
+.brand{font-family:Anton,"Arial Narrow",sans-serif;font-size:var(--fs-md);text-transform:uppercase;letter-spacing:.06em}
+h1{font-family:Anton,"Arial Narrow",sans-serif;font-size:var(--fs-lg);line-height:1.02;text-transform:uppercase;margin-top:8px}
+.period{color:var(--muted);font-size:var(--fs-sm);margin-top:6px}
+.headline{font-family:Anton,"Arial Narrow",sans-serif;font-size:var(--fs-md);color:var(--accent);
+  text-transform:uppercase;margin:20px 0 24px;line-height:1.15}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:28px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px}
+.kpi-num{font-family:Anton,"Arial Narrow",sans-serif;font-size:var(--fs-lg);color:var(--accent);line-height:1}
+.kpi-label{color:var(--muted);margin-top:4px}
+.delta{display:inline-block;margin-top:6px;font-weight:700;font-size:var(--fs-sm)}
+.block{margin-bottom:28px}
+.block-title{font-family:Anton,"Arial Narrow",sans-serif;font-size:var(--fs-md);text-transform:uppercase;
+  letter-spacing:.02em;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.context{color:var(--muted);margin-top:10px}
+.chart{width:100%;height:auto;display:block}
+.svg-val{fill:var(--text);font-size:12px;font-weight:700}
+.svg-lbl{fill:var(--muted);font-size:11px}
+.winners{width:100%;border-collapse:collapse}
+.winners td{padding:10px 8px;border-bottom:1px solid var(--border)}
+.w-pos{font-family:Anton,"Arial Narrow",sans-serif;color:var(--accent);width:36px}
+.w-prize{color:var(--muted);text-align:right}
+.secondary{list-style:none;display:flex;flex-direction:column;gap:8px}
+.secondary strong{color:var(--text)}
+.closing{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--accent);
+  border-radius:8px;padding:16px;margin:8px 0 24px;color:var(--text)}
+footer{color:var(--muted);text-align:center;padding-top:16px;border-top:1px solid var(--border)}
+.avg{color:var(--muted);margin-top:10px}
+</style>
+</head>
+<body>
+<header>
+  <img src="/logo.png" alt="PRODE O2"/>
+  <span class="brand">PRODE O2</span>
+</header>
+
+<h1>Reporte de actividad — Fase de grupos</h1>
+<p class="period">Fase de grupos · del 11 al 28 de junio al</p>
+
+<p class="headline">Fase de grupos cerrada con 55,9% de acierto.</p>
+
+<div class="kpis">
+  <article class="kpi">
+    <h3 class="kpi-num">93</h3>
+    <p class="kpi-label">Usuarios activos</p>
+    
+  </article>
+  <article class="kpi">
+    <h3 class="kpi-num">3.019</h3>
+    <p class="kpi-label">Predicciones cargadas</p>
+    
+  </article>
+  <article class="kpi">
+    <h3 class="kpi-num">53</h3>
+    <p class="kpi-label">Nuevos usuarios</p>
+    
+  </article>
+  <article class="kpi">
+    <h3 class="kpi-num">71,0%</h3>
+    <p class="kpi-label">Participación</p>
+    
+  </article>
+</div>
+
+<section class="block">
+  <h2 class="block-title">Interacción semana a semana</h2>
+  <svg viewBox="0 0 640 180" role="img" aria-label="Interacción semana a semana: Semana 1 80 usuarios, Semana 2 88 usuarios, Semana 3 93 usuarios" class="chart">
+    <line x1="28" y1="152" x2="612" y2="152" stroke="var(--border)" stroke-width="1"/>
+    <rect x="89.3" y="45" width="72.0" height="107" rx="3" fill="var(--accent)"/>
+      <text x="125.3" y="39" text-anchor="middle" class="svg-val">80</text>
+      <text x="125.3" y="172" text-anchor="middle" class="svg-lbl">Semana 1</text><rect x="284.0" y="35" width="72.0" height="117" rx="3" fill="var(--accent)"/>
+      <text x="320.0" y="29" text-anchor="middle" class="svg-val">88</text>
+      <text x="320.0" y="172" text-anchor="middle" class="svg-lbl">Semana 2</text><rect x="478.7" y="28" width="72.0" height="124" rx="3" fill="var(--accent)"/>
+      <text x="514.7" y="22" text-anchor="middle" class="svg-val">93</text>
+      <text x="514.7" y="172" text-anchor="middle" class="svg-lbl">Semana 3</text>
+  </svg>
+  <p class="context">La actividad creció semana a semana durante toda la fase.</p>
+</section>
+
+<section class="block">
+  <h2 class="block-title">Nuevos usuarios</h2>
+  <svg viewBox="0 0 640 180" role="img" aria-label="Nuevos usuarios: Semana 1 30 (acumulado 108), Semana 2 12 (acumulado 120), Semana 3 11 (acumulado 131)" class="chart">
+    <line x1="28" y1="152" x2="612" y2="152" stroke="var(--border)" stroke-width="1"/>
+    <rect x="89.3" y="28" width="72.0" height="124" rx="3" fill="var(--accent)"/>
+      <text x="125.3" y="22" text-anchor="middle" class="svg-val">30</text>
+      <text x="125.3" y="172" text-anchor="middle" class="svg-lbl">Semana 1</text><rect x="284.0" y="102" width="72.0" height="50" rx="3" fill="var(--accent)"/>
+      <text x="320.0" y="96" text-anchor="middle" class="svg-val">12</text>
+      <text x="320.0" y="172" text-anchor="middle" class="svg-lbl">Semana 2</text><rect x="478.7" y="107" width="72.0" height="45" rx="3" fill="var(--accent)"/>
+      <text x="514.7" y="101" text-anchor="middle" class="svg-val">11</text>
+      <text x="514.7" y="172" text-anchor="middle" class="svg-lbl">Semana 3</text>
+  </svg>
+  <p class="context">El registro sigue abierto y suma socios fecha a fecha.</p>
+</section>
+
+<section class="block">
+  <h2 class="block-title">Predicciones</h2>
+  <svg viewBox="0 0 640 180" role="img" aria-label="Predicciones: Semana 1 1.200, Semana 2 980, Semana 3 839" class="chart">
+    <line x1="28" y1="152" x2="612" y2="152" stroke="var(--border)" stroke-width="1"/>
+    <rect x="89.3" y="28" width="72.0" height="124" rx="3" fill="var(--accent)"/>
+      <text x="125.3" y="22" text-anchor="middle" class="svg-val">1.200</text>
+      <text x="125.3" y="172" text-anchor="middle" class="svg-lbl">Semana 1</text><rect x="284.0" y="51" width="72.0" height="101" rx="3" fill="var(--accent)"/>
+      <text x="320.0" y="45" text-anchor="middle" class="svg-val">980</text>
+      <text x="320.0" y="172" text-anchor="middle" class="svg-lbl">Semana 2</text><rect x="478.7" y="65" width="72.0" height="87" rx="3" fill="var(--accent)"/>
+      <text x="514.7" y="59" text-anchor="middle" class="svg-val">839</text>
+      <text x="514.7" y="172" text-anchor="middle" class="svg-lbl">Semana 3</text>
+  </svg>
+  <p class="avg">Promedio por activo: <strong>32,5</strong></p>
+  <p class="context">No solo se registran: vuelven cada fecha a jugar.</p>
+</section>
+
+<section class="block">
+    <h2 class="block-title">Ganadores de premios</h2>
+    <table class="winners"><tbody><tr>
+      <td class="w-pos">1</td>
+      <td>Santiago Schwarzenberger</td>
+      <td class="w-prize">1 mes de O2 gratis</td>
+    </tr></tbody></table>
+    <p class="context">Premios entregados, comunidad activa: la prueba de que el juego mueve gente.</p>
+  </section>
+
+<section class="block">
+    <h2 class="block-title">Datos secundarios</h2>
+    <ul class="secondary">
+      <li>Acierto de la fase: <strong>55,9%</strong></li>
+      <li>Nuevos: <strong>53</strong> · Recurrentes: <strong>40</strong> · Power: <strong>9</strong></li>
+      
+    </ul>
+  </section>
+
+<div class="closing">Seguimos optimizando la experiencia fecha a fecha. Próxima entrega: cierre de 16avos.</div>
+
+<footer>PRODE O2 · Mundial 2026</footer>
+</body>
+</html>"
+`;

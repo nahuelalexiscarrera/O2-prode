@@ -22,6 +22,7 @@ import { TLA_TO_CODE, stageToPhase, fdStatusToMatch } from "@/lib/football-api/t
 import { evaluateMatchSettledForUsers } from "@/lib/achievements/match-settled";
 import { reconcilePositionAchievements } from "@/lib/achievements/position-reconcile";
 import { broadcastPush } from "@/lib/push/notify";
+import { maybeTriggerPhaseReport } from "@/lib/reports/phase/triggerCheck";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -264,6 +265,10 @@ async function handle(req: NextRequest) {
     // bonus de skill recién otorgados) las posiciones se reordenan para ~todos los
     // socios, no solo los predictores → se reconcilian ranking-wide, al final.
     await reconcilePositionAchievements();
+
+    // Reporte de actividad por fase: si el cierre de estos partidos completó una
+    // fase, dispara el reporte al staff. Defensivo — no rompe el settle si falla.
+    await maybeTriggerPhaseReport(supabase, finishedMatchIds);
   }
 
   return NextResponse.json({ ok: true, processed: fixtures.length, changes: changes.length, detail: changes });
