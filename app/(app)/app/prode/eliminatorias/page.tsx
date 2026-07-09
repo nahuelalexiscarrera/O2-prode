@@ -75,13 +75,10 @@ export default async function KnockoutPage() {
       <div className="flex flex-col gap-4 px-4">
         {PHASES.map(({ phase, label, multiplier, unlockLabel }) => {
           const phaseMatches = allMatches.filter((m) => m.phase === phase);
-          const now = Date.now();
-          const firstKickoff =
-            phaseMatches[0]?.kickoff_at != null
-              ? new Date(phaseMatches[0].kickoff_at).getTime()
-              : null;
-          const isLocked =
-            phaseMatches.length === 0 || (firstKickoff !== null && firstKickoff > now + 3600_000);
+          // Fase visible si ya existen sus cruces (los crea el cron sync-results cuando
+          // football-data.org publica equipos definidos). Los otros gates (server action,
+          // RLS, MatchCard) cierran cada partido individual 20 min antes del kickoff.
+          const isLocked = phaseMatches.length === 0;
 
           return (
             <div key={phase} className="flex flex-col gap-3">
